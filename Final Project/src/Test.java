@@ -12,7 +12,7 @@ public class Test extends PApplet {
     if (mousePressed) {
       line(mouseX,mouseY,pmouseX,pmouseY);
     }
-    System.out.println("Weee");
+  
   }
 }
 
