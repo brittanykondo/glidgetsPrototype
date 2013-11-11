@@ -9,9 +9,9 @@ public class Test extends PApplet {
 
   public void draw() {
     stroke(255);
-    /**if (mousePressed) {
+    if (mousePressed) {
       line(mouseX,mouseY,pmouseX,pmouseY);
-    }*/
+    }
   
   }
 }
