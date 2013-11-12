@@ -6,16 +6,17 @@ import java.util.Scanner;
 import processing.core.*;
 
 public class Test extends PApplet {
-  //public Node testNode;
+    public Node testNode;
 	public ArrayList<Node> nodes;
 	public ArrayList<Edge> edges;
-  
+    public Slider timeSlider;
+    
 /**Initialize the view, draw the visualization
    * */
   public void setup() {
     size(800,800);
     background(0);
-    //generateTestNodes();
+    /**generateTestNodes();
     readLesMis();
     ForceDirectedLayout layout = new ForceDirectedLayout(this.nodes,this.edges);
     layout.makeLayout();
@@ -25,10 +26,20 @@ public class Test extends PApplet {
     
     for (int i = 0;i<layout.numEdges;i++){
     	layout.edges.get(i).display(layout.nodes);    	
-    }
-    //testNode = new Node(this,10,10,0);
-    //testNode.display();
+    }*/
+    testNode = new Node(this,0,"");
+    testNode.x = 100;
+    testNode.y = 100;
+    testNode.display();
+    ArrayList <String> testLabels = new ArrayList <String>();
+    testLabels.add("0");
+    testLabels.add("1");
+    testLabels.add("2");
+    testLabels.add("3");
+    testLabels.add("4");
     
+    this.timeSlider = new Slider(this,testLabels,50);
+    this.timeSlider.drawSlider();
   }
  
   /**Re-draw the screen in response to a mouse event
@@ -36,6 +47,7 @@ public class Test extends PApplet {
   public void draw() {
     stroke(255);    
    // testNode.mouseClicked();
+    this.timeSlider.redrawTick();
     if (mousePressed) {
       line(mouseX,mouseY,pmouseX,pmouseY);      
     }   
