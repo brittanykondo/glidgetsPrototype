@@ -6,8 +6,18 @@ public class Test extends PApplet {
 	public Edge [] edges;
 	
   public void setup() {
-    size(200,200);
+    size(500,500);
     background(0);
+    generateTestNodes();
+    ForceDirectedLayout layout = new ForceDirectedLayout(this.nodes,this.edges);
+    layout.makeLayout();
+    for (int i = 0;i<layout.numNodes;i++){
+    	layout.nodes[i].display();    	
+    }
+    
+    for (int i = 0;i<layout.numEdges;i++){
+    	layout.edges[i].display(layout.nodes);    	
+    }
     //testNode = new Node(this,10,10,0);
     //testNode.display();
     

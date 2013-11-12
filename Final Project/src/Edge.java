@@ -13,4 +13,17 @@ public class Edge {
     	  this.node2 = n2;
       }
       
+      void display(Node [] nodes){
+    	  parent.stroke(255);  
+    	  Node n1 = nodes[this.node1];
+    	  Node n2 = nodes[this.node2];
+    	  parent.line(n1.x,n1.y,n2.x,n2.y);
+      } 
+      
+     /** void mouseClicked(){
+    	  if (parent.mousePressed && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=RADIUS){
+    		  System.out.println("clicked");
+    	  }
+      }*/
+      
 }
