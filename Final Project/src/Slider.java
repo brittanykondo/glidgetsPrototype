@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import processing.core.PApplet;
 import processing.core.PFont;
 
-
 public class Slider {
 	 
      ArrayList <String> labels;
@@ -12,7 +11,11 @@ public class Slider {
      int spacing; //Between ticks
      float yPos; //Of the slider
      float xPos; //Spacing from edge
-     float tickHeight;
+     float dragTickHeight = 20, dragTickWidth=10; //Of the draggable tick
+     float tickHeight, tickWidth; //Of the ticks along the main slider
+     int currentView;
+     boolean dragging;
+     float dragTickX, dragTickY;
      
      Slider (PApplet p, ArrayList<String>l,int sp){   	  
 	   	  this.parent = p;
@@ -20,9 +23,11 @@ public class Slider {
 	   	  this.numLabels = l.size();
 	   	  this.spacing = sp;
 	   	  
-	   	  this.yPos = 700;
+	   	  this.yPos = 80;
 	   	  this.xPos = 10;
 	   	  this.tickHeight = 20;
+	   	  this.currentView = 0;
+	   	  this.dragging = false;
 	   	  
 	   	  setTicks();
      }
@@ -44,7 +49,7 @@ public class Slider {
 	   	  parent.textFont(font);	   	  
 	   	  parent.fill(255);
 	   	  
-	   	  parent.line(this.tickPositions.get(0), this.yPos, this.tickPositions.get(this.numLabels-1), this.yPos);
+	   	  parent.line(this.tickPositions.get(this.currentView), this.yPos, this.tickPositions.get(this.numLabels-1), this.yPos);
 	   	  
 	   	  //Draw the ticks and the labels
 	   	  for (int i=0;i<this.numLabels;i++){
@@ -53,18 +58,42 @@ public class Slider {
 	   		   parent.text(this.labels.get(i), this.tickPositions.get(i), this.yPos - this.tickHeight/2);
 	   	  }
 	   	  
+	   	  //Draw the draggable tick
+	   	  parent.fill(100);
+	   	  this.dragTickX = this.tickPositions.get(this.currentView)-this.dragTickWidth/2;
+	   	  this.dragTickY = this.yPos-this.dragTickHeight/2;   	        
      } 
     /**Re-draws the draggable tick along the main slider bar (responds to mouse interaction)
      * */
-     void redrawTick(){
-    	 parent.fill(100);
-    	 parent.rect(10,10,10,20,5);
+    void redrawTick(){
+    	parent.stroke(0);
+        if (dragging) parent.fill(50);        
+        else parent.fill(175,200);
+    	parent.rect(this.dragTickX,this.dragTickY,this.dragTickWidth,this.dragTickHeight,4);  
+     } 
+     
+     /**Checks if a mouse down event is occurring on the draggable tick
+      * */
+     void selectTick(int mx, int my){    	 
+    	 if (mx >= this.dragTickX && mx < this.dragTickX+this.dragTickWidth && 
+    			 my >= this.dragTickY && my<this.dragTickY+this.dragTickHeight){    		 
+    		this.dragging = true;
+    	 }
+     }
+     /**Re-draws the tick's position in correspondence with the mouse position if the tick
+      * has been selected
+      * */
+     void drag(int mx){    
+    	 //Only update position if it's in bounds of the slider    	
+    	 if (this.dragging == true && mx >= this.tickPositions.get(0) && mx < this.tickPositions.get(this.numLabels-1)){
+    		 this.dragTickX = mx; 
+    	 }    	    	 
      }
     
-     /**void mouseClicked(){
-	   	  if (parent.mousePressed && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=RADIUS){
-	   		  System.out.println("clicked");
-	   	  }
-     }*/
+     /**Snaps the tick to the nearest tick on the slider
+      * */
+     void releaseTick(){    	 
+         this.dragging = false;    	     	 
+     }
      
 }
