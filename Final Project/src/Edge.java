@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 import processing.core.PApplet;
 
-
+//TODO: need fast look up each edge between two nodes, when does it dissappear (no connections between the nodes)
 public class Edge {
       int node1, node2; //Id's of the connected nodes 
       int id;
@@ -25,10 +25,13 @@ public class Edge {
       /**Draws an edge at a certain moment in time
        * */
       void display(ArrayList<Node> nodes, int view){
+    	 
     	  parent.stroke(255);  
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
-    	  parent.line(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y);
+    	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null){ //Safety Check        	  
+    		  parent.line(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y);
+    	  }
       } 
       
      /** void mouseClicked(){

@@ -12,7 +12,7 @@ public void setup() {
     size(900,900);
     background(0);   
     
-    this.graph = new GraphManager(this);
+    this.graph = new GraphManager(this,null);
     this.graph.drawGraph();    
     
 	ArrayList <String> testLabels = new ArrayList <String>();
