@@ -4,24 +4,21 @@ import processing.core.*;
 
 public class Test extends PApplet {   	
     public Slider timeSlider;
-    public GraphManager graph;
+    public ForceDirectedGraph graph;
     
 /**Initialize the view, draw the visualization
    * */
 public void setup() {
     size(900,900);
-    background(0);   
+    background(25,25,25);   
     
-    this.graph = new GraphManager(this,null);
-    this.graph.drawGraph();    
+    this.graph = new ForceDirectedGraph(this,"savedGraphData.txt",6);
+    this.graph.drawGraph(1); //View 0 has no graph, should remove this time slice
     
 	ArrayList <String> testLabels = new ArrayList <String>();
-    testLabels.add("0");
-    testLabels.add("1");
-    testLabels.add("2");
-    testLabels.add("3");
-    testLabels.add("4");
-    
+	for (int i=0;i<this.graph.numTimeSlices;i++){
+		testLabels.add(""+i);
+	}    
     this.timeSlider = new Slider(this,testLabels,50);
     this.timeSlider.drawSlider();
   }

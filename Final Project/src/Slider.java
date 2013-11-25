@@ -23,7 +23,7 @@ public class Slider {
 	   	  this.numLabels = l.size();
 	   	  this.spacing = sp;
 	   	  
-	   	  this.yPos = 80;
+	   	  this.yPos = 700;
 	   	  this.xPos = 10;
 	   	  this.tickHeight = 20;
 	   	  this.currentView = 0;

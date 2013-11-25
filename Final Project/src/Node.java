@@ -40,13 +40,13 @@ public class Node {
        * */
       void display(int view){       	
     	  if (this.coords.get(view)!=null){
-    		  parent.fill(255,100);
+    		  parent.fill(206,18,86);
         	  parent.noStroke();
         	  parent.ellipse(this.coords.get(view).x,this.coords.get(view).y,RADIUS,RADIUS);  
         	  
         	  PFont font = parent.createFont("Arial",12,true);
     	   	  parent.textFont(font);	   	  
-    	   	  parent.fill(255);
+    	   	  parent.fill(247,244,249);
     	   	  parent.text(this.label, this.coords.get(view).x,this.coords.get(view).y);
     	  }    	  	  
       }
