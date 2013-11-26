@@ -171,7 +171,7 @@ public class GraphManager {
        					this.edges.add(new ArrayList <Edge>());
        				}else{
        					if (time==0){ //The first time stamp, create all 32 nodes        						
-       						this.nodes.add(new Node(this.parent,nodeCounter,""+nodeCounter));	       						  						
+       						this.nodes.add(new Node(this.parent,nodeCounter,""+nodeCounter,this.numTimeSlices));	       						  						
        					}
        					//Find the edges for each time stamp					
        					parseLine_vanDeBunt(nodeCounter,time,items);       					

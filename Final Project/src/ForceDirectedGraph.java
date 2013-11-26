@@ -44,6 +44,29 @@ public class ForceDirectedGraph {
   		   this.nodes.get(i).display(view);    	
   	     }  
      }
+     /**Animates the graph between time slices, node positions are interpolated
+      * Animates in response to the slider being dragged, therefore speed is 
+      * dependent on dragging speed.
+      * @param start the starting time slice
+      * @param end the ending time slice
+      * @param interpolation the amount to interpolation the motion by
+      * */
+     public void animateGraph(int start, int end, float interpolation){
+    	 for (int i = 0;i<this.nodes.size();i++){
+    		   this.nodes.get(i).animate(start, end, interpolation);	
+    	  }
+    	 for (int row = 0;row<this.edges.size();row++){ 			
+ 	          this.edges.get(row).animate(this.nodes, start, end, interpolation);    	        	   	
+ 	     }
+     }
+     
+     /** Calls functions for showing global persistence values for each edge and node
+      * */
+     public void drawGlobalPersistence(int view){
+    	 for (int i = 0;i<this.nodes.size();i++){
+    		   this.nodes.get(i).displayGlobalPersistence(view) ;   	
+    	     }
+     }
      /**Reads the text file containing the node positions and edges for each time slice
       * */
      public void readGraphDataFile(String filename){    	 
@@ -66,7 +89,7 @@ public class ForceDirectedGraph {
        				String[] items = line.split(" ");
        				if (items[0].equals("node")){ //Save the node
        					nodeId = Integer.parseInt(items[1]);       					
-       					this.nodes.add(new Node(this.parent,nodeId,items[1]));
+       					this.nodes.add(new Node(this.parent,nodeId,items[1],this.numTimeSlices));
        				}else if (items[0].equals("time")){ //Save the time slice
        					nodesDone = true;    
        					time = Integer.parseInt(items[1]);

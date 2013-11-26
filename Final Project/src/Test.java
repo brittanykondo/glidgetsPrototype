@@ -9,26 +9,28 @@ public class Test extends PApplet {
 /**Initialize the view, draw the visualization
    * */
 public void setup() {
-    size(900,900);
-    background(25,25,25);   
-    
-    this.graph = new ForceDirectedGraph(this,"savedGraphData.txt",6);
-    this.graph.drawGraph(1); //View 0 has no graph, should remove this time slice
-    
+    size(800,800);    
+    this.graph = new ForceDirectedGraph(this,"savedGraphData.txt",6);   
 	ArrayList <String> testLabels = new ArrayList <String>();
 	for (int i=0;i<this.graph.numTimeSlices;i++){
 		testLabels.add(""+i);
 	}    
-    this.timeSlider = new Slider(this,testLabels,50);
-    this.timeSlider.drawSlider();
+    this.timeSlider = new Slider(this,testLabels,70);     
   }
  
   /**Re-draw the view
   * */
   public void draw() {
+	background(25,25,25); 
     stroke(255);  
     timeSlider.drag(mouseX);
-    timeSlider.redrawTick();
+    timeSlider.drawSlider();   
+    if (timeSlider.dragging){
+    	this.graph.animateGraph(timeSlider.currentView, timeSlider.nextView, timeSlider.interpAmount);
+    }else{
+    	this.graph.drawGraph(timeSlider.currentView); //View 0 has no graph, should remove this time slice    
+        // this.graph.drawGlobalPersistence(4);
+    }    
   }
   
   /**Responds to a mouse down event on the canvas
@@ -40,7 +42,8 @@ public void setup() {
   /**Responds to a mouse up event on the canvas
    * */
   public void mouseReleased(){	 	  
-      timeSlider.releaseTick();	  
+      timeSlider.releaseTick();	
+      
   }     
 
 }
