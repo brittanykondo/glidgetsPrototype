@@ -18,6 +18,10 @@ public class ForceDirectedGraph {
      public ArrayList<Edge> edges;    
      PApplet parent;
      public int numTimeSlices;
+     public int currentView;
+     public int nextView;
+     public boolean dragging;
+     public int selectedNode;
      
      /**Creates a new graph manager which generates or parses and saves the data
       * necessary for drawing the dynamic graph
@@ -28,21 +32,42 @@ public class ForceDirectedGraph {
      public ForceDirectedGraph(PApplet p,String dataFile,int time){
     	 this.parent = p; 
     	 this.numTimeSlices = time;
+    	 this.currentView = 0;
+    	 this.nextView = 1;
+    	 this.dragging = false;
+    	 this.selectedNode = -1;
          readGraphDataFile(dataFile);            
      }     
      
      /**Calls the display function for all nodes and edges, which will
       * render them onto the screen for a certain view
       * */
-     public void drawGraph(int view){    	   	  
-    	
-		 for (int row = 0;row<this.edges.size();row++){ 			
-  	          this.edges.get(row).display(this.nodes,view);    	  	    	        	   	
-  	     }	 
+     public void drawGraph(int view){   	
+		 for (int row = 0;row<this.edges.size();row++)
+			 this.edges.get(row).display(this.nodes,view);  	    		 
+		 for (int i = 0;i<this.nodes.size();i++)
+			 this.nodes.get(i).display(view);   
 		 
-		 for (int i = 0;i<this.nodes.size();i++){
-  		   this.nodes.get(i).display(view);    	
-  	     }  
+		 this.currentView = view;
+		 this.nextView = view++;
+     }
+     /**Handles the mouse down listener for all nodes in the graph.
+      * For now, only one node can be clicked at the same time
+      * */
+     public void selectNodes(){  
+    	 int selected = -1;
+    	 for (int i = 0;i<this.nodes.size();i++){
+    		selected = this.nodes.get(i).selectNode(this.currentView);    		
+    	 }	
+    	 if (selected!=-1) this.selectedNode = selected;
+     }
+     /**Handles the mouse up listener for all nodes in the graph.
+      * For now, only one node can be clicked at the same time
+      * */
+     public void releaseNodes(){    	 
+    	 for (int i = 0;i<this.nodes.size();i++){
+    		//this.nodes.get(i).releaseNode(this.currentView);
+    	 }			 
      }
      /**Animates the graph between time slices, node positions are interpolated
       * Animates in response to the slider being dragged, therefore speed is 
@@ -58,6 +83,8 @@ public class ForceDirectedGraph {
     	 for (int row = 0;row<this.edges.size();row++){ 			
  	          this.edges.get(row).animate(this.nodes, start, end, interpolation);    	        	   	
  	     }
+    	 this.currentView = start;
+    	 this.nextView = end;
      }
      
      /** Calls functions for showing global persistence values for each edge and node
@@ -65,7 +92,10 @@ public class ForceDirectedGraph {
      public void drawGlobalPersistence(int view){
     	 for (int i = 0;i<this.nodes.size();i++){
     		   this.nodes.get(i).displayGlobalPersistence(view) ;   	
-    	     }
+    	  }
+    	 for (int i = 0;i<this.edges.size();i++){
+  		      this.edges.get(i).displayGlobalPersistence(this.nodes,view) ;   	
+  	     }
      }
      /**Reads the text file containing the node positions and edges for each time slice
       * */

@@ -51,6 +51,7 @@ public class Slider {
       * */
      void drawSliderBackground(){
     	//Draw the main line
+    	 parent.strokeWeight(2);
 	   	  parent.stroke(255);
 	   	  PFont font = parent.createFont("Arial",16,true);
 	   	  parent.textFont(font);	   	  
@@ -70,6 +71,7 @@ public class Slider {
      * */
     void drawSlider(){
     	drawSliderBackground();
+    	parent.strokeWeight(1);
     	parent.stroke(0);       
     	parent.rect(this.dragTickX,this.dragTickY,this.dragTickWidth,this.dragTickHeight,4);  
      } 

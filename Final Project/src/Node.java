@@ -14,6 +14,8 @@ public class Node {
       ArrayList<Coordinate> coords; //Ordered by time
       float globalPersistence; //Percentage of time the node does not disappear
       int numTimeSlices;
+      boolean clicked;
+      boolean dragging;
       
       Node(PApplet p,int id,String l,int t){
     	  this.x = 0;
@@ -22,6 +24,8 @@ public class Node {
     	  this.parent = p;
     	  this.id = id;    
     	  this.numTimeSlices = t;
+    	  this.clicked = false;  
+    	  this.dragging = false;
     	  
     	  this.coords = new ArrayList<Coordinate>();
       }  
@@ -50,6 +54,9 @@ public class Node {
        *  @param alpha the amount of transparency (0 to 255)
        * */
       void drawNode(float x, float y,int alpha){
+    	  if (this.clicked){
+    		  drawHintPath(x,y);
+    	  }
     	  parent.fill(206,18,86,alpha);
     	  parent.noStroke();
     	  parent.ellipse(x,y,RADIUS,RADIUS);  
@@ -69,7 +76,7 @@ public class Node {
       void displayGlobalPersistence(int view){    	  
     	  if (this.coords.get(view)!=null){
     		  this.globalPersistence = calculateGlobalPersistence();  
-    		  drawNode(this.coords.get(view).x, this.coords.get(view).y,255);   
+    		  drawNode(this.coords.get(view).x, this.coords.get(view).y,(int)(255*this.globalPersistence));   
     	  }     	  
       }
       
@@ -85,11 +92,36 @@ public class Node {
     	  return (float)(this.numTimeSlices - disappearanceCount)/this.numTimeSlices;
       }
       /**Checks to see if the mouse event is in the node's circular area
+       * @param view  the current view
+       * @return index of the selected, -1 otherwise
        * */
-      void mouseClicked(){
-    	  if (parent.mousePressed && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=RADIUS){
-    		  System.out.println("clicked");
+      int selectNode(int view){
+    	  if (this.coords.get(view)!=null){
+	    	  if (parent.mousePressed && parent.dist(this.coords.get(view).x,this.coords.get(view).y,parent.mouseX,parent.mouseY)<=RADIUS){
+	    		  this.clicked = true;	
+	    		  return this.id;
+	    	  }
     	  }
+    	  return -1;
+      }
+     
+      /** Visualizes the node persistence across all time slices to guide interaction    
+       * */
+      void drawHintPath(float x, float y){
+    	  float interval = parent.TWO_PI/this.numTimeSlices;    	  
+    	  int segments = (int) Math.ceil( parent.TWO_PI/interval);
+    	  float startAngle, endAngle;
+    	  for (int i=0;i<segments;i++){
+    		  startAngle = i*interval;
+    		  endAngle = startAngle + interval;
+    		  if (this.coords.get(i)==null){
+    			  parent.stroke(253, 224, 221);
+    		  }else{
+    			  parent.stroke(250, 159, 181);    	    	  
+    		  }    		  
+        	  parent.strokeWeight(5);
+        	  parent.arc(x, y, RADIUS+5, RADIUS+5, startAngle, endAngle);
+    	  }    	 
       }
       
       /**Animates a node by interpolating its position between two time slices
@@ -107,12 +139,13 @@ public class Node {
     		  x1 = endPosition.x;
     		  y1 = endPosition.y;
     		  x = (x1 - x0)*interpolation + x0;
-    		  y = y0 +(y1-y0)*((x-x0)/(x1-x0));
-    		  drawNode(x,y,255);
-    	  }else if (startPosition==null && endPosition!=null){ //Node is fading in    		  
+    		  y = y0 +(y1-y0)*((x-x0)/(x1-x0));    		 
+    		  drawNode(x,y,255);   		  
+    	  }/**else if (startPosition==null && endPosition!=null){ //Node is fading in    		  
     		  drawNode(endPosition.x,endPosition.y,(int)(interpolation*255));
     	  }else if (startPosition!=null && endPosition==null){ //Node is fading out
     		  drawNode(startPosition.x,startPosition.y,(int)(interpolation*255));
-    	  }    	  
+    	  }    */
+    	  //TODO: get fading effect to work (needs to be offset to occur closer to the view switch)
       }       
 }

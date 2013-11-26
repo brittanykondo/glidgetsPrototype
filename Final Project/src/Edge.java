@@ -9,6 +9,8 @@ public class Edge {
       String label;
       PApplet parent;
       ArrayList<Integer> persistence; //1 if the edge is drawn, 0 if it disappears
+      float globalPersistence;
+      int numTimeSlices;
       
       Edge(PApplet p,String l, int n1, int n2, int numTimeSlices){
     	  this.parent = p;
@@ -21,6 +23,7 @@ public class Edge {
     			  this.persistence.add(0);
     		  }
     	  }
+    	  this.numTimeSlices = numTimeSlices;
       }
       /**Draws an edge in a static graph
        * @param nodes indexed list of all nodes in the graph    
@@ -28,7 +31,7 @@ public class Edge {
       void display(ArrayList<Node> nodes){    	  
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
-    	  drawEdge(n1.x,n1.y,n2.x,n2.y,255);    	  
+    	  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1);    	  
       } 
       
       /**Draws an edge at a certain moment in time
@@ -39,9 +42,34 @@ public class Edge {
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){ //Safety Check
-    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255);
+    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1);
     	  }
       } 
+      /** Visualizes the overall edge persistence (how often is it displayed?) 
+       *  at a certain time slice
+       * */
+      //TODO: what about edges that are not in the view?
+      void displayGlobalPersistence(ArrayList<Node> nodes,int view){   
+    	  Node n1 = nodes.get(this.node1);
+    	  Node n2 = nodes.get(this.node2);
+    	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){
+    		  this.globalPersistence = calculateGlobalPersistence();  
+    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,(float)(this.globalPersistence*10));   
+    	  }     	  
+      }
+      
+      /**Calculates the overall persistence: 
+       * (number of time slices - number of disappearances)/number of time slices
+       * @return the global persistence measure (as probability)
+       * */
+      float calculateGlobalPersistence(){    	  
+    	  int disappearanceCount = 0;
+    	  for (int i=0;i<this.persistence.size();i++){
+    		  if (this.persistence.get(i)==0) disappearanceCount++;
+    	  }    	 
+    	  return (float)(this.numTimeSlices - disappearanceCount)/this.numTimeSlices;
+      }
+      
       /** Finds an edge in an ArrayList of edges
        *  @param Arraylist of edges to search within
        *  @return index of the edge that was found, -1 otherwise
@@ -81,22 +109,24 @@ public class Edge {
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  if (this.persistence.get(start)!=0 && this.persistence.get(end)!=0){ //Safety Check     		  
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,255);
-    	  }else if(this.persistence.get(start)!=0 && this.persistence.get(end)==0){
+    		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1);
+    	  }/**else if(this.persistence.get(start)!=0 && this.persistence.get(end)==0){
     		  n1 = nodes.get(start);
     		  n2 = nodes.get(start);
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,(int)(interpolation*255));
+    		  drawEdge(n1.x,n1.y,n2.x,n2.y,(int)(interpolation*255),1);
     	  }else if(this.persistence.get(start)==0 && this.persistence.get(end)!=0){
     		  n1 = nodes.get(end);
     		  n2 = nodes.get(end);
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,(int)(interpolation*255));
-    	  }
+    		  drawEdge(n1.x,n1.y,n2.x,n2.y,(int)(interpolation*255),1);
+    	  }*/
       }
       /** Renders the edge between the specified coordinates
        *  @param x0,y0,x1,y1 the coordinates
        *  @param alpha the alpha amount (0 to 255) for setting transparency
+       *  @param weight the thickness of the stroke
        * */
-      void drawEdge(float x0, float y0, float x1, float y1,int alpha){
+      void drawEdge(float x0, float y0, float x1, float y1,int alpha,float weight){
+    	  parent.strokeWeight(weight);
     	  parent.stroke(200,200,200,alpha);  
 		  parent.line(x0, y0,x1,y1);
       }
