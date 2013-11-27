@@ -10,7 +10,7 @@ public class Edge {
       PApplet parent;
       ArrayList<Integer> persistence; //1 if the edge is drawn, 0 if it disappears
       float globalPersistence;
-      int numTimeSlices;
+      int numTimeSlices;    
       
       Edge(PApplet p,String l, int n1, int n2, int numTimeSlices){
     	  this.parent = p;
@@ -23,7 +23,7 @@ public class Edge {
     			  this.persistence.add(0);
     		  }
     	  }
-    	  this.numTimeSlices = numTimeSlices;
+    	  this.numTimeSlices = numTimeSlices;    	  
       }
       /**Draws an edge in a static graph
        * @param nodes indexed list of all nodes in the graph    
@@ -68,52 +68,26 @@ public class Edge {
     		  if (this.persistence.get(i)==0) disappearanceCount++;
     	  }    	 
     	  return (float)(this.numTimeSlices - disappearanceCount)/this.numTimeSlices;
-      }
-      
-      /** Finds an edge in an ArrayList of edges
-       *  @param Arraylist of edges to search within
-       *  @return index of the edge that was found, -1 otherwise
-       * */
-      int find(ArrayList<Edge> edges){
-    	  for (int i=0;i<edges.size();i++){
-    		  if (equalTo(edges.get(i),this)){
-    			  return i;
-    		  }
-    	  }
-    	  return -1;
-      }
+      }     
+  
       /** Checks to see if two edges are equal.
        *  Two edges are considered equal if they connected to the same nodes
-       *  @param e1, e2 the edges to compare
+       *  @param e the edge to compare with this (calling object)
        *  @return true if they are equal, false otherwise
        * */
-      boolean equalTo(Edge e1, Edge e2){
-    	  if (e1.node1 == e2.node1 && e1.node2==e2.node2){
+      boolean equalTo(Edge e){
+    	  if (this.node1 == e.node1 && this.node2==e.node2){
     		  return true;
     	  }
     	  return false;
       }
       
-      /**Checks to see if the mouse event is on the edge
-       * @param view  the current view
-       * @return index of the selected edge, -1 otherwise
-       * */
-      //TODO: interaction challenge here, be sure to implement the drawing gesture between the nodes as another way to select an edge
-      int selectEdge(int view){
-    	  /**if (this.coords.get(view)!=null){
-	    	  if (parent.mousePressed && parent.dist(this.coords.get(view).x,this.coords.get(view).y,parent.mouseX,parent.mouseY)<=RADIUS){
-	    		  this.clicked = true;	
-	    		  return this.id;
-	    	  }
-    	  }*/
-    	  return -1;
-      }
-      
       /**Animates an edge by re-drawing it according to the interpolated position of
        * the nodes it is attached to
+       * @param nodes an array of all nodes in the graph
        * @param start the starting time slice
        * @param end the ending time slice
-       * @interpolation the amount to interpolate by
+       * @param interpolation the amount to interpolate by
        * */
       void animate(ArrayList<Node> nodes,int start,int end, float interpolation){
     	  Node n1 = nodes.get(this.node1);
@@ -138,24 +112,33 @@ public class Edge {
       void drawEdge(float x0, float y0, float x1, float y1,int alpha,float weight){
     	  parent.strokeWeight(weight);
     	  parent.stroke(200,200,200,alpha);  
-		  parent.line(x0, y0,x1,y1);
+		  parent.line(x0, y0,x1,y1);		  
       }
-      /** Visualizes the edge persistence across all time slices to guide interaction    
+      /** Visualizes the edge persistence across all time slices to guide interaction
+       *  @param nodes an array of all nodes in the graph    
        * */
-      void drawHintPath(){
-    	  /**float interval = parent.TWO_PI/this.numTimeSlices;    	  
-    	  int segments = (int) Math.ceil( parent.TWO_PI/interval);
-    	  float startAngle, endAngle;
-    	  for (int i=0;i<segments;i++){
-    		  startAngle = i*interval;
-    		  endAngle = startAngle + interval;
-    		  if (this.coords.get(i)==null){
+      void drawHintPath(ArrayList <Node> nodes){
+    	  Node n1 = nodes.get(this.node1);
+    	  Node n2 = nodes.get(this.node2);
+    	  System.out.println("drawing.."); 
+    	  parent.strokeWeight(5);    	  
+    	  float interval = (float)1/this.numTimeSlices;
+    	  float startX = n1.x,startY = n1.y;    	  
+    	  float endX,endY,interpolation=interval;    	  
+    	  
+    	  for (int i=0;i<this.numTimeSlices;i++){      
+    		  System.out.println(interpolation);
+    		  endX = (n2.x - startX)*interpolation + startX;
+    		  endY = startY +(n2.y-startY)*((endX-startX)/(n2.x-startX)); 
+    		  if (this.persistence.get(i)==0){
     			  parent.stroke(253, 224, 221);
     		  }else{
     			  parent.stroke(250, 159, 181);    	    	  
-    		  }    		  
-        	  parent.strokeWeight(5);
-        	  parent.arc(x, y, RADIUS+5, RADIUS+5, startAngle, endAngle);
-    	  }    	*/ 
+    		  } 
+    		  parent.line(startX,startY,endX,endY);
+    		  interpolation +=interval;
+    		  startX = endX;
+    		  startY = endY;
+    	  }    	  
       }
 }

@@ -35,12 +35,11 @@ public void setup() {
     }else if (graph.selectedNode !=-1 && graph.releasedNode!= -1){ //Show edge hint path between nodes    	
     	graph.connectNodes();
     	this.graph.drawGraph(timeSlider.currentView);    	
-    }else{
-    	this.graph.drawGraph(timeSlider.currentView); //View 0 has no graph, should remove this time slice  
+    }else{    	 
     	this.startX = mouseX;
     	this.startY = mouseY;
-    	//this.graph.drawGlobalPersistence(timeSlider.currentView);
-    }    
+    	this.graph.drawGraph(timeSlider.currentView);
+    } 
   }
   
   /**Adds a trail to the mouse movement to simulate the appearance of sketching

@@ -23,6 +23,7 @@ public class ForceDirectedGraph {
      public boolean dragging;
      public int selectedNode;
      public int releasedNode;
+     public int selectedEdge;
      
      /**Creates a new graph manager which generates or parses and saves the data
       * necessary for drawing the dynamic graph
@@ -38,6 +39,7 @@ public class ForceDirectedGraph {
     	 this.dragging = false;
     	 this.selectedNode = -1;
     	 this.releasedNode = -1;
+    	 this.selectedEdge = -1;
          readGraphDataFile(dataFile);            
      }     
      
@@ -49,8 +51,10 @@ public class ForceDirectedGraph {
 			 this.edges.get(row).display(this.nodes,view);  	    		 
 		 for (int i = 0;i<this.nodes.size();i++)
 			 this.nodes.get(i).display(view);   
+		 if (selectedEdge !=-1)
+		       this.edges.get(selectedEdge).drawHintPath(this.nodes);
 		 
-		 this.currentView = view;
+	     this.currentView = view;
 		 this.nextView = view++;
      }
      /**Handles the mouse down listener for all nodes in the graph.
@@ -85,10 +89,23 @@ public class ForceDirectedGraph {
       * Draws the hint path for the edge joined by selected and released node
       * */
      public void connectNodes(){
-    	 this.releasedNode = -1;
-   	     this.selectedNode = -1;
+    	 Edge e = new Edge(this.parent,"",this.selectedNode,this.releasedNode,this.numTimeSlices);    	
+         this.selectedEdge = find(this.edges,e);    	  	
      }
      
+     /** Finds an edge in an ArrayList of edges
+      *  @param Arraylist of edges to search within
+      *  @param e the edge to search for
+      *  @return index of the edge that was found, -1 otherwise
+      * */
+     int find(ArrayList<Edge> edges, Edge e){
+   	  for (int i=0;i<edges.size();i++){
+   		  if (e.equalTo(edges.get(i))){
+   			  return i;
+   		  }
+   	  }
+   	  return -1;
+     }
      /**Animates the graph between time slices, node positions are interpolated
       * Animates in response to the slider being dragged, therefore speed is 
       * dependent on dragging speed.
@@ -146,7 +163,7 @@ public class ForceDirectedGraph {
        				}else{
        					if (nodesDone){ //Save the edge information       						
        						newEdge = new Edge (this.parent,"",Integer.parseInt(items[0]),Integer.parseInt(items[1]),this.numTimeSlices);
-       						foundEdge = newEdge.find(this.edges);
+       						foundEdge = find(this.edges,newEdge);
        						if (foundEdge==-1){ //If edge doesn't exist, create it       							
        							newEdge.persistence.set(time, 1);
        							this.edges.add(newEdge);

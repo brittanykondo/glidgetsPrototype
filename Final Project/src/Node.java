@@ -25,22 +25,9 @@ public class Node {
     	  this.id = id;    
     	  this.numTimeSlices = t;
     	  this.clicked = false;  
-    	  this.dragging = false;
-    	  
+    	  this.dragging = false;    	  
     	  this.coords = new ArrayList<Coordinate>();
-      }  
-      /**Renders a node and adds a text label
-       * */
-      void display(){
-    	  parent.fill(255,100);
-    	  parent.noStroke();
-    	  parent.ellipse(this.x,this.y,RADIUS,RADIUS);  
-    	 
-    	  PFont font = parent.createFont("Arial",12,true);
-	   	  parent.textFont(font);	   	  
-	   	  parent.fill(255);
-	   	  parent.text(this.label, this.x, this.y);
-      } 
+      }        
       
       /**Renders the node at its position at a certain moment in time
        * */
