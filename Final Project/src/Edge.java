@@ -93,11 +93,21 @@ public class Edge {
     	  }
     	  return false;
       }
-     /** void mouseClicked(){
-    	  if (parent.mousePressed && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=RADIUS){
-    		  System.out.println("clicked");
-    	  }
-      }*/
+      
+      /**Checks to see if the mouse event is on the edge
+       * @param view  the current view
+       * @return index of the selected edge, -1 otherwise
+       * */
+      //TODO: interaction challenge here, be sure to implement the drawing gesture between the nodes as another way to select an edge
+      int selectEdge(int view){
+    	  /**if (this.coords.get(view)!=null){
+	    	  if (parent.mousePressed && parent.dist(this.coords.get(view).x,this.coords.get(view).y,parent.mouseX,parent.mouseY)<=RADIUS){
+	    		  this.clicked = true;	
+	    		  return this.id;
+	    	  }
+    	  }*/
+    	  return -1;
+      }
       
       /**Animates an edge by re-drawing it according to the interpolated position of
        * the nodes it is attached to
@@ -129,5 +139,23 @@ public class Edge {
     	  parent.strokeWeight(weight);
     	  parent.stroke(200,200,200,alpha);  
 		  parent.line(x0, y0,x1,y1);
+      }
+      /** Visualizes the edge persistence across all time slices to guide interaction    
+       * */
+      void drawHintPath(){
+    	  /**float interval = parent.TWO_PI/this.numTimeSlices;    	  
+    	  int segments = (int) Math.ceil( parent.TWO_PI/interval);
+    	  float startAngle, endAngle;
+    	  for (int i=0;i<segments;i++){
+    		  startAngle = i*interval;
+    		  endAngle = startAngle + interval;
+    		  if (this.coords.get(i)==null){
+    			  parent.stroke(253, 224, 221);
+    		  }else{
+    			  parent.stroke(250, 159, 181);    	    	  
+    		  }    		  
+        	  parent.strokeWeight(5);
+        	  parent.arc(x, y, RADIUS+5, RADIUS+5, startAngle, endAngle);
+    	  }    	*/ 
       }
 }

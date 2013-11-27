@@ -5,6 +5,7 @@ import processing.core.*;
 public class Test extends PApplet {   	
     public Slider timeSlider;
     public ForceDirectedGraph graph;
+    public float startX,startY; //Saved mouse coordinates for sketching the edge between nodes
     //public int toggleGlobalPersistence;
     
 /**Initialize the view, draw the visualization
@@ -28,14 +29,28 @@ public void setup() {
     timeSlider.drawSlider();   
     if (timeSlider.dragging){
     	this.graph.animateGraph(timeSlider.currentView, timeSlider.nextView, timeSlider.interpAmount);
-    }else if (graph.dragging){
-    	
+    }else if (graph.dragging){ //Draw a line used to sketch    	
+    	this.graph.drawGraph(timeSlider.currentView);
+    	sketch();
+    }else if (graph.selectedNode !=-1 && graph.releasedNode!= -1){ //Show edge hint path between nodes    	
+    	graph.connectNodes();
+    	this.graph.drawGraph(timeSlider.currentView);    	
     }else{
     	this.graph.drawGraph(timeSlider.currentView); //View 0 has no graph, should remove this time slice  
+    	this.startX = mouseX;
+    	this.startY = mouseY;
     	//this.graph.drawGlobalPersistence(timeSlider.currentView);
-    }
+    }    
   }
   
+  /**Adds a trail to the mouse movement to simulate the appearance of sketching
+   * This is displayed when the mouse has dragged from one node to another
+   * */
+  public void sketch(){
+	  stroke(255);
+	  line(this.startX,this.startY,mouseX,mouseY);
+  }
+
   /**Responds to a mouse down event on the canvas
    * */
   public void mousePressed(){	  

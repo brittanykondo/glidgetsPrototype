@@ -91,17 +91,34 @@ public class Node {
     	  }    	 
     	  return (float)(this.numTimeSlices - disappearanceCount)/this.numTimeSlices;
       }
+      
       /**Checks to see if the mouse event is in the node's circular area
        * @param view  the current view
+       * @param selectedNode the currently selected node (if any)
        * @return index of the selected, -1 otherwise
        * */
-      int selectNode(int view){
-    	  if (this.coords.get(view)!=null){
-	    	  if (parent.mousePressed && parent.dist(this.coords.get(view).x,this.coords.get(view).y,parent.mouseX,parent.mouseY)<=RADIUS){
-	    		  this.clicked = true;	
-	    		  return this.id;
-	    	  }
+      int selectNode(int view,int selectedNode){
+    	  Coordinate coord = this.coords.get(view);
+    	 
+    	  if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=RADIUS && this.id!=selectedNode){
+    		  this.clicked = true;		    		 
+    		  return this.id;
     	  }
+    	  this.clicked = false;
+    	  return -1;
+      }
+      
+      /**Checks to see if the mouse up event is in the node's circular area
+       * @param view  the current view
+       * @param selectedNode the currently selected node (if any)
+       * @return index of the released if it is a different node than what is selected
+       *  -1 otherwise 
+       * */
+      int releaseNode(int view, int selectedNode){
+    	  Coordinate coord = this.coords.get(view);    	  
+    	  if (coord != null && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=RADIUS && this.id!=selectedNode){    		 
+    		  return this.id;   		  
+    	  }    	 
     	  return -1;
       }
      

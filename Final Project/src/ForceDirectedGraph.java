@@ -22,6 +22,7 @@ public class ForceDirectedGraph {
      public int nextView;
      public boolean dragging;
      public int selectedNode;
+     public int releasedNode;
      
      /**Creates a new graph manager which generates or parses and saves the data
       * necessary for drawing the dynamic graph
@@ -36,6 +37,7 @@ public class ForceDirectedGraph {
     	 this.nextView = 1;
     	 this.dragging = false;
     	 this.selectedNode = -1;
+    	 this.releasedNode = -1;
          readGraphDataFile(dataFile);            
      }     
      
@@ -55,20 +57,38 @@ public class ForceDirectedGraph {
       * For now, only one node can be clicked at the same time
       * */
      public void selectNodes(){  
+    	 this.releasedNode = -1;
     	 int selected = -1;
     	 for (int i = 0;i<this.nodes.size();i++){
-    		selected = this.nodes.get(i).selectNode(this.currentView);    		
-    	 }	
-    	 if (selected!=-1) this.selectedNode = selected;
+    		selected = this.nodes.get(i).selectNode(this.currentView,this.selectedNode); 
+    		if (selected != -1) this.selectedNode = selected;
+    	 }	    	 
+    	 this.dragging = true;
      }
      /**Handles the mouse up listener for all nodes in the graph.
-      * For now, only one node can be clicked at the same time
+      * If the mouse up event is on a different node than what is
+      * selected, want to draw the edge hint path in between nodes    
       * */
-     public void releaseNodes(){    	 
+     public void releaseNodes(){  
+    	 int released = -1;
     	 for (int i = 0;i<this.nodes.size();i++){
-    		//this.nodes.get(i).releaseNode(this.currentView);
-    	 }			 
+    		released = this.nodes.get(i).releaseNode(this.currentView,this.selectedNode);
+    		if (released != -1) this.releasedNode = released;
+    	 }
+    	 this.dragging = false;
+    	 if (this.releasedNode ==-1){
+    		 this.selectedNode = -1;    		 
+    	 }
      }
+     
+     /**Re-sets the selected and released node after the edge hint path is drawn.
+      * Draws the hint path for the edge joined by selected and released node
+      * */
+     public void connectNodes(){
+    	 this.releasedNode = -1;
+   	     this.selectedNode = -1;
+     }
+     
      /**Animates the graph between time slices, node positions are interpolated
       * Animates in response to the slider being dragged, therefore speed is 
       * dependent on dragging speed.
@@ -122,8 +142,7 @@ public class ForceDirectedGraph {
        					this.nodes.add(new Node(this.parent,nodeId,items[1],this.numTimeSlices));
        				}else if (items[0].equals("time")){ //Save the time slice
        					nodesDone = true;    
-       					time = Integer.parseInt(items[1]);
-       					//this.edges.add(new ArrayList <Edge>());
+       					time = Integer.parseInt(items[1]);       				
        				}else{
        					if (nodesDone){ //Save the edge information       						
        						newEdge = new Edge (this.parent,"",Integer.parseInt(items[0]),Integer.parseInt(items[1]),this.numTimeSlices);
