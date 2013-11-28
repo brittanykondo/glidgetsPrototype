@@ -14,9 +14,9 @@ public class Node {
       ArrayList<Coordinate> coords; //Ordered by time
       ArrayList<Integer> degrees; //Ordered by time, degree of the node
       float globalPersistence; //Percentage of time the node does not disappear
-      int numTimeSlices;
-      boolean clicked; //Currently not being used in this class
+      int numTimeSlices;      
       boolean dragging;
+      int maxDegree; //For scaling visualizations of relative degree amount (only w.r.t to this node's degree changes)
       
       Node(PApplet p,int id,String l,int t){
     	  this.x = 0;
@@ -24,11 +24,11 @@ public class Node {
     	  this.label = l;
     	  this.parent = p;
     	  this.id = id;    
-    	  this.numTimeSlices = t;
-    	  this.clicked = false;  
+    	  this.numTimeSlices = t;    	  
     	  this.dragging = false;    	  
     	  this.coords = new ArrayList<Coordinate>();
     	  this.degrees = new ArrayList<Integer>();
+    	  this.maxDegree = -1;
       }        
       
       /**Renders the node at its position at a certain moment in time
@@ -49,19 +49,21 @@ public class Node {
     	  }
     	  //For each time slice, count the number of edges containing the node
     	  Edge currentEdge;
-    	  int degreeCount;
+    	  int degreeCount;    	  
     	  
     	  for (int i=0;i<edges.size();i++){
     		  currentEdge = edges.get(i);
     		  if (currentEdge.node1==this.id || currentEdge.node2 == this.id){    			 
     			  for (int t=0;t<this.numTimeSlices;t++){
     				  if (currentEdge.persistence.get(t)==1){
-    					  degreeCount = this.degrees.get(t);
-    					  this.degrees.set(t, degreeCount+1);
+    					  degreeCount = this.degrees.get(t)+1;
+    					  if (degreeCount>this.maxDegree) this.maxDegree = degreeCount;
+    					  this.degrees.set(t, degreeCount);
     				  }
     			  }
     		  }
-    	  }   	 
+    	  }
+    	  //System.out.println(this.maxDegree);
       }
       
       /** Renders the node at the specified position and saves the positions in class variables
@@ -111,13 +113,10 @@ public class Node {
        * @return index of the selected, -1 otherwise
        * */
       int selectNode(int view,int selectedNode){
-    	  Coordinate coord = this.coords.get(view);
-    	 
-    	  if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=RADIUS && this.id!=selectedNode){
-    		  //this.clicked = true;		    		 
+    	  Coordinate coord = this.coords.get(view);    	 
+    	  if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=RADIUS && this.id!=selectedNode){    			    		 
     		  return this.id;
-    	  }
-    	  //this.clicked = false;
+    	  }    	 
     	  return -1;
       }
       
@@ -138,18 +137,22 @@ public class Node {
       /** Visualizes the node persistence across all time slices to guide interaction    
        * */
       void drawHintPath(){
-    	  float interval = parent.TWO_PI/this.numTimeSlices;    	  
-    	  int segments = (int) Math.ceil( parent.TWO_PI/interval);
+    	  float interval = parent.TWO_PI/this.numTimeSlices;       	 
     	  float startAngle, endAngle;
-    	  for (int i=0;i<segments;i++){
+    	  int alpha;
+    	  for (int i=0;i<this.numTimeSlices;i++){
     		  startAngle = i*interval;
     		  endAngle = startAngle + interval;
     		  if (this.coords.get(i)==null){
-    			  parent.stroke(253, 224, 221);
+    			  parent.stroke(253, 224, 221,100);
     		  }else{
-    			  parent.stroke(250, 159, 181);    	    	  
+    			  alpha= (int)(((float)this.degrees.get(i)/this.maxDegree)*255);
+    			  System.out.println(alpha+" "+this.maxDegree+" "+this.degrees.get(i));
+    			  parent.stroke(250, 159, 181,alpha);    	    	  
     		  }    		  
         	  parent.strokeWeight(5);
+        	  parent.strokeCap(parent.SQUARE);
+        	  parent.noFill();
         	  parent.arc(this.x, this.y, RADIUS+5, RADIUS+5, startAngle, endAngle);
     	  }    	 
       }
