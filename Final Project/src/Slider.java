@@ -13,10 +13,11 @@ public class Slider {
      float xPos; //Spacing from edge
      float dragTickHeight = 20, dragTickWidth=10; //Of the draggable tick
      float tickHeight, tickWidth; //Of the ticks along the main slider
-     int currentView,nextView;
+     int currentView,nextView,drawingView;
      boolean dragging;
      float dragTickX, dragTickY;
      float interpAmount;
+    
      
      Slider (PApplet p, ArrayList<String>l,int sp){   	  
 	   	  this.parent = p;
@@ -28,6 +29,7 @@ public class Slider {
 	   	  this.xPos = 10;
 	   	  this.tickHeight = 20;
 	   	  this.currentView = 0;
+	   	  this.drawingView = 0;
 	   	  this.nextView = 1;
 	   	  this.dragging = false;
 	   	  this.interpAmount = 0;
@@ -51,11 +53,11 @@ public class Slider {
       * */
      void drawSliderBackground(){
     	//Draw the main line
-    	 parent.strokeWeight(2);
-	   	  parent.stroke(255);
+    	  parent.strokeWeight(2);
+	   	  parent.stroke(115,115,115);
 	   	  PFont font = parent.createFont("Arial",16,true);
 	   	  parent.textFont(font);	   	  
-	   	  parent.fill(255);
+	   	  parent.fill(115,115,115);
 	   	  
 	   	  parent.line(this.tickPositions.get(0), this.yPos, this.tickPositions.get(this.numLabels-1), this.yPos);
 	   	  
@@ -70,9 +72,7 @@ public class Slider {
      * Also re-draws the slider bar
      * */
     void drawSlider(){
-    	drawSliderBackground();
-    	parent.strokeWeight(1);
-    	parent.stroke(0);       
+    	drawSliderBackground();    	  
     	parent.rect(this.dragTickX,this.dragTickY,this.dragTickWidth,this.dragTickHeight,4);  
      } 
      
@@ -82,7 +82,7 @@ public class Slider {
     	 if (mx >= this.dragTickX && mx < this.dragTickX+this.dragTickWidth && 
     			 my >= this.dragTickY && my<this.dragTickY+this.dragTickHeight){    		 
     		this.dragging = true;
-    	 }
+    	 }    	 
      }
      /**Re-draws the tick's position in correspondence with the mouse position if the tick
       * has been selected
@@ -117,12 +117,16 @@ public class Slider {
 		 
 		 if (currentDist < nextDist){ //Snap to current view
 			 this.dragTickX = current;
+			 this.drawingView = this.currentView;
 		 }else{ //Snap to next view
 			 this.dragTickX = next;
 			 if (this.nextView<(this.numLabels-1)){
 				 this.currentView = this.nextView;
 				 this.nextView++;
-			 }			
+				 this.drawingView = this.currentView;
+			 }else{
+				 this.drawingView = this.nextView;
+			 }
 		 }
      }
      

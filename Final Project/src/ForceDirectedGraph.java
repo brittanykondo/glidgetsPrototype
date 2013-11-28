@@ -46,14 +46,28 @@ public class ForceDirectedGraph {
      /**Calls the display function for all nodes and edges, which will
       * render them onto the screen for a certain view
       * */
-     public void drawGraph(int view){   	
-		 for (int row = 0;row<this.edges.size();row++)
+     public void drawGraph(int view){       	
+		 //Render the edges
+    	 for (int row = 0;row<this.edges.size();row++)
 			 this.edges.get(row).display(this.nodes,view);  	    		 
-		 for (int i = 0;i<this.nodes.size();i++)
-			 this.nodes.get(i).display(view);   
-		 if (selectedEdge !=-1)
-		       this.edges.get(selectedEdge).drawHintPath(this.nodes);
+		  
+		 //Render the edge hint path (if an edge is selected) or the node hint path (no dragging)
+		 if (selectedEdge !=-1){
+			 if (selectedEdge ==-2){ //Show that two nodes are never connected
+				 Edge blankEdge = new Edge(this.parent,"",this.selectedNode,this.releasedNode,this.numTimeSlices);
+				 blankEdge.drawHintPath(this.nodes);
+			 }else{ //Otherwise draw the regular hint path
+				 this.edges.get(selectedEdge).drawHintPath(this.nodes);
+			 }			 
+		 }else if (this.selectedNode != -1){
+			 this.nodes.get(this.selectedNode).drawHintPath();
+		 }
 		 
+		 //Render the nodes
+		 for (int i = 0;i<this.nodes.size();i++)
+			 this.nodes.get(i).display(view); 
+		 
+		 //Update the view
 	     this.currentView = view;
 		 this.nextView = view++;
      }
@@ -61,7 +75,11 @@ public class ForceDirectedGraph {
       * For now, only one node can be clicked at the same time
       * */
      public void selectNodes(){  
+    	 //Re-set event variables
     	 this.releasedNode = -1;
+    	 this.selectedEdge = -1;
+    	 this.selectedNode = -1;
+    	 
     	 int selected = -1;
     	 for (int i = 0;i<this.nodes.size();i++){
     		selected = this.nodes.get(i).selectNode(this.currentView,this.selectedNode); 
@@ -79,10 +97,7 @@ public class ForceDirectedGraph {
     		released = this.nodes.get(i).releaseNode(this.currentView,this.selectedNode);
     		if (released != -1) this.releasedNode = released;
     	 }
-    	 this.dragging = false;
-    	 if (this.releasedNode ==-1){
-    		 this.selectedNode = -1;    		 
-    	 }
+    	 this.dragging = false;    	
      }
      
      /**Re-sets the selected and released node after the edge hint path is drawn.
@@ -90,7 +105,9 @@ public class ForceDirectedGraph {
       * */
      public void connectNodes(){
     	 Edge e = new Edge(this.parent,"",this.selectedNode,this.releasedNode,this.numTimeSlices);    	
-         this.selectedEdge = find(this.edges,e);    	  	
+         this.selectedEdge = find(this.edges,e);  
+         this.selectedEdge = (this.selectedEdge==-1)?-2:this.selectedEdge; //Need to know if no connection exists between the nodes, in this case set the selectedEdge to -2 
+                                                                           //(-1 already means no edge is currently selected)
      }
      
      /** Finds an edge in an ArrayList of edges
@@ -99,12 +116,12 @@ public class ForceDirectedGraph {
       *  @return index of the edge that was found, -1 otherwise
       * */
      int find(ArrayList<Edge> edges, Edge e){
-   	  for (int i=0;i<edges.size();i++){
-   		  if (e.equalTo(edges.get(i))){
-   			  return i;
-   		  }
-   	  }
-   	  return -1;
+		  for (int i=0;i<edges.size();i++){
+			  if (e.equalTo(edges.get(i))){
+				  return i;
+			  }
+		  }
+		  return -1;
      }
      /**Animates the graph between time slices, node positions are interpolated
       * Animates in response to the slider being dragged, therefore speed is 
@@ -117,7 +134,7 @@ public class ForceDirectedGraph {
     	 for (int i = 0;i<this.nodes.size();i++){
     		   this.nodes.get(i).animate(start, end, interpolation);	
     	  }
-    	 for (int row = 0;row<this.edges.size();row++){ 			
+    	 for (int row = 0;row<this.edges.size();row++){     		 
  	          this.edges.get(row).animate(this.nodes, start, end, interpolation);    	        	   	
  	     }
     	 this.currentView = start;
@@ -147,6 +164,7 @@ public class ForceDirectedGraph {
        	  this.nodes = new ArrayList<Node>();
        	  this.edges = new ArrayList <Edge>	();
        	  
+       	  //Read in the file
        	  try {
        			scan = new Scanner(new File(filename));
        			while(scan.hasNext())
@@ -182,6 +200,11 @@ public class ForceDirectedGraph {
        			}	       			
        		} catch (FileNotFoundException e) {			
        			e.printStackTrace();
-       		}         	 
+       		}
+       	  
+       	  //Set the node degree changes over time
+       	  for (int i=0;i<this.nodes.size();i++){
+       		  this.nodes.get(i).setNodeDegree(this.edges);
+       	  }
      }
 }

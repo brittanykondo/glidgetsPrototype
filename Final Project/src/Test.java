@@ -1,12 +1,14 @@
 import java.util.ArrayList;
 import processing.core.*;
+//import org.gicentre.handy.*;
 
 
 public class Test extends PApplet {   	
     public Slider timeSlider;
-    public ForceDirectedGraph graph;
-    public float startX,startY; //Saved mouse coordinates for sketching the edge between nodes
+    public ForceDirectedGraph graph;  
+ 
     //public int toggleGlobalPersistence;
+    //public HandyRenderer sketchyEffect;
     
 /**Initialize the view, draw the visualization
    * */
@@ -17,29 +19,31 @@ public void setup() {
 	for (int i=0;i<this.graph.numTimeSlices;i++){
 		testLabels.add(""+i);
 	}    
-    this.timeSlider = new Slider(this,testLabels,70);     
+    this.timeSlider = new Slider(this,testLabels,70);    
+    //this.sketchyEffect = new HandyRenderer(this);
   }
  
   /**Re-draw the view
   * */
-  public void draw() {
-	background(25,25,25); 
-    stroke(255);  
-    timeSlider.drag(mouseX);
-    timeSlider.drawSlider();   
+  public void draw() {   
+     
     if (timeSlider.dragging){
+    	background(25,25,25); 
+    	timeSlider.drag(mouseX);
+    	timeSlider.drawSlider();  
     	this.graph.animateGraph(timeSlider.currentView, timeSlider.nextView, timeSlider.interpAmount);
-    }else if (graph.dragging){ //Draw a line used to sketch    	
-    	this.graph.drawGraph(timeSlider.currentView);
+    }else if (graph.dragging){ //Issue query sketch   	
     	sketch();
-    }else if (graph.selectedNode !=-1 && graph.releasedNode!= -1){ //Show edge hint path between nodes    	
+    }else if (graph.selectedNode !=-1 && graph.releasedNode!= -1){ //Show edge hint path between nodes  
+    	background(25,25,25);
+    	timeSlider.drawSlider();  
     	graph.connectNodes();
-    	this.graph.drawGraph(timeSlider.currentView);    	
+    	this.graph.drawGraph(timeSlider.drawingView);    	
     }else{    	 
-    	this.startX = mouseX;
-    	this.startY = mouseY;
-    	this.graph.drawGraph(timeSlider.currentView);
-    } 
+    	background(25,25,25);     	
+        timeSlider.drawSlider();  
+    	this.graph.drawGraph(timeSlider.drawingView);
+    }      
   }
   
   /**Adds a trail to the mouse movement to simulate the appearance of sketching
@@ -47,7 +51,8 @@ public void setup() {
    * */
   public void sketch(){
 	  stroke(255);
-	  line(this.startX,this.startY,mouseX,mouseY);
+	  strokeWeight(1);
+	  /**sketchyEffect.*/line(pmouseX,pmouseY,mouseX,mouseY);
   }
 
   /**Responds to a mouse down event on the canvas
@@ -63,6 +68,9 @@ public void setup() {
       timeSlider.releaseTick();	 
       graph.releaseNodes();
   }     
-
+  //Maybe can use key press to aggregrate queries? (e.g., select multiple nodes)
+  public void keyPressed(){
+	  System.out.println("key pressed");
+  }
 }
 

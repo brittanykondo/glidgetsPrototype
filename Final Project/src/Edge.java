@@ -24,15 +24,7 @@ public class Edge {
     		  }
     	  }
     	  this.numTimeSlices = numTimeSlices;    	  
-      }
-      /**Draws an edge in a static graph
-       * @param nodes indexed list of all nodes in the graph    
-       * */
-      void display(ArrayList<Node> nodes){    	  
-    	  Node n1 = nodes.get(this.node1);
-    	  Node n2 = nodes.get(this.node2);
-    	  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1);    	  
-      } 
+      }     
       
       /**Draws an edge at a certain moment in time
        * @param nodes indexed list of all nodes in the graph
@@ -42,7 +34,7 @@ public class Edge {
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){ //Safety Check
-    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1);
+    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,1,1);
     	  }
       } 
       /** Visualizes the overall edge persistence (how often is it displayed?) 
@@ -54,7 +46,7 @@ public class Edge {
     	  Node n2 = nodes.get(this.node2);
     	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){
     		  this.globalPersistence = calculateGlobalPersistence();  
-    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,(float)(this.globalPersistence*10));   
+    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,1,(float)(this.globalPersistence*10));   
     	  }     	  
       }
       
@@ -76,12 +68,18 @@ public class Edge {
        *  @return true if they are equal, false otherwise
        * */
       boolean equalTo(Edge e){
-    	  if (this.node1 == e.node1 && this.node2==e.node2){
+    	  if ((this.node1 == e.node1 && this.node2==e.node2) || 
+    			  (this.node1==e.node2 && this.node2 == e.node1)){ //Consider repeated edges
     		  return true;
     	  }
     	  return false;
       }
       
+      /**Prints an edge */
+      void print(){
+    	  System.out.println("Id "+this.label+" node 1: "+this.node1+" node 2: "+this.node2);
+      }
+     
       /**Animates an edge by re-drawing it according to the interpolated position of
        * the nodes it is attached to
        * @param nodes an array of all nodes in the graph
@@ -93,25 +91,20 @@ public class Edge {
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  if (this.persistence.get(start)!=0 && this.persistence.get(end)!=0){ //Safety Check     		  
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1);
-    	  }/**else if(this.persistence.get(start)!=0 && this.persistence.get(end)==0){
-    		  n1 = nodes.get(start);
-    		  n2 = nodes.get(start);
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,(int)(interpolation*255),1);
-    	  }else if(this.persistence.get(start)==0 && this.persistence.get(end)!=0){
-    		  n1 = nodes.get(end);
-    		  n2 = nodes.get(end);
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,(int)(interpolation*255),1);
-    	  }*/
+    		  drawEdge(n1.x,n1.y,n2.x,n2.y,1,1);
+    	  }else if (this.persistence.get(start)==1 || this.persistence.get(end)==1){ //Should appear in either of the neighbor time slices
+    		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolation,1);
+    	  }    	  
       }
       /** Renders the edge between the specified coordinates
        *  @param x0,y0,x1,y1 the coordinates
-       *  @param alpha the alpha amount (0 to 255) for setting transparency
+       *  @param interp amount for setting the alpha value
        *  @param weight the thickness of the stroke
        * */
-      void drawEdge(float x0, float y0, float x1, float y1,int alpha,float weight){
-    	  parent.strokeWeight(weight);
-    	  parent.stroke(200,200,200,alpha);  
+      void drawEdge(float x0, float y0, float x1, float y1,double interp,float weight){
+    	  int alpha = (int)(interp*100); //Scale down the transparency
+    	  parent.strokeWeight(weight);    	
+    	  parent.stroke(253, 224, 221,alpha); 
 		  parent.line(x0, y0,x1,y1);		  
       }
       /** Visualizes the edge persistence across all time slices to guide interaction

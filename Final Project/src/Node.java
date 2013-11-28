@@ -9,12 +9,13 @@ public class Node {
       int id;
       String label;
       double value;     
-      public static final float RADIUS = 50;
+      public static final float RADIUS = 30;
       PApplet parent;
       ArrayList<Coordinate> coords; //Ordered by time
+      ArrayList<Integer> degrees; //Ordered by time, degree of the node
       float globalPersistence; //Percentage of time the node does not disappear
       int numTimeSlices;
-      boolean clicked;
+      boolean clicked; //Currently not being used in this class
       boolean dragging;
       
       Node(PApplet p,int id,String l,int t){
@@ -27,6 +28,7 @@ public class Node {
     	  this.clicked = false;  
     	  this.dragging = false;    	  
     	  this.coords = new ArrayList<Coordinate>();
+    	  this.degrees = new ArrayList<Integer>();
       }        
       
       /**Renders the node at its position at a certain moment in time
@@ -36,14 +38,38 @@ public class Node {
     		  drawNode(this.coords.get(view).x, this.coords.get(view).y,255);    		  
     	  }    	  	  
       }
+      /**Finds and saved the degree (number of edges incident on the node) of the node
+       * for each time slice
+       * @param an array of all edges present in the graph (for each time slice) 
+       * */
+      void setNodeDegree(ArrayList<Edge> edges){
+    	  //Initialize the array for saving degree over time
+    	  for (int i=0;i<this.numTimeSlices;i++){
+    		  this.degrees.add(0);
+    	  }
+    	  //For each time slice, count the number of edges containing the node
+    	  Edge currentEdge;
+    	  int degreeCount;
+    	  
+    	  for (int i=0;i<edges.size();i++){
+    		  currentEdge = edges.get(i);
+    		  if (currentEdge.node1==this.id || currentEdge.node2 == this.id){    			 
+    			  for (int t=0;t<this.numTimeSlices;t++){
+    				  if (currentEdge.persistence.get(t)==1){
+    					  degreeCount = this.degrees.get(t);
+    					  this.degrees.set(t, degreeCount+1);
+    				  }
+    			  }
+    		  }
+    	  }   	 
+      }
+      
       /** Renders the node at the specified position and saves the positions in class variables
        *  @param x,y the position coordinates
        *  @param alpha the amount of transparency (0 to 255)
        * */
-      void drawNode(float x, float y,int alpha){
-    	  if (this.clicked){
-    		  drawHintPath(x,y);
-    	  }
+      void drawNode(float x, float y,int alpha){    	  
+    	  
     	  parent.fill(206,18,86,alpha);
     	  parent.noStroke();
     	  parent.ellipse(x,y,RADIUS,RADIUS);  
@@ -51,8 +77,8 @@ public class Node {
     	  PFont font = parent.createFont("Arial",12,true);
 	   	  parent.textFont(font);	   	  
 	   	  parent.fill(247,244,249,alpha);
-	   	  parent.text(this.label, x,y);
-	   	  
+	   	  parent.text(this.label, x,y);	   	
+	   	 
     	  this.x = x;
 	   	  this.y = y;
       }
@@ -88,10 +114,10 @@ public class Node {
     	  Coordinate coord = this.coords.get(view);
     	 
     	  if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=RADIUS && this.id!=selectedNode){
-    		  this.clicked = true;		    		 
+    		  //this.clicked = true;		    		 
     		  return this.id;
     	  }
-    	  this.clicked = false;
+    	  //this.clicked = false;
     	  return -1;
       }
       
@@ -111,7 +137,7 @@ public class Node {
      
       /** Visualizes the node persistence across all time slices to guide interaction    
        * */
-      void drawHintPath(float x, float y){
+      void drawHintPath(){
     	  float interval = parent.TWO_PI/this.numTimeSlices;    	  
     	  int segments = (int) Math.ceil( parent.TWO_PI/interval);
     	  float startAngle, endAngle;
@@ -124,7 +150,7 @@ public class Node {
     			  parent.stroke(250, 159, 181);    	    	  
     		  }    		  
         	  parent.strokeWeight(5);
-        	  parent.arc(x, y, RADIUS+5, RADIUS+5, startAngle, endAngle);
+        	  parent.arc(this.x, this.y, RADIUS+5, RADIUS+5, startAngle, endAngle);
     	  }    	 
       }
       
@@ -145,11 +171,11 @@ public class Node {
     		  x = (x1 - x0)*interpolation + x0;
     		  y = y0 +(y1-y0)*((x-x0)/(x1-x0));    		 
     		  drawNode(x,y,255);   		  
-    	  }/**else if (startPosition==null && endPosition!=null){ //Node is fading in    		  
+    	  }else if (startPosition==null && endPosition!=null){ //Node is fading in    		  
     		  drawNode(endPosition.x,endPosition.y,(int)(interpolation*255));
     	  }else if (startPosition!=null && endPosition==null){ //Node is fading out
     		  drawNode(startPosition.x,startPosition.y,(int)(interpolation*255));
-    	  }    */
+    	  }    
     	  //TODO: get fading effect to work (needs to be offset to occur closer to the view switch)
       }       
 }
