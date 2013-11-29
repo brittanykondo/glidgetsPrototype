@@ -9,7 +9,7 @@ public class Node {
       int id;
       String label;
       double value;     
-      public static final float RADIUS = 30;
+    
       PApplet parent;
       ArrayList<Coordinate> coords; //Ordered by time
       ArrayList<Integer> degrees; //Ordered by time, degree of the node
@@ -18,13 +18,28 @@ public class Node {
       boolean dragging;
       int maxDegree; //For scaling visualizations of relative degree amount (only w.r.t to this node's degree changes)
       
+      //Class Constants
+      static int MIN_WEIGHT = 2;
+      static int MAX_WEIGHT = 8;
+      static final float RADIUS = 30;
+      
+      /** Constructor for creating a Node
+       * @param p Reference to processing applet for drawing with processing commands
+       * @param id unique id to discern nodes
+       * @param l label to be drawn inside the node
+       * @param t  the number of time slices in the dataset
+       * */
       Node(PApplet p,int id,String l,int t){
-    	  this.x = 0;
-    	  this.y = 0;       	  
+    	   
+    	  //Save the parameters
     	  this.label = l;
     	  this.parent = p;
     	  this.id = id;    
-    	  this.numTimeSlices = t;    	  
+    	  this.numTimeSlices = t; 
+    	  
+    	  //Initialize other class variables
+    	  this.x = 0;
+    	  this.y = 0;  
     	  this.dragging = false;    	  
     	  this.coords = new ArrayList<Coordinate>();
     	  this.degrees = new ArrayList<Integer>();
@@ -144,13 +159,14 @@ public class Node {
     		  startAngle = i*interval;
     		  endAngle = startAngle + interval;
     		  if (this.coords.get(i)==null){
-    			  parent.stroke(253, 224, 221,100);
+    			  parent.stroke(189, 189, 189);
+    			  parent.strokeWeight(MIN_WEIGHT);
     		  }else{
-    			  alpha= (int)(((float)this.degrees.get(i)/this.maxDegree)*255);
-    			  System.out.println(alpha+" "+this.maxDegree+" "+this.degrees.get(i));
-    			  parent.stroke(250, 159, 181,alpha);    	    	  
+    			  //alpha= (int)(((float)this.degrees.get(i)/this.maxDegree)*255);    			  
+    			  parent.stroke(250, 159, 181,255);    	   
+    			  parent.strokeWeight(MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT));
     		  }    		  
-        	  parent.strokeWeight(5);
+        	  
         	  parent.strokeCap(parent.SQUARE);
         	  parent.noFill();
         	  parent.arc(this.x, this.y, RADIUS+5, RADIUS+5, startAngle, endAngle);
@@ -179,6 +195,6 @@ public class Node {
     	  }else if (startPosition!=null && endPosition==null){ //Node is fading out
     		  drawNode(startPosition.x,startPosition.y,(int)(interpolation*255));
     	  }    
-    	  //TODO: get fading effect to work (needs to be offset to occur closer to the view switch)
+    	  //TODO: try to offset fading effect closer to when the time slice is switched
       }       
 }

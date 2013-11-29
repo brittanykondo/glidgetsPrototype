@@ -71,6 +71,6 @@ public void setup() {
   //Maybe can use key press to aggregrate queries? (e.g., select multiple nodes)
   public void keyPressed(){
 	  System.out.println("key pressed");
-  }
+  } 
 }
 
