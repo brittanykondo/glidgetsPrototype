@@ -124,7 +124,7 @@ public class Edge {
     		  endX = (n2.x - startX)*interpolation + startX;
     		  endY = startY +(n2.y-startY)*((endX-startX)/(n2.x-startX)); 
     		  if (this.persistence.get(i)==0){
-    			  parent.stroke(253, 224, 221);
+    			  parent.stroke(189, 189, 189);
     		  }else{
     			  parent.stroke(250, 159, 181);    	    	  
     		  } 

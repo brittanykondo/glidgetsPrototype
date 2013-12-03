@@ -3,7 +3,6 @@ import processing.core.*;
 /**A node on a graph, for displaying it and saving important properties
  * */
 
-//TODO: need fast look up of when node disappears and re-appears from view (e.g, coords at a view is null)
 public class Node {
       float x, y;      
       int id;
@@ -19,8 +18,8 @@ public class Node {
       int maxDegree; //For scaling visualizations of relative degree amount (only w.r.t to this node's degree changes)
       
       //Class Constants
-      static int MIN_WEIGHT = 2;
-      static int MAX_WEIGHT = 8;
+      static int MIN_WEIGHT = 4;
+      static int MAX_WEIGHT = 10;
       static final float RADIUS = 30;
       
       /** Constructor for creating a Node
@@ -123,13 +122,12 @@ public class Node {
       }
       
       /**Checks to see if the mouse event is in the node's circular area
-       * @param view  the current view
-       * @param selectedNode the currently selected node (if any)
+       * @param view  the current view       
        * @return index of the selected, -1 otherwise
        * */
-      int selectNode(int view,int selectedNode){
+      int selectNode(int view){
     	  Coordinate coord = this.coords.get(view);    	 
-    	  if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=RADIUS && this.id!=selectedNode){    			    		 
+    	  if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=RADIUS){    			    		 
     		  return this.id;
     	  }    	 
     	  return -1;
@@ -149,9 +147,14 @@ public class Node {
     	  return -1;
       }
      
-      /** Visualizes the node persistence across all time slices to guide interaction    
+      /** Visualizes the node persistence across all time slices to guide interaction 
+       *  Will add an anchor to the hint path to show the current position in time (if
+       *  it's not -1)   
+       *  @param currentView current time slice of the visualization
+       *  @param interpolation amount to animate the anchor by (if visible)
        * */
-      void drawHintPath(){
+      //TODO: offset the angles, such that beginning of time is on top of node (similar to clock)
+      void drawHintPath(int currentView,float interpolation){
     	  float interval = parent.TWO_PI/this.numTimeSlices;       	 
     	  float startAngle, endAngle;
     	  int alpha;
@@ -169,32 +172,57 @@ public class Node {
         	  
         	  parent.strokeCap(parent.SQUARE);
         	  parent.noFill();
-        	  parent.arc(this.x, this.y, RADIUS+5, RADIUS+5, startAngle, endAngle);
+        	  parent.arc(this.x, this.y, RADIUS, RADIUS, startAngle, endAngle);
+        	  
+        	  if (i==currentView){ //Draw an indicator showing current time
+        		  parent.stroke(206,18,86,255); 
+        		  parent.strokeWeight(MIN_WEIGHT);
+        		  float drawingAngle = endAngle-startAngle;
+        		  float x1 = (float) (this.x + RADIUS*Math.cos(startAngle+interpolation*drawingAngle));
+        		  float y1 = (float) (this.y + RADIUS*Math.sin(startAngle+interpolation*drawingAngle));        		 
+        		  parent.line(x1, y1, this.x, this.y);
+        	  }
     	  }    	 
       }
       
       /**Animates a node by interpolating its position between two time slices
        * @param start the starting time slice
        * @param end the ending time slice
-       * @interpolation the amount to interpolate by
+       * @param interpolation the amount to interpolate by
+       * @param selectedNode, if a node is selected, draw it's hint path and animate the indicator
        * */
-      void animate(int start,int end, float interpolation){
+      void animate(int start,int end, float interpolation,int selectedNode){
     	  Coordinate startPosition = this.coords.get(start);
-    	  Coordinate endPosition = this.coords.get(end);
-    	  float x0,y0,x1,y1,x,y;
+    	  Coordinate endPosition = this.coords.get(end);    	  
+    	  Coordinate interpPosition;
+    	 
     	  if (startPosition != null && endPosition !=null){
-    		  x0 = startPosition.x;
-    		  y0 = startPosition.y;
-    		  x1 = endPosition.x;
-    		  y1 = endPosition.y;
-    		  x = (x1 - x0)*interpolation + x0;
-    		  y = y0 +(y1-y0)*((x-x0)/(x1-x0));    		 
-    		  drawNode(x,y,255);   		  
+    		  if (selectedNode ==this.id){//Draw and animate the hint path
+        		  drawHintPath(start,interpolation);
+        		  drawNode(startPosition.x,startPosition.y,255);			  
+    		  }else{    	
+    			  interpPosition = interpolatePosition(startPosition,endPosition,interpolation);
+        		  drawNode(interpPosition.x,interpPosition.y,255); 
+    		  }    		      		  
     	  }else if (startPosition==null && endPosition!=null){ //Node is fading in    		  
     		  drawNode(endPosition.x,endPosition.y,(int)(interpolation*255));
     	  }else if (startPosition!=null && endPosition==null){ //Node is fading out
     		  drawNode(startPosition.x,startPosition.y,(int)(interpolation*255));
     	  }    
     	  //TODO: try to offset fading effect closer to when the time slice is switched
-      }       
+      }  
+      /**Linearly interpolates the position of a node 
+       * @param c0 first coordinate of a point on the line
+       * @param c1 second coordinate of a point on the line
+       * @return Coordinate: new coordinates using the lerp formula
+       * */
+      Coordinate interpolatePosition(Coordinate c0, Coordinate c1, float interpAmount){
+    	  float x0 = c0.x;
+    	  float y0 = c0.y;
+    	  float x1 = c1.x;
+    	  float y1 = c1.y;
+    	  float x = (x1 - x0)*interpAmount + x0;
+		  float y = y0 +(y1-y0)*((x-x0)/(x1-x0)); 
+		  return new Coordinate(x,y);
+      }
 }

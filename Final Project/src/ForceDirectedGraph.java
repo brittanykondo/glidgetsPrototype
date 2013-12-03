@@ -15,12 +15,14 @@ import processing.core.PApplet;
  * */
 public class ForceDirectedGraph {	 
 	 public ArrayList<Node> nodes;
-     public ArrayList<Edge> edges;    
+     public ArrayList<Edge> edges;  
+     public ArrayList <Node> aggregatedNodes;
      PApplet parent;
      public int numTimeSlices;
      public int currentView;
      public int nextView;
      public boolean dragging;
+     public boolean multipleNodes;
      public int selectedNode;
      public int releasedNode;
      public int selectedEdge;
@@ -40,6 +42,8 @@ public class ForceDirectedGraph {
     	 this.selectedNode = -1;
     	 this.releasedNode = -1;
     	 this.selectedEdge = -1;
+    	 this.aggregatedNodes = new ArrayList<Node>();
+    	 this.multipleNodes = false;
          readGraphDataFile(dataFile);            
      }     
      
@@ -60,7 +64,7 @@ public class ForceDirectedGraph {
 				 this.edges.get(selectedEdge).drawHintPath(this.nodes);
 			 }			 
 		 }else if (this.selectedNode != -1){
-			 this.nodes.get(this.selectedNode).drawHintPath();
+			 this.nodes.get(this.selectedNode).drawHintPath(this.currentView,0);
 		 }
 		 
 		 //Render the nodes
@@ -78,12 +82,17 @@ public class ForceDirectedGraph {
     	 //Re-set event variables
     	 this.releasedNode = -1;
     	 this.selectedEdge = -1;
-    	 this.selectedNode = -1;
+    	 //this.selectedNode = -1;
     	 
     	 int selected = -1;
     	 for (int i = 0;i<this.nodes.size();i++){
-    		selected = this.nodes.get(i).selectNode(this.currentView,this.selectedNode); 
-    		if (selected != -1) this.selectedNode = selected;
+    		selected = this.nodes.get(i).selectNode(this.currentView); 
+    		if (selected == this.selectedNode) {
+    			//Start dragging around node
+    		}
+            if (selected !=-1){
+            	this.selectedNode = selected;
+            }    			
     	 }	    	 
     	 this.dragging = true;
      }
@@ -109,7 +118,44 @@ public class ForceDirectedGraph {
          this.selectedEdge = (this.selectedEdge==-1)?-2:this.selectedEdge; //Need to know if no connection exists between the nodes, in this case set the selectedEdge to -2 
                                                                            //(-1 already means no edge is currently selected)
      }
-     
+     /**Allows for multiple nodes to be selected if a key is held down.
+      * */
+     public void selectMultipleNodes(){
+    	 this.selectedNode = -1;
+    	 int selected = -1;
+    	 for (int i = 0;i<this.nodes.size();i++){
+    		selected = this.nodes.get(i).selectNode(this.currentView); 
+    		if (selected != -1) {
+    			this.aggregatedNodes.add(this.nodes.get(i));
+    			this.selectedNode = selected;
+    			System.out.println("selecting node "+this.selectedNode);
+    		}
+    	 }	
+    	 this.multipleNodes = true;
+     }
+     /**When multiple nodes have been selected and the key is released,
+      * an aggregated hint path is drawn on all of them to show 
+      * when they disappear/reappear at the same time slices
+      * */
+     public void aggregateNodes(){
+    	 ArrayList<Integer> aggregatedPersistence = new ArrayList<Integer>();
+    	 Node current;
+    	 for (int i=0;i<this.aggregatedNodes.size();i++){
+    		 current = this.aggregatedNodes.get(i);
+    		 for (int t=0;t<this.numTimeSlices;t++){
+    			 if (i==0) {
+    				 aggregatedPersistence.add((current.coords.get(t)!=null)?1:0);
+    			 }else{
+    				 if (aggregatedPersistence.get(t)==1 && current.coords.get(t)!=null){
+    					 aggregatedPersistence.set(t, 1);
+    				 }    				 
+    			 }
+    		 }    		
+    	 }
+    	 //TODO: draw the hint paths now, check if aggregation is correct
+    	 this.aggregatedNodes.clear();
+    	 this.multipleNodes = false;
+     }
      /** Finds an edge in an ArrayList of edges
       *  @param Arraylist of edges to search within
       *  @param e the edge to search for
@@ -132,7 +178,7 @@ public class ForceDirectedGraph {
       * */
      public void animateGraph(int start, int end, float interpolation){
     	 for (int i = 0;i<this.nodes.size();i++){
-    		   this.nodes.get(i).animate(start, end, interpolation);	
+    		   this.nodes.get(i).animate(start, end, interpolation,this.selectedNode);	
     	  }
     	 for (int row = 0;row<this.edges.size();row++){     		 
  	          this.edges.get(row).animate(this.nodes, start, end, interpolation);    	        	   	

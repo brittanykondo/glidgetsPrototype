@@ -39,7 +39,12 @@ public void setup() {
     	timeSlider.drawSlider();  
     	graph.connectNodes();
     	this.graph.drawGraph(timeSlider.drawingView);    	
-    }else{    	 
+    }else if (graph.selectedNode!=-1 && graph.releasedNode==-1){ //One node is selected, can drag along it
+    	background(25,25,25);     	
+        timeSlider.drawSlider();  
+    	this.graph.drawGraph(timeSlider.drawingView);
+    	 System.out.println("selected one node");
+    }else{
     	background(25,25,25);     	
         timeSlider.drawSlider();  
     	this.graph.drawGraph(timeSlider.drawingView);
@@ -71,6 +76,11 @@ public void setup() {
   //Maybe can use key press to aggregrate queries? (e.g., select multiple nodes)
   public void keyPressed(){
 	  System.out.println("key pressed");
+	  graph.selectMultipleNodes();
   } 
+  public void keyReleased(){
+	  System.out.println("key released");
+	  graph.aggregateNodes();
+  }
 }
 
