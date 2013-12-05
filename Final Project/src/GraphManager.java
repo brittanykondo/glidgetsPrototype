@@ -30,11 +30,11 @@ public class GraphManager {
       * */
      public GraphManager(PApplet p,boolean saveData){
     	 this.parent = p;      	
-         readVanDeBunt();
-         generateGraphs();
+         readVanDeBunt2();
+         /**generateGraphs();
          if (saveData){
-        	//saveGraphData("savedData.txt"); //Doesn't work
-         }    	   		   	 
+        	saveGraphData("savedData.txt"); //Doesn't work
+         }    	*/   		   	 
      }
      
      /**Uses the JUNG to generate a set of layouts for the graph at each time slice      
@@ -132,19 +132,7 @@ public class GraphManager {
 	   		 this.nodes.set(i, currentNode);	   		    		  
 	   	  }   	  
      }
-     /**Calls the display function for all nodes and edges, which will
-      * render them onto the screen for a certain view
-      * */
-     public void drawGraph(int view){    	   	  
-    	
-		 for (int row = 0;row<this.edges.get(view).size();row++){ 			
-  	          this.edges.get(view).get(row).display(this.nodes,view);    	  	    	        	   	
-  	     }	 
-		 
-		 for (int i = 0;i<this.nodes.size();i++){
-  		   this.nodes.get(i).display(view);    	
-  	     }  
-     }
+    
      /**Reads the text file containing time-varying data of undergraduate student's friendship
       * Originally used in an experiment by Van De Bunt (1999)
       * */
@@ -203,6 +191,73 @@ public class GraphManager {
     		}
     	}     	
     	
+    }
+    
+    /************************************ Parser for heat map visualization *************************************************/
+    
+    /**Reads the text file containing time-varying data of undergraduate student's friendship
+     * Originally used in an experiment by Van De Bunt (1999)
+     * */
+    public void readVanDeBunt2(){
+   	  String filename = "vanDeBunt_all.txt";
+      	  Scanner scan;
+      	  int time = 0;
+      	  int nodeCounter = 0;       	 
+      	 
+      	  ArrayList<Edge> edges = new ArrayList <Edge>(); //All unique edges      	 
+      	  
+      	  try {
+      			scan = new Scanner(new File(filename));
+      			while(scan.hasNext())
+      			{   				
+      				String line;
+      				line = scan.nextLine();
+      				String[] items = line.split(" ");
+      				if (items[0].equals("time")){
+      					time = Integer.parseInt(items[1]);
+      					nodeCounter = 0;        					
+      				}else{      					
+      					//Find the edges for each time stamp	     					
+      				 	Edge newEdge;    
+      				 	//Parse a line of the file
+      				   	for (int i=0;i<items.length;i++){      				   		
+      				   		int relation = Integer.parseInt(items[i]);   					
+      						newEdge = new Edge (this.parent,"",i,nodeCounter,7);    			
+      						int foundEdge = find(edges,newEdge);
+       						if (foundEdge==-1){ //If edge doesn't exist, create it         							
+       							newEdge.persistence.set(time, relation);
+       							edges.add(newEdge);
+       						}else{//Otherwise just update the persistence info
+       							edges.get(foundEdge).persistence.set(time, relation);
+       						}       						    			
+      				   		
+      				   	} 
+      					nodeCounter++;       					
+      				}				
+      			}	       			
+      		} catch (FileNotFoundException e) {			
+      			e.printStackTrace();
+      		} 
+      	  for (int i=0;i<edges.size();i++){
+      		  System.out.print(edges.get(i).node1+"\t"+edges.get(i).node2+"\t");
+      		  for (int j=0;j<edges.get(i).persistence.size();j++){
+      			System.out.print(edges.get(i).persistence.get(j)+"\t");
+      		  }
+      		  System.out.println();
+      	  }
+    }  
+    /** Finds an edge in an ArrayList of edges
+     *  @param Arraylist of edges to search within
+     *  @param e the edge to search for
+     *  @return index of the edge that was found, -1 otherwise
+     * */
+    int find(ArrayList<Edge> edges, Edge e){
+		  for (int i=0;i<edges.size();i++){
+			  if (e.equalTo(edges.get(i))){
+				  return i;
+			  }
+		  }
+		  return -1;
     }
 	 
 }

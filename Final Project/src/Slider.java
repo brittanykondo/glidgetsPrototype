@@ -18,15 +18,20 @@ public class Slider {
      float dragTickX, dragTickY;
      float interpAmount;
     
-     
-     Slider (PApplet p, ArrayList<String>l,int sp){   	  
+     /**Creates a new interactive slider widget
+      * @param p reference to the processing applet (for drawing)
+      * @param l an array of labels to appear along the slider
+      * @param sp the spacing in between ticks along the slider
+      * @param x,y the screen coordinates indicating position of the slider
+      * */
+     Slider (PApplet p, ArrayList<String>l,int sp,int x, int y){   	  
 	   	  this.parent = p;
 	   	  this.labels = l;   
 	   	  this.numLabels = l.size();
 	   	  this.spacing = sp;
 	   	  
-	   	  this.yPos = 600;
-	   	  this.xPos = 10;
+	   	  this.yPos = y;
+	   	  this.xPos = x;
 	   	  this.tickHeight = 20;
 	   	  this.currentView = 0;
 	   	  this.drawingView = 0;

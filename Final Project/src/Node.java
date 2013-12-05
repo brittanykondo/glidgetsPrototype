@@ -76,8 +76,7 @@ public class Node {
     				  }
     			  }
     		  }
-    	  }
-    	  //System.out.println(this.maxDegree);
+    	  }    	 
       }
       
       /** Renders the node at the specified position and saves the positions in class variables
@@ -93,7 +92,8 @@ public class Node {
     	  PFont font = parent.createFont("Arial",12,true);
 	   	  parent.textFont(font);	   	  
 	   	  parent.fill(247,244,249,alpha);
-	   	  parent.text(this.label, x,y);	   	
+	   	  parent.textAlign(parent.CENTER);
+	   	  parent.text(this.label, x,y);	  	   	  
 	   	 
     	  this.x = x;
 	   	  this.y = y;
@@ -151,40 +151,64 @@ public class Node {
        *  Will add an anchor to the hint path to show the current position in time (if
        *  it's not -1)   
        *  @param currentView current time slice of the visualization
-       *  @param interpolation amount to animate the anchor by (if visible)
-       * */
-      //TODO: offset the angles, such that beginning of time is on top of node (similar to clock)
+       *  @param interpolation amount to animate the anchor by (if visible)       
+       * */      
       void drawHintPath(int currentView,float interpolation){
     	  float interval = parent.TWO_PI/this.numTimeSlices;       	 
     	  float startAngle, endAngle;
-    	  int alpha;
+    	  //int alpha;
     	  for (int i=0;i<this.numTimeSlices;i++){
     		  startAngle = i*interval;
     		  endAngle = startAngle + interval;
     		  if (this.coords.get(i)==null){
-    			  parent.stroke(189, 189, 189);
+    			  parent.stroke(189, 189, 189,170);
     			  parent.strokeWeight(MIN_WEIGHT);
     		  }else{
-    			  //alpha= (int)(((float)this.degrees.get(i)/this.maxDegree)*255);    			  
-    			  parent.stroke(250, 159, 181,255);    	   
+    			  //alpha= (int)(((float)this.degrees.get(i)/this.maxDegree)*255); Experiment with transparency encoding the persistence   			  
+    			  parent.stroke(206,18,86,170);    	   
     			  parent.strokeWeight(MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT));
     		  }    		  
         	  
         	  parent.strokeCap(parent.SQUARE);
         	  parent.noFill();
-        	  parent.arc(this.x, this.y, RADIUS, RADIUS, startAngle, endAngle);
+        	//Offset by half pi so that beginning of time lies on top of the node (like a clock layout)
+        	  parent.arc(this.x, this.y, RADIUS, RADIUS, startAngle-parent.HALF_PI, endAngle-parent.HALF_PI); 
         	  
-        	  if (i==currentView){ //Draw an indicator showing current time
+        	 /** if (i==currentView){ //Draw an indicator showing current time
         		  parent.stroke(206,18,86,255); 
         		  parent.strokeWeight(MIN_WEIGHT);
         		  float drawingAngle = endAngle-startAngle;
         		  float x1 = (float) (this.x + RADIUS*Math.cos(startAngle+interpolation*drawingAngle));
         		  float y1 = (float) (this.y + RADIUS*Math.sin(startAngle+interpolation*drawingAngle));        		 
         		  parent.line(x1, y1, this.x, this.y);
-        	  }
+        	  }*/
     	  }    	 
       }
-      
+      /** Draws an aggregated hint path (following a persistence array)
+       *  @param currentView current time slice of the visualization
+       *  @param interpolation amount to animate the anchor by (if visible)     
+       *  @param persistence Array of persistence information for the aggregated nodes  
+       * */      
+      void drawAggregatedHintPath(int currentView,float interpolation,ArrayList<Integer> persistence){
+    	  float interval = parent.TWO_PI/this.numTimeSlices;       	 
+    	  float startAngle, endAngle;    	 
+    	  parent.strokeWeight(5);
+    	  for (int i=0;i<this.numTimeSlices;i++){
+    		  startAngle = i*interval;
+    		  endAngle = startAngle + interval;
+    		  if (persistence.get(i)==0){
+    			  parent.stroke(189, 189, 189,170);    			  
+    		  }else{    			  	  
+    			  parent.stroke(206,18,86,170);    			  
+    		  }    		  
+        	  
+        	  parent.strokeCap(parent.SQUARE);
+        	  parent.noFill();
+        	//Offset by half pi so that beginning of time lies on top of the node (like a clock layout)
+        	  parent.arc(this.x, this.y, RADIUS, RADIUS, startAngle-parent.HALF_PI, endAngle-parent.HALF_PI); 
+        	
+    	  }    	 
+      }
       /**Animates a node by interpolating its position between two time slices
        * @param start the starting time slice
        * @param end the ending time slice
@@ -197,13 +221,13 @@ public class Node {
     	  Coordinate interpPosition;
     	 
     	  if (startPosition != null && endPosition !=null){
-    		  if (selectedNode ==this.id){//Draw and animate the hint path
+    		  /**if (selectedNode ==this.id){//Draw and animate the hint path
         		  drawHintPath(start,interpolation);
         		  drawNode(startPosition.x,startPosition.y,255);			  
-    		  }else{    	
+    		  }else{    */	
     			  interpPosition = interpolatePosition(startPosition,endPosition,interpolation);
         		  drawNode(interpPosition.x,interpPosition.y,255); 
-    		  }    		      		  
+    		  //}    		      		  
     	  }else if (startPosition==null && endPosition!=null){ //Node is fading in    		  
     		  drawNode(endPosition.x,endPosition.y,(int)(interpolation*255));
     	  }else if (startPosition!=null && endPosition==null){ //Node is fading out

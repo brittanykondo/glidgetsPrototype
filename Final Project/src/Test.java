@@ -13,13 +13,13 @@ public class Test extends PApplet {
 /**Initialize the view, draw the visualization
    * */
 public void setup() {
-    size(800,800);    
+    size(800,800);       
     this.graph = new ForceDirectedGraph(this,"savedGraphData.txt",6);   
 	ArrayList <String> testLabels = new ArrayList <String>();
 	for (int i=0;i<this.graph.numTimeSlices;i++){
 		testLabels.add(""+i);
 	}    
-    this.timeSlider = new Slider(this,testLabels,70);    
+    this.timeSlider = new Slider(this,testLabels,70,10,700);    
     //this.sketchyEffect = new HandyRenderer(this);
   }
  
@@ -32,19 +32,18 @@ public void setup() {
     	timeSlider.drag(mouseX);
     	timeSlider.drawSlider();  
     	this.graph.animateGraph(timeSlider.currentView, timeSlider.nextView, timeSlider.interpAmount);
-    }else if (graph.dragging){ //Issue query sketch   	
+    }else if (graph.dragging){ //Issue query sketching   	
     	sketch();
-    }else if (graph.selectedNode !=-1 && graph.releasedNode!= -1){ //Show edge hint path between nodes  
+    }else if (graph.selectedNode !=-1 && graph.releasedNode!= -1){ //Mouse is released, show edge hint path between nodes  
     	background(25,25,25);
     	timeSlider.drawSlider();  
     	graph.connectNodes();
     	this.graph.drawGraph(timeSlider.drawingView);    	
-    }else if (graph.selectedNode!=-1 && graph.releasedNode==-1){ //One node is selected, can drag along it
+    }/**else if (graph.selectedNode!=-1 && graph.releasedNode==-1){ //Mouse is released, one node is selected
     	background(25,25,25);     	
         timeSlider.drawSlider();  
-    	this.graph.drawGraph(timeSlider.drawingView);
-    	 System.out.println("selected one node");
-    }else{
+    	this.graph.drawGraph(timeSlider.drawingView);    	 
+    }*/else{
     	background(25,25,25);     	
         timeSlider.drawSlider();  
     	this.graph.drawGraph(timeSlider.drawingView);
@@ -75,12 +74,12 @@ public void setup() {
   }     
   //Maybe can use key press to aggregrate queries? (e.g., select multiple nodes)
   public void keyPressed(){
-	  System.out.println("key pressed");
+	  //System.out.println("key pressed");
 	  graph.selectMultipleNodes();
   } 
   public void keyReleased(){
-	  System.out.println("key released");
-	  graph.aggregateNodes();
+	  //System.out.println("key released");	 
+	  graph.releaseMultipleNodes();
   }
 }
 

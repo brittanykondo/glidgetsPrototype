@@ -16,13 +16,13 @@ import processing.core.PApplet;
 public class ForceDirectedGraph {	 
 	 public ArrayList<Node> nodes;
      public ArrayList<Edge> edges;  
-     public ArrayList <Node> aggregatedNodes;
+     public ArrayList <Integer> aggregatedNodes; //Only stores the id's of the nodes
      PApplet parent;
      public int numTimeSlices;
      public int currentView;
      public int nextView;
      public boolean dragging;
-     public boolean multipleNodes;
+     public boolean keyPressed;
      public int selectedNode;
      public int releasedNode;
      public int selectedEdge;
@@ -42,38 +42,58 @@ public class ForceDirectedGraph {
     	 this.selectedNode = -1;
     	 this.releasedNode = -1;
     	 this.selectedEdge = -1;
-    	 this.aggregatedNodes = new ArrayList<Node>();
-    	 this.multipleNodes = false;
+    	 this.aggregatedNodes = new ArrayList<Integer>();
+    	 this.keyPressed = false;
          readGraphDataFile(dataFile);            
      }     
      
      /**Calls the display function for all nodes and edges, which will
       * render them onto the screen for a certain view
       * */
-     public void drawGraph(int view){       	
-		 //Render the edges
-    	 for (int row = 0;row<this.edges.size();row++)
-			 this.edges.get(row).display(this.nodes,view);  	    		 
-		  
-		 //Render the edge hint path (if an edge is selected) or the node hint path (no dragging)
-		 if (selectedEdge !=-1){
+     public void drawGraph(int view){   	  
+	   if (keyPressed){ //Case 1: key is pressed, multiple nodes can be selected, aggregate the hint paths
+		   renderEdges(view);		
+		   aggregateNodeHintPaths();
+		   renderNodes(view);
+	   }else if (selectedEdge !=-1){ //Case 2: Need to draw an edge hint path
+			 renderEdges(view);
+			 renderNodes(view);
+			//Render the nodes
+			 for (int i = 0;i<this.nodes.size();i++)
+				 this.nodes.get(i).display(view); 
 			 if (selectedEdge ==-2){ //Show that two nodes are never connected
 				 Edge blankEdge = new Edge(this.parent,"",this.selectedNode,this.releasedNode,this.numTimeSlices);
 				 blankEdge.drawHintPath(this.nodes);
 			 }else{ //Otherwise draw the regular hint path
 				 this.edges.get(selectedEdge).drawHintPath(this.nodes);
-			 }			 
-		 }else if (this.selectedNode != -1){
-			 this.nodes.get(this.selectedNode).drawHintPath(this.currentView,0);
+			 }				
+		 }else if (this.selectedNode != -1){ //Case 3: draw a node's hint path
+			 renderEdges(view);			 
+			 this.nodes.get(this.selectedNode).drawHintPath(view,0);	
+			 renderNodes(view);
+		 }else{ //Case 4: Just render both edges and nodes without hint paths
+			 renderEdges(view);
+			 renderNodes(view);		 
 		 }
-		 
-		 //Render the nodes
-		 for (int i = 0;i<this.nodes.size();i++)
-			 this.nodes.get(i).display(view); 
 		 
 		 //Update the view
 	     this.currentView = view;
 		 this.nextView = view++;
+     }
+     /**Draws all the nodes on the screen for the specified view
+      * @param view  the current view of the visualization
+      * */
+     public void renderNodes(int view){    	
+		 for (int i = 0;i<this.nodes.size();i++)
+			 this.nodes.get(i).display(view); 
+     }
+     
+     /**Draws all the edges on the screen for the specified view
+      * @param view  the current view of the visualization
+      * */
+     public void renderEdges(int view){
+    	 for (int row = 0;row<this.edges.size();row++)
+			 this.edges.get(row).display(this.nodes,view); 
      }
      /**Handles the mouse down listener for all nodes in the graph.
       * For now, only one node can be clicked at the same time
@@ -81,8 +101,8 @@ public class ForceDirectedGraph {
      public void selectNodes(){  
     	 //Re-set event variables
     	 this.releasedNode = -1;
-    	 this.selectedEdge = -1;
-    	 //this.selectedNode = -1;
+    	 this.selectedEdge = -1;    	 
+    	 this.selectedNode = -1;
     	 
     	 int selected = -1;
     	 for (int i = 0;i<this.nodes.size();i++){
@@ -126,35 +146,45 @@ public class ForceDirectedGraph {
     	 for (int i = 0;i<this.nodes.size();i++){
     		selected = this.nodes.get(i).selectNode(this.currentView); 
     		if (selected != -1) {
-    			this.aggregatedNodes.add(this.nodes.get(i));
-    			this.selectedNode = selected;
-    			System.out.println("selecting node "+this.selectedNode);
+    			if (!this.aggregatedNodes.contains(i)){
+    				this.aggregatedNodes.add(i);
+    			}    	   			
     		}
     	 }	
-    	 this.multipleNodes = true;
+    	 this.keyPressed = true;
      }
+     
+     /**Allows for multiple nodes to be released when a key is released
+      * */
+     public void releaseMultipleNodes(){
+    	this.keyPressed = false;
+    	this.aggregatedNodes.clear();    	
+     }
+     
      /**When multiple nodes have been selected and the key is released,
       * an aggregated hint path is drawn on all of them to show 
       * when they disappear/reappear at the same time slices
       * */
-     public void aggregateNodes(){
+     public void aggregateNodeHintPaths(){
+    	 
+    	 if (this.aggregatedNodes.size()==0) return;
+    	 
     	 ArrayList<Integer> aggregatedPersistence = new ArrayList<Integer>();
-    	 Node current;
-    	 for (int i=0;i<this.aggregatedNodes.size();i++){
-    		 current = this.aggregatedNodes.get(i);
+    	 Node currentNode;
+    	 for (int i=0;i<this.aggregatedNodes.size();i++){    		 
+    		 currentNode = this.nodes.get(this.aggregatedNodes.get(i));
     		 for (int t=0;t<this.numTimeSlices;t++){
     			 if (i==0) {
-    				 aggregatedPersistence.add((current.coords.get(t)!=null)?1:0);
-    			 }else{
-    				 if (aggregatedPersistence.get(t)==1 && current.coords.get(t)!=null){
-    					 aggregatedPersistence.set(t, 1);
-    				 }    				 
+    				 aggregatedPersistence.add((currentNode.coords.get(t)!=null)?1:0);
+    			 }else if (aggregatedPersistence.get(t)==1 && currentNode.coords.get(t)==null){
+    				aggregatedPersistence.set(t, 0);    				 				 
     			 }
     		 }    		
-    	 }
-    	 //TODO: draw the hint paths now, check if aggregation is correct
-    	 this.aggregatedNodes.clear();
-    	 this.multipleNodes = false;
+    	 }    	
+    	//Draw the hint paths for the aggregated nodes
+    	 for (int i=0;i<this.aggregatedNodes.size();i++){
+    		 this.nodes.get(this.aggregatedNodes.get(i)).drawAggregatedHintPath(0, 0, aggregatedPersistence);
+    	 }    	
      }
      /** Finds an edge in an ArrayList of edges
       *  @param Arraylist of edges to search within
@@ -177,12 +207,14 @@ public class ForceDirectedGraph {
       * @param interpolation the amount to interpolation the motion by
       * */
      public void animateGraph(int start, int end, float interpolation){
-    	 for (int i = 0;i<this.nodes.size();i++){
-    		   this.nodes.get(i).animate(start, end, interpolation,this.selectedNode);	
-    	  }
+    	
     	 for (int row = 0;row<this.edges.size();row++){     		 
  	          this.edges.get(row).animate(this.nodes, start, end, interpolation);    	        	   	
  	     }
+    	 for (int i = 0;i<this.nodes.size();i++){
+  		   this.nodes.get(i).animate(start, end, interpolation,this.selectedNode);	
+  	     }
+    	 
     	 this.currentView = start;
     	 this.nextView = end;
      }

@@ -75,7 +75,7 @@ public class Edge {
     	  return false;
       }
       
-      /**Prints an edge */
+      /**Prints the contents of an edge */
       void print(){
     	  System.out.println("Id "+this.label+" node 1: "+this.node1+" node 2: "+this.node2);
       }
@@ -113,8 +113,8 @@ public class Edge {
       void drawHintPath(ArrayList <Node> nodes){
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
-    	  System.out.println("drawing.."); 
-    	  parent.strokeWeight(5);    	  
+    	 
+    	  parent.strokeWeight(4);    	  
     	  float interval = (float)1/this.numTimeSlices;
     	  float startX = n1.x,startY = n1.y;    	  
     	  float endX,endY,interpolation=interval;    	  
@@ -124,9 +124,9 @@ public class Edge {
     		  endX = (n2.x - startX)*interpolation + startX;
     		  endY = startY +(n2.y-startY)*((endX-startX)/(n2.x-startX)); 
     		  if (this.persistence.get(i)==0){
-    			  parent.stroke(189, 189, 189);
+    			  parent.stroke(189, 189, 189,170);
     		  }else{
-    			  parent.stroke(250, 159, 181);    	    	  
+    			  parent.stroke(206,18,86,170);    	    	  
     		  } 
     		  parent.line(startX,startY,endX,endY);
     		  interpolation +=interval;
