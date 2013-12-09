@@ -23,10 +23,12 @@ public class ForceDirectedGraph {
      public int currentView;
      public int nextView;
      public boolean dragging;
+     public boolean draggingNode;
      public int keyPressed;
      public int selectedNode;
      public int releasedNode;
      public int selectedEdge;
+     public float interpAmount;
      
      /**Creates a new graph manager which generates or parses and saves the data
       * necessary for drawing the dynamic graph
@@ -39,7 +41,9 @@ public class ForceDirectedGraph {
     	 this.numTimeSlices = time;
     	 this.currentView = 0;
     	 this.nextView = 1;
+    	 this.interpAmount = 0;
     	 this.dragging = false;
+    	 this.draggingNode = false;
     	 this.selectedNode = -1;
     	 this.releasedNode = -1;
     	 this.selectedEdge = -1;
@@ -52,7 +56,8 @@ public class ForceDirectedGraph {
      /**Calls the display function for all nodes and edges, which will
       * render them onto the screen for a certain view
       * */
-     public void drawGraph(int view){   	  
+     public void drawGraph(int view){      	
+    	 
 	   if (keyPressed ==1){ //Case 1: 'n' key is pressed, multiple nodes can be selected, aggregate the hint paths
 		   renderEdges(view);		
 		   aggregateNodeHintPaths();
@@ -72,19 +77,96 @@ public class ForceDirectedGraph {
 			 }else{ //Otherwise draw the regular hint path
 				 this.edges.get(selectedEdge).drawHintPath(this.nodes,null);
 			 }				
-		 }else if (this.selectedNode != -1){ //Case 4: draw a node's hint path
+		 }else if (this.selectedNode != -1){ //Case 4: draw a node's hint path			 
 			 renderEdges(view);			 
 			 this.nodes.get(this.selectedNode).drawHintPath(view,0);	
 			 renderNodes(view);
 		 }else{ //Case 5: Just render both edges and nodes without hint paths
 			 renderEdges(view);
 			 renderNodes(view);		 
-		 }
-		 
-		 //Update the view
-	     this.currentView = view;
-		 this.nextView = view++;
+		 }	
+	   
+	   //Set the view variables
+	    this.currentView = view;
+		this.nextView = view++;
      }
+    /** public void selectNodeAnchor(){
+    	  Node n = this.nodes.get(this.selectedNode);
+    	  float startAngle = n.hintAngles.get(this.currentView).x;
+   	      float endAngle = n.hintAngles.get(this.currentView).y;
+	   	  float drawingAngle = endAngle-startAngle;
+	      float anchorX = (float) (n.x + n.RADIUS*Math.cos(startAngle+drawingAngle));
+	      float anchorY = (float) (n.y + n.RADIUS*Math.sin(startAngle+drawingAngle));                         
+	      
+	      float mouseX = (float) (n.x + n.RADIUS*Math.cos(startAngle+drawingAngle));
+	      float mouseY = (float) (n.x + n.RADIUS*Math.cos(startAngle+drawingAngle));
+     }*/
+    
+     /** Checks where the mouse is w.r.t the hint path
+      * */
+     public void dragAroundNode(){   	 
+    	 Node n = this.nodes.get(this.selectedNode);
+	   	 
+    	 //Find the angle of the mouse w.r.t the node's center point
+	   	 float adj = parent.mouseX - n.x;
+	   	 float opp = n.y - parent.mouseY;
+	   	 float mouseAngle = (float) Math.atan2(adj,opp);
+	 
+	   	 if (mouseAngle < 0)	mouseAngle = (float) ((Math.PI - mouseAngle*(-1))+Math.PI);
+	   	 
+	   	 float currentAngle = n.hintAngles.get(this.currentView).x + (n.hintAngles.get(this.currentView).y - n.hintAngles.get(this.currentView).x);
+	   	 float nextAngle = n.hintAngles.get(this.nextView).x + (n.hintAngles.get(this.nextView).y - n.hintAngles.get(this.nextView).x);
+	   	 float bounds = checkBounds(mouseAngle,currentAngle,nextAngle);    
+	   	System.out.println(currentAngle*180/Math.PI+" "+nextAngle*180/Math.PI+" "+mouseAngle*180/Math.PI);
+	        //Change views or update the view
+		    if (bounds == 0){		    
+		    	this.interpAmount = Math.abs(mouseAngle -currentAngle)/(nextAngle-currentAngle);		    	
+		    }else if (bounds == 1) { //At current	
+		    	if (this.currentView >0){ //Move backward in time
+		    		 this.nextView = this.currentView;
+			    	 this.currentView--;
+		    	}			    				   
+		    }else{ //At next
+		    	if (this.nextView < this.numTimeSlices-1){ //Move forward in time
+		    		this.currentView = nextView;
+			    	this.nextView++;
+		    	} 			    		        
+		    }   
+		    parent.stroke(206,18,86,255); 
+            parent.strokeWeight(n.MIN_WEIGHT);
+            
+            float x1 = (float) (n.x + n.RADIUS*Math.cos(mouseAngle - parent.HALF_PI));
+            float y1 = (float) (n.y + n.RADIUS*Math.sin(mouseAngle - parent.HALF_PI));                         
+            parent.line(x1, y1, n.x, n.y);
+		    //n.drawHintPath(this.currentView,this.interpAmount);
+		    animateGraph(this.currentView, this.nextView, this.interpAmount);
+     }
+     /** Checks if the mouse is in bounds defined by a and b, updates the interpolation amount
+      *  @param mouse: the mouse position
+      *  @return 0 if in between views
+      *          1 if passed current
+      *          2 if passed next
+      * */
+     public int checkBounds(float mouse,float a,float b){
+   	//Resolve the boundaries for comparison, start is lower value, end is higher
+   	    float start,end;
+   	    if (a>b){
+   	        end = a;
+   	        start =b;
+   	    }else{
+   	        start = a;
+   	        end = b;
+   	    }
+
+   	    //Check if the mouse is between start and end values
+   	    if (mouse <= start) {    	       
+   	        return 1;
+   	    }else if (mouse >= end) {    	       
+   	        return 2;
+   	    }
+   	    return 0;
+     }        
+  
      /**Draws all the nodes on the screen for the specified view
       * @param view  the current view of the visualization
       * */
@@ -104,22 +186,20 @@ public class ForceDirectedGraph {
       * For now, only one node can be clicked at the same time
       * */
      public void selectNodes(){  
+    	 int previousNode = this.selectedNode;
     	 //Re-set event variables
     	 this.releasedNode = -1;
     	 this.selectedEdge = -1;    	 
-    	 this.selectedNode = -1;
-    	 
+    	 this.selectedNode = -1;    	 
     	 int selected = -1;
+    	 
     	 for (int i = 0;i<this.nodes.size();i++){
-    		selected = this.nodes.get(i).selectNode(this.currentView); 
-    		if (selected == this.selectedNode) {
-    			//TODO:Start dragging around node
-    		}
-            if (selected !=-1){
-            	this.selectedNode = selected;
-            }    			
-    	 }	     
-    	 System.out.println(this.selectedNode+" "+this.releasedNode);
+    		selected = this.nodes.get(i).selectNode(this.currentView);     		
+            if (selected !=-1)	{
+            	if (selected == previousNode) this.draggingNode = true;
+            	this.selectedNode = selected;           	
+            }
+    	 }    
     	 this.dragging = true;
      }
      /**Handles the mouse up listener for all nodes in the graph.
@@ -130,13 +210,14 @@ public class ForceDirectedGraph {
     	 int released = -1;
     	 for (int i = 0;i<this.nodes.size();i++){
     		released = this.nodes.get(i).releaseNode(this.currentView,this.selectedNode);
-    		if (released != -1) this.releasedNode = released;
+    		if (released != -1) this.releasedNode = released;    		
     	 }
     	 
     	 if (this.selectedNode != -1 && this.releasedNode !=-1){    		 
     		 connectNodes();
     	 }
-    	 this.dragging = false;    	
+    	 this.dragging = false; 
+    	 this.draggingNode = false;
      }
      
      /**Re-sets the selected and released node after the edge hint path is drawn.
@@ -261,11 +342,11 @@ public class ForceDirectedGraph {
       * @param end the ending time slice
       * @param interpolation the amount to interpolation the motion by
       * */
-     public void animateGraph(int start, int end, float interpolation){
-    	
+     public void animateGraph(int start, int end, float interpolation){    	
     	 for (int row = 0;row<this.edges.size();row++){     		 
  	          this.edges.get(row).animate(this.nodes, start, end, interpolation);    	        	   	
  	     }
+    	 //System.out.println(start+" "+end+" "+interpolation+" "+this.selectedNode);
     	 for (int i = 0;i<this.nodes.size();i++){
   		   this.nodes.get(i).animate(start, end, interpolation,this.selectedNode);	
   	     }

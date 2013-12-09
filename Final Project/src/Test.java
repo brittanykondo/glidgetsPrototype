@@ -32,25 +32,18 @@ public void setup() {
     	timeSlider.drawSlider();  
     	timeSlider.drag(mouseX);
     	this.graph.animateGraph(timeSlider.currentView, timeSlider.nextView, timeSlider.interpAmount);
-    }else if (graph.dragging){ //Issue query sketching   	
-    	sketch();
-    }/**else if (graph.selectedNode !=-1 && graph.releasedNode!= -1){ //Mouse is released, show edge hint path between nodes  
+    }else if (graph.draggingNode){
     	background(25,25,25);
     	drawGlobalButton();    	
-    	timeSlider.drawSlider();  
-    	//graph.connectNodes();
-    	this.graph.drawGraph(timeSlider.drawingView);    	
+    	timeSlider.drawSlider();
+    	this.graph.dragAroundNode();    	
+    }else if (graph.dragging){ //Issue query sketching   	
+    	sketch();
     }/**else if (graph.selectedNode!=-1 && graph.releasedNode==-1){ //Mouse is released, one node is selected
     	background(25,25,25);     	
         timeSlider.drawSlider();  
     	this.graph.drawGraph(timeSlider.drawingView);    	 
-    }*//**else if (toggleGlobalPersistence==1){
-    	background(25,25,25); 
-    	drawGlobalButton();    	
-        timeSlider.drawSlider();
-        this.graph.drawGraph(timeSlider.drawingView);
-        this.graph.drawGlobalPersistence(timeSlider.drawingView);
-    } */else{
+    */else{
     	background(25,25,25); 
     	drawGlobalButton();    	
         timeSlider.drawSlider();  
@@ -71,7 +64,9 @@ public void setup() {
    * */
   public void mousePressed(){	  
 	  timeSlider.selectTick(mouseX,mouseY);
-	  graph.selectNodes();
+	  if (!timeSlider.dragging){
+		  graph.selectNodes(); //Avoid interference between selecting node and slider tick
+	  }	 
 	  toggleGlobalButton();
   }
   
@@ -109,13 +104,16 @@ public void setup() {
 	  if (this.toggleGlobalPersistence==1){
 		  this.graph.drawGlobalPersistence(timeSlider.drawingView); //Draw the global highlights on the graph
 		  fill(255);
+		  stroke(255,255,255,100);
 	  }else{
 		  fill(100);
+		  noStroke();
 	  }
 	  ellipse(10,690,10,10);
 	  PFont font = createFont("Arial",12,true);
    	  textFont(font);	   	  
    	  fill(255);   	  
+   	  textAlign(LEFT);
    	  text("Global Persistence", 20,695);	
   }
   /**Checks if the mouse was pressed on this button

@@ -63,6 +63,7 @@ public class Slider {
 	   	  PFont font = parent.createFont("Arial",16,true);
 	   	  parent.textFont(font);	   	  
 	   	  parent.fill(115,115,115);
+	   	  parent.textAlign(parent.CENTER);
 	   	  
 	   	  parent.line(this.tickPositions.get(0), this.yPos, this.tickPositions.get(this.numLabels-1), this.yPos);
 	   	  
@@ -70,7 +71,7 @@ public class Slider {
 	   	  for (int i=0;i<this.numLabels;i++){
 	   		   parent.line(this.tickPositions.get(i), this.yPos + this.tickHeight/2, this.tickPositions.get(i), 
 	   				   this.yPos -this.tickHeight/2);
-	   		   parent.text(this.labels.get(i), this.tickPositions.get(i), this.yPos - this.tickHeight/2);
+	   		   parent.text(this.labels.get(i), this.tickPositions.get(i), this.yPos - this.tickHeight);
 	   	  }
      }
     /**Re-draws the draggable tick along the main slider bar (responds to mouse interaction).
