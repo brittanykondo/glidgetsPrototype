@@ -1,13 +1,13 @@
 import java.util.ArrayList;
+
 import processing.core.*;
 //import org.gicentre.handy.*;
 
 
 public class Test extends PApplet {   	
     public Slider timeSlider;
-    public ForceDirectedGraph graph;  
- 
-    //public int toggleGlobalPersistence;
+    public ForceDirectedGraph graph;   
+    public int toggleGlobalPersistence;
     //public HandyRenderer sketchyEffect;
     
 /**Initialize the view, draw the visualization
@@ -19,35 +19,43 @@ public void setup() {
 	for (int i=0;i<this.graph.numTimeSlices;i++){
 		testLabels.add(""+i);
 	}    
-    this.timeSlider = new Slider(this,testLabels,70,10,700);    
+    this.timeSlider = new Slider(this,testLabels,70,10,650);    
     //this.sketchyEffect = new HandyRenderer(this);
   }
- 
-  /**Re-draw the view
-  * */
+
+  /**Re-draw the view */
   public void draw() {   
      
     if (timeSlider.dragging){
-    	background(25,25,25); 
-    	timeSlider.drag(mouseX);
+    	background(25,25,25);
+    	drawGlobalButton();    	
     	timeSlider.drawSlider();  
+    	timeSlider.drag(mouseX);
     	this.graph.animateGraph(timeSlider.currentView, timeSlider.nextView, timeSlider.interpAmount);
     }else if (graph.dragging){ //Issue query sketching   	
     	sketch();
-    }else if (graph.selectedNode !=-1 && graph.releasedNode!= -1){ //Mouse is released, show edge hint path between nodes  
+    }/**else if (graph.selectedNode !=-1 && graph.releasedNode!= -1){ //Mouse is released, show edge hint path between nodes  
     	background(25,25,25);
+    	drawGlobalButton();    	
     	timeSlider.drawSlider();  
-    	graph.connectNodes();
+    	//graph.connectNodes();
     	this.graph.drawGraph(timeSlider.drawingView);    	
     }/**else if (graph.selectedNode!=-1 && graph.releasedNode==-1){ //Mouse is released, one node is selected
     	background(25,25,25);     	
         timeSlider.drawSlider();  
     	this.graph.drawGraph(timeSlider.drawingView);    	 
-    }*/else{
-    	background(25,25,25);     	
+    }*//**else if (toggleGlobalPersistence==1){
+    	background(25,25,25); 
+    	drawGlobalButton();    	
+        timeSlider.drawSlider();
+        this.graph.drawGraph(timeSlider.drawingView);
+        this.graph.drawGlobalPersistence(timeSlider.drawingView);
+    } */else{
+    	background(25,25,25); 
+    	drawGlobalButton();    	
         timeSlider.drawSlider();  
     	this.graph.drawGraph(timeSlider.drawingView);
-    }      
+    }          
   }
   
   /**Adds a trail to the mouse movement to simulate the appearance of sketching
@@ -64,22 +72,61 @@ public void setup() {
   public void mousePressed(){	  
 	  timeSlider.selectTick(mouseX,mouseY);
 	  graph.selectNodes();
+	  toggleGlobalButton();
   }
   
   /**Responds to a mouse up event on the canvas
    * */
   public void mouseReleased(){	 	  
       timeSlider.releaseTick();	 
-      graph.releaseNodes();
+      graph.releaseNodes();      
   }     
-  //Maybe can use key press to aggregrate queries? (e.g., select multiple nodes)
-  public void keyPressed(){
-	  //System.out.println("key pressed");
-	  graph.selectMultipleNodes();
+ /** When a key is pressed, queries can be aggregated.  This means that either node or edge
+  *  persistence is combined into a single hint path (over time).  This shows when a set of
+  *  nodes appear together.
+  * */
+  public void keyPressed(){	 
+	  if (key=='n' || key=='N'){ //Aggregate nodes
+		  graph.selectMultipleNodes();	
+	  }	else if (key=='e'||key=='E'){ //Aggregate edges
+		  graph.selectMultipleEdges();
+	  }    	 
   } 
-  public void keyReleased(){
-	  //System.out.println("key released");	 
-	  graph.releaseMultipleNodes();
+  /**Cancels the aggregated query by clearing the hint paths 
+   * */
+  public void keyReleased(){	 
+	  if (key=='n' || key=='N'){ //Aggregate nodes
+		  graph.releaseMultipleNodes();
+	  }	else if (key=='e'||key=='E'){ //Aggregate edges
+		  graph.releaseMultipleEdges();
+	  }
+  }
+  /**Draws a button used for toggling the global highlights on and off 
+   * (for now, can only toggle when the graph is at a view (not during
+   * interaction)
+   * */
+  public void drawGlobalButton(){
+	  if (this.toggleGlobalPersistence==1){
+		  this.graph.drawGlobalPersistence(timeSlider.drawingView); //Draw the global highlights on the graph
+		  fill(255);
+	  }else{
+		  fill(100);
+	  }
+	  ellipse(10,690,10,10);
+	  PFont font = createFont("Arial",12,true);
+   	  textFont(font);	   	  
+   	  fill(255);   	  
+   	  text("Global Persistence", 20,695);	
+  }
+  /**Checks if the mouse was pressed on this button
+   * */
+  public void toggleGlobalButton(){
+	  if (dist(10,690,mouseX,mouseY)<=10 && this.toggleGlobalPersistence==0){    			    		 
+		  this.toggleGlobalPersistence = 1;
+		  return;
+	  }  
+	  this.toggleGlobalPersistence = 0;
+	  return;	  
   }
 }
 

@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import processing.core.PApplet;
 import processing.core.PFont;
 
-//TODO: need fast look up each edge between two nodes, when does it dissappear (no connections between the nodes)
 public class Edge {
       int node1, node2; //Id's of the connected nodes 
       String label;
@@ -109,21 +108,24 @@ public class Edge {
       }
       /** Visualizes the edge persistence across all time slices to guide interaction
        *  @param nodes an array of all nodes in the graph    
+       *  @param persistence an array of persistence values (if null, then set it to this object's persistence)
        * */
-      void drawHintPath(ArrayList <Node> nodes){
+      void drawHintPath(ArrayList <Node> nodes,ArrayList<Integer>persistence){
+    	  if (persistence == null)
+    		  persistence = this.persistence;
+    	  
     	  Node n1 = nodes.get(this.node1);
-    	  Node n2 = nodes.get(this.node2);
-    	 
+    	  Node n2 = nodes.get(this.node2);    	  
+    	  
     	  parent.strokeWeight(4);    	  
     	  float interval = (float)1/this.numTimeSlices;
     	  float startX = n1.x,startY = n1.y;    	  
     	  float endX,endY,interpolation=interval;    	  
     	  
-    	  for (int i=0;i<this.numTimeSlices;i++){      
-    		  System.out.println(interpolation);
+    	  for (int i=0;i<this.numTimeSlices;i++){     		  
     		  endX = (n2.x - startX)*interpolation + startX;
     		  endY = startY +(n2.y-startY)*((endX-startX)/(n2.x-startX)); 
-    		  if (this.persistence.get(i)==0){
+    		  if (persistence.get(i)==0){
     			  parent.stroke(189, 189, 189,170);
     		  }else{
     			  parent.stroke(206,18,86,170);    	    	  
