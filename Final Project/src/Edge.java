@@ -38,17 +38,25 @@ public class Edge {
       } 
       /** Visualizes the overall edge persistence (how often is it displayed?) 
        *  at a certain time slice
+       *  @param nodes all nodes in the graph
+       *  @param view  the view to draw the edges at
        * */
-      //TODO: what about edges that are not in the view?
+      //TODO: what about edges that are not in the current view?
       void displayGlobalPersistence(ArrayList<Node> nodes,int view){   
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){
     		  this.globalPersistence = calculateGlobalPersistence();  
-    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,1,(float)(this.globalPersistence*10));   
+    		  //Stroke thickness: 
+    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,1,(float)(this.globalPersistence*10));      		
     	  }     	  
       }
-      
+      /** Adds highlights to the edges to show global persistence
+       * */  
+      //TODO: experiment with different designs
+      void drawGlobalPersistenceHighlights(){
+    	          	  
+      }
       /**Calculates the overall persistence: 
        * (number of time slices - number of disappearances)/number of time slices
        * @return the global persistence measure (as probability)

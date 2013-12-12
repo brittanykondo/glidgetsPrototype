@@ -91,7 +91,7 @@ public class Node {
     		  
     		  //First, calculate the angles for the current time interval
     		  startAngle = (i*interval);    		  
-    		  endAngle = (startAngle + interval);  
+    		  endAngle = (startAngle + interval);      		 
     		  
     		  //Then, convert all negative angles into positive ones
     		  if (startAngle < 0)	startAngle = (float) ((Math.PI - startAngle*(-1))+Math.PI);
@@ -128,14 +128,21 @@ public class Node {
       void displayGlobalPersistence(int view){    	  
     	  if (this.coords.get(view)!=null){
     		  this.globalPersistence = calculateGlobalPersistence();  
+    		  drawGlobalPersistenceHighlights();
     		  drawNode(this.coords.get(view).x, this.coords.get(view).y,255);   
     	  }     	  
       }
       /** Adds highlights to the nodes to show global persistence
-       * */  
-      //TODO: experiment with some different design ideas
-      void drawGlobalPersistenceHighlights(int view){    	  
-    	       	  
+       * */       
+      void drawGlobalPersistenceHighlights(){
+    	  //Piechart Glyph:
+    	  parent.stroke(206,18,86,170);    
+    	  parent.strokeWeight(MIN_WEIGHT);
+    	  parent.strokeCap(parent.SQUARE);
+    	  parent.noFill();   
+    	  float startAngle = 0;
+    	  float endAngle = parent.TWO_PI*this.globalPersistence;
+    	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle-parent.HALF_PI, endAngle-parent.HALF_PI);        	  
       }
       /**Calculates the overall persistence: 
        * (number of time slices - number of disappearances)/number of time slices
@@ -208,7 +215,33 @@ public class Node {
                }
     	  }    	 
       }
-    
+      /**Animates the anchor around the hint path (when dragging around a selected node)
+       * @param mouseAngle the angle to draw the anchor at 
+       * */
+      void animateHintPath(float mouseAngle){
+    	  float startAngle,endAngle;
+    	  for (int i=0;i<this.numTimeSlices;i++){
+    		 
+    		  if (this.coords.get(i)==null){
+    			  parent.stroke(189, 189, 189,170);
+    			  parent.strokeWeight(MIN_WEIGHT);
+    		  }else{    			  		  
+    			  parent.stroke(206,18,86,170);    	   
+    			  parent.strokeWeight(MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT));
+    		  }    		  
+        	  
+        	  parent.strokeCap(parent.SQUARE);
+        	  parent.noFill();   
+        	  startAngle = this.hintAngles.get(i).x;
+        	  endAngle = this.hintAngles.get(i).y;
+        	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle, endAngle);      	   
+    	  }
+    	  parent.stroke(206,18,86,255); 
+          parent.strokeWeight(MIN_WEIGHT);          
+          float x1 = (float) (this.x + RADIUS*Math.cos(mouseAngle));
+          float y1 = (float) (this.y + RADIUS*Math.sin(mouseAngle));                         
+          parent.line(x1, y1, this.x, this.y);
+      }
       /** Draws an aggregated hint path (following a persistence array)
        *  @param currentView current time slice of the visualization
        *  @param interpolation amount to animate the anchor by (if visible)     
@@ -233,16 +266,17 @@ public class Node {
        * @param start the starting time slice
        * @param end the ending time slice
        * @param interpolation the amount to interpolate by
-       * @param selectedNode, if a node is selected, draw it's hint path and animate the indicator
+       * @param pinned the node that should be pinned during the animation (set to -1 if none)
+       * @param pinnedView the view to pin their position to (set to -1 if none)
        * */
-      void animate(int start,int end, float interpolation,int selectedNode){
+      void animate(int start,int end, float interpolation,int pinned,int pinnedView){
     	  Coordinate startPosition = this.coords.get(start);
     	  Coordinate endPosition = this.coords.get(end);    	  
     	  Coordinate interpPosition;
     	 
     	  if (startPosition != null && endPosition !=null){    		
-    		  if (selectedNode == this.id){    			  
-    			  drawNode(startPosition.x,startPosition.y,255); 
+    		  if (pinned == this.id){    			  
+    			  drawNode(this.coords.get(pinnedView).x,this.coords.get(pinnedView).y,255); 
     		  }else{
     			  interpPosition = interpolatePosition(startPosition,endPosition,interpolation);
         		  drawNode(interpPosition.x,interpPosition.y,255); 
@@ -251,8 +285,7 @@ public class Node {
     		  drawNode(endPosition.x,endPosition.y,(int)(interpolation*255));
     	  }else if (startPosition!=null && endPosition==null){ //Node is fading out
     		  drawNode(startPosition.x,startPosition.y,(int)(interpolation*255));
-    	  }    
-    	  
+    	  }     	  
       }  
       
       /**Linearly interpolates the position of a node 

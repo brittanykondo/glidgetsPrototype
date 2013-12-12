@@ -135,5 +135,25 @@ public class Slider {
 			 }
 		 }
      }
+     /**Moves the tick across the slider based on the specified views and interpolation amount
+      * @param interpolation amount to move the slider by
+      * @param start, end views to draw in between
+      * */
+     void animateTick(float interpolation,int start,int end){
+    	 float x1 = this.tickPositions.get(start);
+    	 float x2 = this.tickPositions.get(end);
+    	 this.dragTickX = (x2-x1)*interpolation + x1;
+     }
+     /**Sets the view variables as the provided parameters
+      * @param current the current view
+      * @param next  the next view
+      * @param drawing the view to draw the graph at
+      * */
+    public void updateView(int current,int next,int drawing){
+    	this.currentView = current;
+    	this.nextView = next;
+    	this.drawingView = drawing;
+    	this.dragTickX = this.tickPositions.get(drawing);
+    }
      
 }
