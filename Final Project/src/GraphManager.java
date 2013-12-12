@@ -30,11 +30,12 @@ public class GraphManager {
       * */
      public GraphManager(PApplet p,boolean saveData){
     	 this.parent = p;      	
-         readVanDeBunt2();
-         /**generateGraphs();
+         //readVanDeBunt2();
+    	 readVanDeBunt();
+         generateGraphs();
          if (saveData){
         	saveGraphData("savedData.txt"); //Doesn't work
-         }    	*/   		   	 
+         }    	  		   	 
      }
      
      /**Uses the JUNG to generate a set of layouts for the graph at each time slice      
@@ -153,7 +154,7 @@ public class GraphManager {
        				String line;
        				line = scan.nextLine();
        				String[] items = line.split(" ");
-       				if (items[0].equals("time")){
+       				if (items[0].equals("time")){       					
        					time = Integer.parseInt(items[1]);
        					nodeCounter = 0;  
        					this.edges.add(new ArrayList <Edge>());
@@ -169,7 +170,8 @@ public class GraphManager {
        		} catch (FileNotFoundException e) {			
        			e.printStackTrace();
        		}  
-       	  this.numTimeSlices = time;        	
+       	  this.numTimeSlices = time;     
+       	  System.out.println(this.numTimeSlices);
      }
      /**Parses one line of the van de bunt data set and sets the edges
       * */
@@ -215,7 +217,7 @@ public class GraphManager {
       				String[] items = line.split(" ");
       				if (items[0].equals("time")){
       					time = Integer.parseInt(items[1]);
-      					nodeCounter = 0;        					
+      					nodeCounter = 0;       					
       				}else{      					
       					//Find the edges for each time stamp	     					
       				 	Edge newEdge;    

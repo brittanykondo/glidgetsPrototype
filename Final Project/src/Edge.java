@@ -118,14 +118,14 @@ public class Edge {
        *  @param nodes an array of all nodes in the graph    
        *  @param persistence an array of persistence values (if null, then set it to this object's persistence)
        * */
-      void drawHintPath(ArrayList <Node> nodes,ArrayList<Integer>persistence){
+      void drawHintPath(ArrayList <Node> nodes,ArrayList<Integer>persistence,int view){
     	  if (persistence == null)
     		  persistence = this.persistence;
     	  
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);    	  
     	  
-    	  parent.strokeWeight(4);    	  
+    	   	  
     	  float interval = (float)1/this.numTimeSlices;
     	  float startX = n1.x,startY = n1.y;    	  
     	  float endX,endY,interpolation=interval;    	  
@@ -138,10 +138,38 @@ public class Edge {
     		  }else{
     			  parent.stroke(206,18,86,170);    	    	  
     		  } 
+    		  parent.strokeWeight(4);   
     		  parent.line(startX,startY,endX,endY);
+    		  
+    		  if (i==view){ //Draw an indicator showing current time (perpendicular to the edge)
+                  parent.stroke(255); 
+                  parent.strokeWeight(3); 
+                  ArrayList<Coordinate> coords = findPerpendicularLine(startX,startY,endX,endY,5.0f);                   
+                  parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);
+               }
     		  interpolation +=interval;
     		  startX = endX;
     		  startY = endY;
     	  }    	  
       }
+   /**Finds the unit vector perpendicular to a line defined by the given points.
+    * Unit vector can be multiplied by a factor to increase it's length
+    * @param x1,y1 the first point on the line
+    * @param x, y2 the second point on the line
+    * @param weight the length of the perpendicular line
+    * @return the two coordinates comprising the perpendicular line
+    * Equation courtesy of: http://stackoverflow.com/questions/133897/how-do-you-
+    * find-a-point-at-a-given-perpendicular-distance-from-a-line
+    * */
+   ArrayList<Coordinate> findPerpendicularLine(float x1, float y1, float x2, float y2, float weight){
+	   ArrayList <Coordinate> lineCoords = new ArrayList <Coordinate>();
+	   float dx = x1-x2;
+       float dy = y1-y2;
+       float dist = (float) Math.sqrt(dx*dx + dy*dy);
+        dx = dx/dist;
+        dy = dy/dist;
+        lineCoords.add(new Coordinate(x1 + weight*dy, y1 - weight*dx));
+        lineCoords.add(new Coordinate(x1 - weight*dy, y1 + weight*dx));
+        return lineCoords;
+   }
 }

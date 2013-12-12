@@ -205,7 +205,7 @@ public class Node {
         	  endAngle = this.hintAngles.get(i).y;
         	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle, endAngle);     
         	  
-        	   if (i==currentView){ //Draw an indicator showing current time
+        	   if (i==currentView){ //Draw an anchor showing current time
                   parent.stroke(206,18,86,255); 
                   parent.strokeWeight(MIN_WEIGHT);
                   float drawingAngle = endAngle-startAngle;

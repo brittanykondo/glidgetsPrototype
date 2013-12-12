@@ -79,9 +79,9 @@ public class ForceDirectedGraph {
 				 this.nodes.get(i).display(view); 
 			 if (selectedEdge ==-2){ //Show that two nodes are never connected
 				 Edge blankEdge = new Edge(this.parent,"",this.selectedNode,this.releasedNode,this.numTimeSlices);
-				 blankEdge.drawHintPath(this.nodes,null);
+				 blankEdge.drawHintPath(this.nodes,null,view);
 			 }else{ //Otherwise draw the regular hint path
-				 this.edges.get(selectedEdge).drawHintPath(this.nodes,null);
+				 this.edges.get(selectedEdge).drawHintPath(this.nodes,null,view);
 			 }				
 		 }else if (this.selectedNode != -1){ //Case 4: draw a node's hint path			 
 			 renderEdges(view);			 
@@ -354,7 +354,7 @@ public class ForceDirectedGraph {
     	 }    	
     	//Draw the hint paths for the aggregated edges
     	 for (int i=0;i<this.aggregatedEdges.size();i++){
-    		 this.aggregatedEdges.get(i).drawHintPath(this.nodes, aggregatedPersistence);
+    		 this.aggregatedEdges.get(i).drawHintPath(this.nodes, aggregatedPersistence,this.currentView);
     	 }    	
      }
      /** Finds an edge in an ArrayList of edges
@@ -444,7 +444,7 @@ public class ForceDirectedGraph {
            						this.nodes.get(nodeId).coords.add(null);
            					}else{           						
            						this.nodes.get(nodeId).coords.add(new Coordinate(Float.parseFloat(items[0]),Float.parseFloat(items[1])));
-           					}       						
+           					}            					
            				}
        				}       				
        				
