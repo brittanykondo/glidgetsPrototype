@@ -13,9 +13,8 @@ public class Test extends PApplet {
 /**Initialize the view, draw the visualization
    * */
 public void setup() {
-    size(800,800);    
-    this.graph = new ForceDirectedGraph(this,"savedGraphData2.txt",6);   
-    //GraphManager g = new GraphManager(this,true);  //Creates the graph layout using JUNG library
+    size(800,800);       
+    this.graph = new ForceDirectedGraph(this,"savedGraphData.txt",6);   
 	ArrayList <String> testLabels = new ArrayList <String>();
 	for (int i=0;i<this.graph.numTimeSlices;i++){
 		testLabels.add(""+i);
