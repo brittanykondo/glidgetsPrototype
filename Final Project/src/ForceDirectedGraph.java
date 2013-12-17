@@ -456,6 +456,6 @@ public class ForceDirectedGraph {
        	  //Set the node degree changes over time
        	  for (int i=0;i<this.nodes.size();i++){
        		  this.nodes.get(i).setNodeDegree(this.edges);
-       	  }
+       	  }       	 
      }
 }

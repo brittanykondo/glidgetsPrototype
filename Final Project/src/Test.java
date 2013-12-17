@@ -1,14 +1,11 @@
 import java.util.ArrayList;
 
 import processing.core.*;
-//import org.gicentre.handy.*;
-
 
 public class Test extends PApplet {   	
     public Slider timeSlider;
     public ForceDirectedGraph graph;   
-    public int toggleGlobalPersistence;
-    //public HandyRenderer sketchyEffect;
+    public int toggleGlobalPersistence;  
     
 /**Initialize the view, draw the visualization
    * */
@@ -20,14 +17,12 @@ public void setup() {
 	for (int i=0;i<this.graph.numTimeSlices;i++){
 		testLabels.add(""+i);
 	}    
-    this.timeSlider = new Slider(this,testLabels,70,10,650);    
-    //this.sketchyEffect = new HandyRenderer(this);
+    this.timeSlider = new Slider(this,testLabels,70,10,650);     
   }
 
   /**Re-draw the view */
   public void draw() {   
-     
-    if (timeSlider.dragging){ //Dragging the slider
+   if (timeSlider.dragging){ //Dragging the slider
     	background(25,25,25);
     	drawGlobalButton();    	
     	timeSlider.drawSlider();  
@@ -69,13 +64,13 @@ public void setup() {
   
   /**Responds to a mouse up event on the canvas */
   public void mouseReleased(){
-	  if (timeSlider.dragging){ //Snap to view based on the slider
-		  timeSlider.releaseTick();
-		  this.graph.updateView(timeSlider.currentView, timeSlider.nextView, timeSlider.drawingView);
-	  } else{ //Snap to view based on the node anchor
+	  if (timeSlider.dragging){ //Snap to view based on the slider		 
+		  timeSlider.releaseTick();		  
+		  this.graph.updateView(timeSlider.currentView, timeSlider.nextView, timeSlider.drawingView);		  
+	  } else { //Snap to view based on the node anchor		 
 		  graph.releaseNodes(); 
 		  timeSlider.updateView(graph.currentView,graph.nextView,graph.drawingView);
-	  }         
+	  }     	 
   }     
  /** When a key is pressed, queries can be aggregated.  This means that either node or edge
   *  persistence is combined into a single hint path (over time).  This shows when a set of
@@ -115,7 +110,7 @@ public void setup() {
    	  textFont(font);	   	  
    	  fill(255);   	  
    	  textAlign(LEFT);
-   	  text("Global Persistence", 20,695);	
+   	  text("Toggle Global Persistence", 20,695);	
   }
   /**Checks if the mouse was pressed on this button
    * */

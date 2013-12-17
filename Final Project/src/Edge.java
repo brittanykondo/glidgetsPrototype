@@ -10,6 +10,8 @@ public class Edge {
       ArrayList<Integer> persistence; //1 if the edge is drawn, 0 if it disappears
       float globalPersistence;
       int numTimeSlices;    
+      ArrayList <Coordinate> hintCoords; //Stores the coordinates along the hint path
+      
       
       Edge(PApplet p,String l, int n1, int n2, int numTimeSlices){
     	  this.parent = p;
@@ -22,9 +24,9 @@ public class Edge {
     			  this.persistence.add(0);
     		  }
     	  }
-    	  this.numTimeSlices = numTimeSlices;    	  
-      }     
-      
+    	  this.numTimeSlices = numTimeSlices;   
+    	  this.hintCoords = new ArrayList <Coordinate>();
+      }
       /**Draws an edge at a certain moment in time
        * @param nodes indexed list of all nodes in the graph
        * @param view the current time slice to draw
@@ -119,37 +121,47 @@ public class Edge {
        *  @param persistence an array of persistence values (if null, then set it to this object's persistence)
        * */
       void drawHintPath(ArrayList <Node> nodes,ArrayList<Integer>persistence,int view){
+    	  this.hintCoords.clear();
+    	  
     	  if (persistence == null)
     		  persistence = this.persistence;
     	  
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);    	  
     	  
-    	   	  
-    	  float interval = (float)1/this.numTimeSlices;
-    	  float startX = n1.x,startY = n1.y;    	  
-    	  float endX,endY,interpolation=interval;    	  
+    	  //Want the first time slice on the hint path to be the node thats closest to the left side of the screen
+    	  //(this corresponds to the layout of the time slider)
+    	  if (n1.x > n2.x){ //Swap them
+    		  Node temp = n1;
+    		  n1 = n2;
+    		  n2 = temp;
+    	  }
+    	  
+    	  float interval = (float)1/(this.numTimeSlices-1);    	      	  
+    	  float interpX,interpY,interpolation=0,prevX=n1.x,prevY=n1.y;    	  
     	  
     	  for (int i=0;i<this.numTimeSlices;i++){     		  
-    		  endX = (n2.x - startX)*interpolation + startX;
-    		  endY = startY +(n2.y-startY)*((endX-startX)/(n2.x-startX)); 
+    		  interpX = (n2.x - n1.x)*interpolation + n1.x;
+    		  interpY = n1.y +(n2.y-n1.y)*((interpX-n1.x)/(n2.x-n1.x)); 
     		  if (persistence.get(i)==0){
     			  parent.stroke(189, 189, 189,170);
     		  }else{
     			  parent.stroke(206,18,86,170);    	    	  
     		  } 
     		  parent.strokeWeight(4);   
-    		  parent.line(startX,startY,endX,endY);
+    		  parent.line(prevX,prevY,interpX,interpY);     		  
+             
+    		  this.hintCoords.add(new Coordinate(interpX,interpY));
     		  
     		  if (i==view){ //Draw an indicator showing current time (perpendicular to the edge)
                   parent.stroke(255); 
                   parent.strokeWeight(3); 
-                  ArrayList<Coordinate> coords = findPerpendicularLine(startX,startY,endX,endY,5.0f);                   
+                  ArrayList<Coordinate> coords = findPerpendicularLine(prevX,prevY,interpX,interpY,5.0f);                   
                   parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);
                }
     		  interpolation +=interval;
-    		  startX = endX;
-    		  startY = endY;
+    		  prevX = interpX;
+    		  prevY = interpY;    		 
     	  }    	  
       }
    /**Finds the unit vector perpendicular to a line defined by the given points.

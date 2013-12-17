@@ -117,7 +117,7 @@ public class Node {
 	   	  parent.textFont(font);	   	  
 	   	  parent.fill(247,244,249,alpha);
 	   	  parent.textAlign(parent.CENTER);
-	   	  parent.text(this.label, x,y);	  	   	  
+	   	  parent.text(this.label, x,y);  	   	  
 	   	 
     	  this.x = x;
 	   	  this.y = y;
