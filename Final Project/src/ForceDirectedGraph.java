@@ -444,7 +444,7 @@ public class ForceDirectedGraph {
            						this.nodes.get(nodeId).coords.add(null);
            					}else{           						
            						this.nodes.get(nodeId).coords.add(new Coordinate(Float.parseFloat(items[0]),Float.parseFloat(items[1])));
-           					}       						
+           					}            					
            				}
        				}       				
        				
