@@ -151,19 +151,58 @@ public class Edge {
     		  parent.strokeWeight(4);   
     		  parent.line(prevX,prevY,interpX,interpY);     		  
              
-    		  this.hintCoords.add(new Coordinate(interpX,interpY));
+    		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path	  
     		  
-    		  if (i==view){ //Draw an indicator showing current time (perpendicular to the edge)
-                  parent.stroke(255); 
-                  parent.strokeWeight(3); 
-                  ArrayList<Coordinate> coords = findPerpendicularLine(prevX,prevY,interpX,interpY,5.0f);                   
-                  parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);
-               }
     		  interpolation +=interval;
     		  prevX = interpX;
     		  prevY = interpY;    		 
-    	  }    	  
+    	  }
+    	  //Draw an indicator showing current time (perpendicular to the edge)
+          parent.stroke(255); 
+          parent.strokeWeight(3); 
+          //A little bit of a hack, but set the points depending on which view to draw at
+          Coordinate coord1,coord2;
+          if (view<this.numTimeSlices-1){
+        	  coord1 = this.hintCoords.get(view);
+        	  coord2 = this.hintCoords.get(this.numTimeSlices-1);
+          }else{
+        	  coord2 = this.hintCoords.get(view-1);
+        	  coord1 = this.hintCoords.get(this.numTimeSlices-1);
+          }
+          ArrayList<Coordinate> coords = findPerpendicularLine(coord1.x,coord1.y,coord2.x,coord2.y,5.0f);                   
+          parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);   	  
       }
+      
+    /** Draws the hint path, then animates the indicator according to mouse dragging along the edge
+     * */
+    void animateHintPath(ArrayList<Node> nodes,float interp, int start,int end){  	  	    	  
+  	  
+  	  for (int i=1;i<this.numTimeSlices;i++){   		 
+  		  if (persistence.get(i)==0){
+  			  parent.stroke(189, 189, 189,170);
+  		  }else{
+  			  parent.stroke(206,18,86,170);    	    	  
+  		  } 
+  		  parent.strokeWeight(4);
+  		  parent.line(this.hintCoords.get(i-1).x,this.hintCoords.get(i-1).y,this.hintCoords.get(i).x,this.hintCoords.get(i).y); 		   		 
+  	  }
+  	   //Animate the indicator
+        parent.stroke(255); 
+        parent.strokeWeight(3);     
+        
+        Coordinate startC = this.hintCoords.get(start);
+        Coordinate endC = this.hintCoords.get(end); 
+        
+        float interpX = (endC.x - startC.x)*interp + startC.x;
+		float interpY = startC.y +(endC.y-startC.y)*((interpX-startC.x)/(endC.x-startC.x));  
+		
+      	Coordinate coord1 = new Coordinate(interpX,interpY);
+      	Coordinate coord2 = this.hintCoords.get(this.numTimeSlices-1); 
+      	
+        ArrayList<Coordinate> coords = findPerpendicularLine(coord1.x,coord1.y,coord2.x,coord2.y,5.0f);                   
+        parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);   
+    }
+    
    /**Finds the unit vector perpendicular to a line defined by the given points.
     * Unit vector can be multiplied by a factor to increase it's length
     * @param x1,y1 the first point on the line

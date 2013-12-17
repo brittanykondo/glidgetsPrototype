@@ -236,6 +236,8 @@ public class Node {
         	  endAngle = this.hintAngles.get(i).y;
         	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle, endAngle);      	   
     	  }
+    	  
+    	  //Animate the anchor
     	  parent.stroke(206,18,86,255); 
           parent.strokeWeight(MIN_WEIGHT);          
           float x1 = (float) (this.x + RADIUS*Math.cos(mouseAngle));

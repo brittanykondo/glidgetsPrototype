@@ -96,7 +96,12 @@ public class ForceDirectedGraph {
 	   this.currentView = view;
 	   this.nextView = view++;
      }   
- 
+     /** Checks where the mouse is w.r.t the edge
+      * */
+     public void dragAlongEdge(){     	 
+    	
+     }
+     
      /** Checks where the mouse is w.r.t the hint path
       * */
      public void dragAroundNode(){   	
@@ -382,7 +387,7 @@ public class ForceDirectedGraph {
      public void animateGraph(int start, int end, float interpolation,int pinned,int pinnedView){    	
     	 for (int row = 0;row<this.edges.size();row++){     		 
  	          this.edges.get(row).animate(this.nodes, start, end, interpolation);    	        	   	
- 	     }
+ 	     }    	 
     	 //System.out.println(start+" "+end+" "+interpolation+" "+this.selectedNode);
     	 for (int i = 0;i<this.nodes.size();i++){
   		   this.nodes.get(i).animate(start, end, interpolation,pinned,pinnedView);	
