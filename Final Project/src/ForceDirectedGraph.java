@@ -469,9 +469,9 @@ public class ForceDirectedGraph {
         			 }else if (aggregatedPersistence.get(t)==1 && currentEdge.persistence.get(t)==0){
         				aggregatedPersistence.set(t, 0);    				 				 
         			 }
-        		 } 	 
-    		    		
-    	 }    	
+        		 } 	    		    		
+    	 }   
+    	 
     	//Draw the hint paths for the aggregated edges
     	 for (int i=0;i<this.aggregatedEdges.size();i++){
     		 this.aggregatedEdges.get(i).drawHintPath(this.nodes, aggregatedPersistence,this.currentView);

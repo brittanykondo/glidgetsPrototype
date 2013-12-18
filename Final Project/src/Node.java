@@ -136,7 +136,8 @@ public class Node {
        * */       
       void drawGlobalPersistenceHighlights(){
     	  //Piechart Glyph:
-    	  parent.stroke(206,18,86,170);    
+    	  //parent.stroke(206,18,86,170);   
+    	  parent.stroke(67,162,202,170);   
     	  parent.strokeWeight(MIN_WEIGHT);
     	  parent.strokeCap(parent.SQUARE);
     	  parent.noFill();   
@@ -191,11 +192,12 @@ public class Node {
     	  for (int i=0;i<this.numTimeSlices;i++){
     		 
     		  if (this.coords.get(i)==null){
-    			  parent.stroke(189, 189, 189,170);
+    			  parent.stroke(189, 189, 189,150);
     			  parent.strokeWeight(MIN_WEIGHT);
     		  }else{
     			  //alpha= (int)(((float)this.degrees.get(i)/this.maxDegree)*255); Experiment with transparency encoding the persistence   			  
-    			  parent.stroke(206,18,86,170);    	   
+    			  //parent.stroke(206,18,86,170); 
+    			  parent.stroke(67,162,202,150); 
     			  parent.strokeWeight(MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT));
     		  }    		  
         	  
@@ -206,7 +208,8 @@ public class Node {
         	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle, endAngle);     
         	  
         	   if (i==currentView){ //Draw an anchor showing current time
-                  parent.stroke(206,18,86,255); 
+                  //parent.stroke(206,18,86,255); 
+        		  parent.stroke(67,162,202,255); 
                   parent.strokeWeight(MIN_WEIGHT);
                   float drawingAngle = endAngle-startAngle;
                   float x1 = (float) (this.x + RADIUS*Math.cos(startAngle+interpolation*drawingAngle));
@@ -223,10 +226,11 @@ public class Node {
     	  for (int i=0;i<this.numTimeSlices;i++){
     		 
     		  if (this.coords.get(i)==null){
-    			  parent.stroke(189, 189, 189,170);
+    			  parent.stroke(189, 189, 189,255);
     			  parent.strokeWeight(MIN_WEIGHT);
     		  }else{    			  		  
-    			  parent.stroke(206,18,86,170);    	   
+    			  //parent.stroke(206,18,86,170); 
+    			  parent.stroke(67,162,202,255); 
     			  parent.strokeWeight(MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT));
     		  }    		  
         	  
@@ -238,7 +242,8 @@ public class Node {
     	  }
     	  
     	  //Animate the anchor
-    	  parent.stroke(206,18,86,255); 
+    	  //parent.stroke(206,18,86,255); 
+    	  parent.stroke(67,162,202,255); 
           parent.strokeWeight(MIN_WEIGHT);          
           float x1 = (float) (this.x + RADIUS*Math.cos(mouseAngle));
           float y1 = (float) (this.y + RADIUS*Math.sin(mouseAngle));                         
@@ -253,9 +258,10 @@ public class Node {
     	  parent.strokeWeight(5);
     	  for (int i=0;i<this.numTimeSlices;i++){    		 
     		  if (persistence.get(i)==0){
-    			  parent.stroke(189, 189, 189,170);    			  
+    			  parent.stroke(189, 189, 189,150);    			  
     		  }else{    			  	  
-    			  parent.stroke(206,18,86,170);    			  
+    			  //parent.stroke(206,18,86,170);
+    			  parent.stroke(67,162,202,150); 
     		  }    		  
         	  
         	  parent.strokeCap(parent.SQUARE);
