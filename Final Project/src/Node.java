@@ -271,13 +271,13 @@ public class Node {
        * @param pinned the node that should be pinned during the animation (set to -1 if none)
        * @param pinnedView the view to pin their position to (set to -1 if none)
        * */
-      void animate(int start,int end, float interpolation,int pinned,int pinnedView){
+      void animate(int start,int end, float interpolation,int [] pinned,int pinnedView){
     	  Coordinate startPosition = this.coords.get(start);
     	  Coordinate endPosition = this.coords.get(end);    	  
     	  Coordinate interpPosition;
     	 
     	  if (startPosition != null && endPosition !=null){    		
-    		  if (pinned == this.id){    			  
+    		  if (pinned[0] == this.id || pinned[1]==this.id){    			  
     			  drawNode(this.coords.get(pinnedView).x,this.coords.get(pinnedView).y,255); 
     		  }else{
     			  interpPosition = interpolatePosition(startPosition,endPosition,interpolation);

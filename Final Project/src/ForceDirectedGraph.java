@@ -24,7 +24,7 @@ public class ForceDirectedGraph {
      public int nextView;
      public int drawingView;
      public boolean dragging;
-     public int draggingNode;
+     public boolean draggingNode;
      public int keyPressed;
      public int selectedNode;
      public int releasedNode;
@@ -32,6 +32,9 @@ public class ForceDirectedGraph {
      public float interpAmount;
      public int startView;
      public float mouseAngle;
+     public Edge draggingEdge;
+     public boolean onDraggingEdge;
+     public int pinnedView;
      
      /**Creates a new graph manager which generates or parses and saves the data
       * necessary for drawing the dynamic graph
@@ -47,15 +50,18 @@ public class ForceDirectedGraph {
     	 this.drawingView = 0;
     	 this.interpAmount = 0;
     	 this.dragging = false;
-    	 this.draggingNode = -1;
+    	 this.draggingNode = false;
     	 this.selectedNode = -1;
     	 this.releasedNode = -1;
     	 this.selectedEdge = -1;
     	 this.mouseAngle = 0;
+    	 this.pinnedView = -1;
     	
     	 this.aggregatedNodes = new ArrayList<Integer>();
     	 this.aggregatedEdges = new ArrayList<Edge>();
     	 this.keyPressed = -1;
+    	 this.draggingEdge = null;
+    	 this.onDraggingEdge = false;
          readGraphDataFile(dataFile);            
      }     
      
@@ -75,14 +81,14 @@ public class ForceDirectedGraph {
 	   } else if (selectedEdge !=-1){ //Case 3: Need to draw an edge hint path
 			 renderEdges(view);
 			 renderNodes(view);			
-			 for (int i = 0;i<this.nodes.size();i++)
-				 this.nodes.get(i).display(view); 
 			 if (selectedEdge ==-2){ //Show that two nodes are never connected
 				 Edge blankEdge = new Edge(this.parent,"",this.selectedNode,this.releasedNode,this.numTimeSlices);
 				 blankEdge.drawHintPath(this.nodes,null,view);
+				 this.draggingEdge = blankEdge;
 			 }else{ //Otherwise draw the regular hint path
 				 this.edges.get(selectedEdge).drawHintPath(this.nodes,null,view);
-			 }				
+				 this.draggingEdge = this.edges.get(selectedEdge);
+			 }		 
 		 }else if (this.selectedNode != -1){ //Case 4: draw a node's hint path			 
 			 renderEdges(view);			 
 			 this.nodes.get(this.selectedNode).drawHintPath(view,0);	
@@ -90,18 +96,123 @@ public class ForceDirectedGraph {
 		 }else{ //Case 5: Just render both edges and nodes without hint paths
 			 renderEdges(view);
 			 renderNodes(view);		 
-		 }	
-	   
+		 }		   
 	   //Set the view variables
-	   this.currentView = view;
-	   this.nextView = view++;
+	   //this.currentView = view;
+	   //this.nextView = view++;	   
      }   
-     /** Checks where the mouse is w.r.t the edge
+     /**Finds the min distance from the mouse point to a point on the line and decides if the edge
+      * is selected and dragged along
       * */
-     public void dragAlongEdge(){     	 
-    	
+     public void selectEdge(){    	 
+    	 Coordinate pt1 = this.draggingEdge.hintCoords.get(this.currentView);
+    	 if (parent.dist(pt1.x,pt1.y,parent.mouseX,parent.mouseY)<=3){ //Rough check to see if mouse was clicked on the anchor
+    		 this.onDraggingEdge = true;
+    		 this.pinnedView = this.currentView;
+    	 }else{
+    		 //Re-set the interaction variables to clear the hint path
+    		 this.onDraggingEdge = false;     
+    		 this.releasedNode = -1;
+        	 this.selectedEdge = -1;    	 
+        	 this.selectedNode = -1; 
+        	 this.draggingEdge = null;        	
+    	 }    	 
      }
      
+     /**Releases an edge after the dragging has stopped, snaps to the nearest view
+      * */
+     public void releaseEdge(){    	
+    	 releaseEdgeAnchor();
+    	 this.onDraggingEdge = false;    	 
+     }
+     
+     /**"Snaps" to a view when dragging along an edge is stopped
+      * */
+     public void releaseEdgeAnchor(){    	 
+    	 Coordinate pt1 = this.draggingEdge.hintCoords.get(this.currentView);
+    	 Coordinate pt2 = this.draggingEdge.hintCoords.get(this.nextView);         
+         float nextDist = calculateDistance(pt1.x,pt1.y,parent.mouseX,parent.mouseY);
+  		 float currentDist = calculateDistance(pt2.x,pt2.y,parent.mouseX,parent.mouseY);
+  		 setDrawingView(currentDist,nextDist);
+     }
+     
+     /** Checks where the mouse is w.r.t the edge
+      * */
+     public void dragAlongEdge(){ 	 
+    	 //System.out.println(this.currentView+" "+this.nextView);
+    	 //Get the two points of the line segment currently dragged along
+    	 Coordinate pt1 = this.draggingEdge.hintCoords.get(this.currentView);
+    	 Coordinate pt2 = this.draggingEdge.hintCoords.get(this.nextView);
+         float [] minDist = minDistancePoint(parent.mouseX,parent.mouseY,pt1.x,pt1.y,pt2.x,pt2.y);
+         Coordinate newPoint; //The new point to draw on the line
+         float t = minDist[2]; //To test whether or not the dragged point will pass pt1 or pt2
+       
+         if (t<0){ //Passed current        	 
+             moveBackward();               
+             newPoint = new Coordinate(pt1.x,pt1.y);
+         }else if (t>1){ //Passed next        	
+             moveForward();                     
+             newPoint= new Coordinate(pt2.x,pt2.y);
+         }else{ //Some in between the views (pt1 and pt2)                         
+             newPoint= new Coordinate (minDist[0],minDist[1]);             
+             this.interpAmount = t;              
+         }
+         
+         this.draggingEdge.animateHintPath(this.nodes, newPoint.x,newPoint.y);
+         this.animateGraph(this.currentView, this.nextView, this.interpAmount, new int []{this.draggingEdge.node1,this.draggingEdge.node2}, this.pinnedView); 
+    	 //System.out.println("dragging edge"+t+" "+this.currentView+" "+this.nextView);
+     }
+     
+     /** Finds the minimum distance between a point at (x,y), with respect
+      * to a line segment defined by points (pt1_x,pt1_y) and (pt2_x,pt2_y)
+      * Code based on: http://stackoverflow.com/questions/849211/shortest
+      * -distance-between-a-point-and-a-line-segment
+      * Formulas can be found at: http://paulbourke.net/geometry/pointlineplane/
+      * @return the point on the line at the minimum distance and the t parameter, as an array: [x,y,t]
+      * */
+     public float [] minDistancePoint (float x,float y,float pt1_x,float pt1_y,float pt2_x,float pt2_y){
+
+    	   float distance = calculateDistance(pt1_x,pt1_y,pt2_x,pt2_y);
+    	   //Two points of the line segment are the same
+    	   if (distance == 0) return new float [] {pt1_x,pt1_y,0};
+
+    	   float t = ((x - pt1_x) * (pt2_x - pt1_x) + (y - pt1_y) * (pt2_y - pt1_y)) / distance;
+    	   if (t < 0) return new float [] {pt1_x,pt1_y,t}; //Point projection goes beyond pt1
+    	   if (t > 1) return new float [] {pt2_x,pt2_y,t}; //Point projection goes beyond pt2
+
+    	   //Otherwise, point projection lies on the line somewhere
+    	    float minX = pt1_x + t*(pt2_x-pt1_x);
+    	    float minY = pt1_y + t*(pt2_y-pt1_y);
+    	    return new float [] {minX,minY,t};
+    	}
+     /** Calculates the distance between two points
+      * (x1,y1) is the first point
+      * (x2,y2) is the second point
+      * @return the distance, avoiding the square root
+      * */
+     public float calculateDistance (float x1,float y1, float x2,float y2){
+    	    float term1 = x1 - x2;
+    	    float term2 = y1 - y2;
+    	    return (term1*term1)+(term2*term2);
+      }
+     /**Moves the visualization forward by one time step
+      * Adjusts the view variables accordingly
+      * */
+     public void moveForward(){
+    	 if (this.nextView < this.numTimeSlices-1){ 
+	    		this.currentView = nextView;
+		    	this.nextView++;
+	    	}
+     }
+     /**Moves the visualization back in time by one time step
+      * Adjusts the view variables accordingly
+      * */
+     public void moveBackward(){
+    	 if (this.currentView >0){
+    		 this.nextView = this.currentView;
+	    	 this.currentView--;
+    	}
+     }
      /** Checks where the mouse is w.r.t the hint path
       * */
      public void dragAroundNode(){   	
@@ -122,19 +233,13 @@ public class ForceDirectedGraph {
 		    if (bounds == 0){		    
 		    	this.interpAmount = Math.abs(mouseAngle -currentAngle)/(nextAngle-currentAngle);		    	
 		    }else if (bounds == 1) { //At current	
-		    	if (this.currentView >0){ //Move backward in time
-		    		 this.nextView = this.currentView;
-			    	 this.currentView--;
-		    	}			    				   
+		    	moveBackward();			    				   
 		    }else{ //At next
-		    	if (this.nextView < this.numTimeSlices-1){ //Move forward in time
-		    		this.currentView = nextView;
-			    	this.nextView++;
-		    	} 			    		        
+		    	moveForward(); 			    		        
 		    }   
 		   //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView);
 		    n.animateHintPath(mouseAngle-parent.HALF_PI);
-		    animateGraph(this.currentView, this.nextView, this.interpAmount,n.id,this.draggingNode);
+		    animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);
 		    
 		    this.mouseAngle = mouseAngle;
      }
@@ -202,7 +307,10 @@ public class ForceDirectedGraph {
     	 for (int i = 0;i<this.nodes.size();i++){
     		selected = this.nodes.get(i).selectNode(this.currentView);     		
             if (selected !=-1)	{
-            	if (selected == previousNode && this.keyPressed==-1) this.draggingNode = this.currentView;
+            	if (selected == previousNode && this.keyPressed==-1) {
+            		this.draggingNode = true;
+            		this.pinnedView = this.currentView;
+            	}
             	this.selectedNode = selected;           	
             }
     	 }    
@@ -214,15 +322,15 @@ public class ForceDirectedGraph {
       * */
      public void releaseNodes(){     	 
     	 
-    	 if (this.draggingNode != -1){ //Snap to view after dragging around the node
-    		 releaseAnchor();    		
+    	 if (this.draggingNode){ //Snap to view after dragging around the node
+    		 releaseNodeAnchor();    		
     	 }else{ //See if an edge hint path should be drawn
     		 findReleasedNode();
     	 }    	 
     	 
     	 //Re-set the interaction variables
     	 this.dragging = false; 
-    	 this.draggingNode = -1;
+    	 this.draggingNode = false;    	 
      }
      /**Tests whether the mouse was released on a different node to show the edge hint path
       * */
@@ -239,7 +347,7 @@ public class ForceDirectedGraph {
      }
      /**"Snaps" to a view when dragging around the node is stopped
       * */
-     public void releaseAnchor(){ 
+     public void releaseNodeAnchor(){ 
     	 
     	 Node n = this.nodes.get(this.selectedNode);
     	 float current = n.hintAngles.get(this.currentView).x + (n.hintAngles.get(this.currentView).y - n.hintAngles.get(this.currentView).x);
@@ -247,8 +355,15 @@ public class ForceDirectedGraph {
          
          float nextDist = Math.abs(this.mouseAngle - next);
   		 float currentDist = Math.abs(this.mouseAngle - current);
-  		 
-  		 if (currentDist < nextDist){ //Snap to current view  			
+  		 setDrawingView(currentDist,nextDist);  		  		
+     }
+     /**Updates the view variables and sets the drawing variables.  This is called when the visualization
+      * should "snap" to a view 
+      * @param currentDist, nextDist  the distance from the mouse to the current and next view markers on 
+      *                               the hint path
+      * */
+     public void setDrawingView(float currentDist,float nextDist){
+    	 if (currentDist < nextDist){ //Snap to current view  			
   			 this.drawingView = this.currentView;
   		 }else{ //Snap to next view  			
   			 if (this.nextView<(this.numTimeSlices-1)){
@@ -258,7 +373,7 @@ public class ForceDirectedGraph {
   			 }else{
   				 this.drawingView = this.nextView;
   			 }
-  		 }  		
+  		 } 
      }
      /**Re-sets the selected and released node after the edge hint path is drawn.
       * Draws the hint path for the edge joined by selected and released node
@@ -381,16 +496,16 @@ public class ForceDirectedGraph {
       * @param start the starting time slice
       * @param end the ending time slice
       * @param interpolation the amount to interpolation the motion by
-      * @param pinned the object (node, edge) that should be pinned during the animation (set to -1 if none)
+      * @param pinned the object(s) (node, edge) that should be pinned during the animation (set to -1 if none)
       * @param pinnedView the view to pin their position to (set to -1 if none)
       * */
-     public void animateGraph(int start, int end, float interpolation,int pinned,int pinnedView){    	
+     public void animateGraph(int start, int end, float interpolation,int [] pinned,int pinnedView){    	
     	 for (int row = 0;row<this.edges.size();row++){     		 
  	          this.edges.get(row).animate(this.nodes, start, end, interpolation);    	        	   	
  	     }    	 
-    	 //System.out.println(start+" "+end+" "+interpolation+" "+this.selectedNode);
+    	
     	 for (int i = 0;i<this.nodes.size();i++){
-  		   this.nodes.get(i).animate(start, end, interpolation,pinned,pinnedView);	
+  		      this.nodes.get(i).animate(start, end, interpolation,pinned,pinnedView);	
   	     }
     	 
     	 this.currentView = start;

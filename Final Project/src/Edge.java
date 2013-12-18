@@ -172,11 +172,13 @@ public class Edge {
           ArrayList<Coordinate> coords = findPerpendicularLine(coord1.x,coord1.y,coord2.x,coord2.y,5.0f);                   
           parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);   	  
       }
-      
+
     /** Draws the hint path, then animates the indicator according to mouse dragging along the edge
+     *  @param nodes a list of all nodes in the dataset
+     *  @param newX,newY the position of the mouse projected onto the hint path (according to the min distance)     *  
      * */
-    void animateHintPath(ArrayList<Node> nodes,float interp, int start,int end){  	  	    	  
-  	  
+    void animateHintPath(ArrayList<Node> nodes,float newX, float newY){  	  	    	  
+  	  //First, draw the hint path
   	  for (int i=1;i<this.numTimeSlices;i++){   		 
   		  if (persistence.get(i)==0){
   			  parent.stroke(189, 189, 189,170);
@@ -186,23 +188,13 @@ public class Edge {
   		  parent.strokeWeight(4);
   		  parent.line(this.hintCoords.get(i-1).x,this.hintCoords.get(i-1).y,this.hintCoords.get(i).x,this.hintCoords.get(i).y); 		   		 
   	  }
-  	   //Animate the indicator
+  	   //Then, animate the indicator according to mouse movement
         parent.stroke(255); 
-        parent.strokeWeight(3);     
-        
-        Coordinate startC = this.hintCoords.get(start);
-        Coordinate endC = this.hintCoords.get(end); 
-        
-        float interpX = (endC.x - startC.x)*interp + startC.x;
-		float interpY = startC.y +(endC.y-startC.y)*((interpX-startC.x)/(endC.x-startC.x));  
-		
-      	Coordinate coord1 = new Coordinate(interpX,interpY);
-      	Coordinate coord2 = this.hintCoords.get(this.numTimeSlices-1); 
-      	
-        ArrayList<Coordinate> coords = findPerpendicularLine(coord1.x,coord1.y,coord2.x,coord2.y,5.0f);                   
+        parent.strokeWeight(3);          
+        Coordinate endC = this.hintCoords.get(this.numTimeSlices-1);       	
+        ArrayList<Coordinate> coords = findPerpendicularLine(newX,newY,endC.x,endC.y,5.0f);                   
         parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);   
     }
-    
    /**Finds the unit vector perpendicular to a line defined by the given points.
     * Unit vector can be multiplied by a factor to increase it's length
     * @param x1,y1 the first point on the line
