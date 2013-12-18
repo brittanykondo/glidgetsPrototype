@@ -6,55 +6,86 @@ public class Test extends PApplet {
     public Slider timeSlider;
     public ForceDirectedGraph graph;   
     public int toggleGlobalPersistence;  
-    
+    public boolean slowDown;
+    public float t;
+    public int start, end;
 /**Initialize the view, draw the visualization
    * */
 public void setup() {
-    size(800,800);    
+    size(800,800);
+    //The screen size: size(displayWidth,displayHeight);
     this.graph = new ForceDirectedGraph(this,"savedGraphData2.txt",6);    
     //GraphManager g = new GraphManager(this,true);  //Creates the graph layout using JUNG library
 	ArrayList <String> testLabels = new ArrayList <String>();
 	for (int i=0;i<this.graph.numTimeSlices;i++){
 		testLabels.add(""+i);
 	}    
-    this.timeSlider = new Slider(this,testLabels,70,10,650);     
+    this.timeSlider = new Slider(this,testLabels,70,10,650);
+    this.slowDown = false;
+    this.t = 0;
+    this.start = -1;
+    this.end = -1;
   }
 
   /**Re-draw the view */
   public void draw() {   
    if (timeSlider.dragging){ //Dragging the slider
-    	background(25,25,25);
-    	drawGlobalButton();    	
+    	drawBackground();    	    	
     	timeSlider.drawSlider();  
     	timeSlider.drag(mouseX);
     	this.graph.animateGraph(timeSlider.currentView, timeSlider.nextView, timeSlider.interpAmount,new int[] {-1,-1},-1);
     }else if (graph.draggingNode){ //Dragging around a node
-    	background(25,25,25);
-    	drawGlobalButton();    	
+    	drawBackground();    	
     	timeSlider.drawSlider();    	
     	this.graph.dragAroundNode();  
     	timeSlider.animateTick(graph.interpAmount, graph.currentView, graph.nextView);
     }else if (graph.onDraggingEdge){
-    	background(25,25,25);
-    	drawGlobalButton();    	
+    	drawBackground();    	
     	timeSlider.drawSlider();
     	timeSlider.animateTick(graph.interpAmount, graph.currentView, graph.nextView);
     	this.graph.dragAlongEdge();    		
     }else if (graph.dragging){ //Issue query sketching   
     	sketch();
-    }else{ //Draw the graph (with hint paths if anything is selected)
-    	background(25,25,25); 
+    }/**else if (slowDown){ //Released a node or edge anchor, slowly animate the graph
+    	background(25,25,25);
     	drawGlobalButton();    	
+    	timeSlider.drawSlider(); 
+    	this.graph.animateGraph(this.start, this.end, this.t, new int [] {-1, -1},-1);
+    	slowDownAnimation();
+    }*/else{ //Draw the graph (with hint paths if anything is selected)
+    	drawBackground();    	
         timeSlider.drawSlider();  
     	this.graph.drawGraph(this.graph.drawingView);
     }          
   }
-  
+  public void slowDownAnimation(){
+	  if (this.start == graph.currentView && this.end == graph.nextView){ //Snapped to current view, animate backwards
+		  this.t -=0.01;
+	      if (this.t<0){
+	    	  this.slowDown = false;
+	       }		  
+	  }else{ //Otherwise animate forward
+		  this.t +=0.01;
+	      if (this.t>1){
+	    	  this.slowDown = false;
+	      }
+	  }
+  }
+  /**Draws the background and other interface components
+   * */
+  public void drawBackground(){
+	  background(25,25,25);
+	  fill(115,115,115,50); //Panel surrounding the slider and toggle options
+	  noStroke();
+	  rect(60,600,390,150);
+	  drawGlobalButton();
+	  drawControlInstructions();
+  }
   /**Adds a trail to the mouse movement to simulate the appearance of sketching
    * This is displayed when the mouse has dragged from one node to another
    * */
   public void sketch(){
-	  stroke(255);
+	  stroke(247,244,249,255);
 	  strokeWeight(1);
 	  line(pmouseX,pmouseY,mouseX,mouseY);
   }
@@ -78,8 +109,12 @@ public void setup() {
 		  timeSlider.releaseTick();		  
 		  this.graph.updateView(timeSlider.currentView, timeSlider.nextView, timeSlider.drawingView);		  
 	  } else if (graph.onDraggingEdge){ //Snap to view based on edge anchor
+		  this.slowDown = true;
+		  this.t = graph.interpAmount;
+		  this.start = graph.currentView;
+		  this.end = graph.nextView;
 		  graph.releaseEdge();
-		  timeSlider.updateView(graph.currentView,graph.nextView,graph.drawingView);
+		  timeSlider.updateView(graph.currentView,graph.nextView,graph.drawingView);		  
 	  }else { //Snap to view based on the node anchor	
 		  graph.releaseNodes(); 
 		  timeSlider.updateView(graph.currentView,graph.nextView,graph.drawingView);
@@ -105,6 +140,16 @@ public void setup() {
 		  graph.releaseMultipleEdges();
 	  }
   }
+  /**Displays the instructions for issuing aggregated queries
+   * */
+  public void drawControlInstructions(){
+	  PFont font = createFont("Droid Serif",12,true);
+   	  textFont(font);	   	  
+   	  fill(255);   	  
+   	  textAlign(LEFT);
+   	  text("Hold 'n' to aggregate node query", 90,710);	   	 
+  	  text("Hold 'e' to aggregate edge query", 90,725);	
+  }
   /**Draws a button used for toggling the global highlights on and off 
    * (for now, can only toggle when the graph is at a view (not during
    * interaction)
@@ -118,17 +163,17 @@ public void setup() {
 		  fill(100);
 		  noStroke();
 	  }
-	  ellipse(10,690,10,10);
-	  PFont font = createFont("Arial",12,true);
+	  ellipse(80,690,10,10);
+	  PFont font = createFont("Droid Serif",12,true);
    	  textFont(font);	   	  
    	  fill(255);   	  
    	  textAlign(LEFT);
-   	  text("Toggle Global Persistence", 20,695);	
+   	  text("Toggle Global Persistence", 90,695);	
   }
   /**Checks if the mouse was pressed on this button
    * */
   public void toggleGlobalButton(){
-	  if (dist(10,690,mouseX,mouseY)<=10 && this.toggleGlobalPersistence==0){    			    		 
+	  if (dist(80,690,mouseX,mouseY)<=10 && this.toggleGlobalPersistence==0){    			    		 
 		  this.toggleGlobalPersistence = 1;
 		  return;
 	  }  

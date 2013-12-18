@@ -113,7 +113,7 @@ public class Node {
     	  parent.noStroke();
     	  parent.ellipse(x,y,RADIUS,RADIUS);  
     	  
-    	  PFont font = parent.createFont("Arial",12,true);
+    	  PFont font = parent.createFont("Droid Sans",12,true);
 	   	  parent.textFont(font);	   	  
 	   	  parent.fill(247,244,249,alpha);
 	   	  parent.textAlign(parent.CENTER);
@@ -128,8 +128,7 @@ public class Node {
       void displayGlobalPersistence(int view){    	  
     	  if (this.coords.get(view)!=null){
     		  this.globalPersistence = calculateGlobalPersistence();  
-    		  drawGlobalPersistenceHighlights();
-    		  drawNode(this.coords.get(view).x, this.coords.get(view).y,255);   
+    		  drawGlobalPersistenceHighlights();    		     
     	  }     	  
       }
       /** Adds highlights to the nodes to show global persistence
@@ -137,7 +136,7 @@ public class Node {
       void drawGlobalPersistenceHighlights(){
     	  //Piechart Glyph:
     	  //parent.stroke(206,18,86,170);   
-    	  parent.stroke(67,162,202,170);   
+    	  parent.stroke(67,162,202,150);   
     	  parent.strokeWeight(MIN_WEIGHT);
     	  parent.strokeCap(parent.SQUARE);
     	  parent.noFill();   

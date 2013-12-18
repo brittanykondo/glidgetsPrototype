@@ -51,17 +51,37 @@ public class Edge {
     	  Node n2 = nodes.get(this.node2);
     	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){
     		  this.globalPersistence = calculateGlobalPersistence(); 
-    		  //drawGlobalPersistenceHighlights();
+    		  drawGlobalPersistenceHighlights(n1.coords.get(view),n2.coords.get(view));
     		  //Stroke thickness: 
-    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,1,(float)(this.globalPersistence*10));      		
+    		  //drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,1,(float)(this.globalPersistence*10));      		
     	  }     	  
       }
       /** Adds highlights to the edges to show global persistence
        * */  
       //TODO: experiment with different designs
-      void drawGlobalPersistenceHighlights(){
-    	          	  
+      void drawGlobalPersistenceHighlights(Coordinate c1, Coordinate c2){
+    	  //Barchart gylphs along edges:
+    	  Coordinate start = pointOnLine(c2.x,c2.y,c1.x,c1.y,-NODE_RADIUS/2);
+    	  Coordinate end = pointOnLine(c1.x,c1.y,c2.x,c2.y,-NODE_RADIUS/2);    	  
+    	  
+    	  float lineHalfDist = euclideanDistance(start.x,start.y,end.x,end.y)/8;    	  
+    	  Coordinate endPoint1 = pointOnLine(start.x,start.y,end.x,end.y,-lineHalfDist*this.globalPersistence);    	  
+    	  Coordinate endPoint2 = pointOnLine(end.x,end.y,start.x,start.y,-lineHalfDist*this.globalPersistence);
+    	
+    	  parent.stroke(67,162,202,150);  
+    	  parent.line(end.x, end.y, endPoint1.x, endPoint1.y);
+    	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);    	  
       }
+      /** Calculates the distance between two points
+       * (x1,y1) is the first point
+       * (x2,y2) is the second point
+       * @return the distance, avoiding the square root
+       * */
+      public float euclideanDistance (float x1,float y1, float x2,float y2){
+     	    float term1 = x1 - x2;
+     	    float term2 = y1 - y2;
+     	    return (float) Math.sqrt((term1*term1)+(term2*term2));
+       }
       /**Calculates the overall persistence: 
        * (number of time slices - number of disappearances)/number of time slices
        * @return the global persistence measure (as probability)

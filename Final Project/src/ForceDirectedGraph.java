@@ -347,8 +347,7 @@ public class ForceDirectedGraph {
      }
      /**"Snaps" to a view when dragging around the node is stopped
       * */
-     public void releaseNodeAnchor(){ 
-    	 
+     public void releaseNodeAnchor(){     	 
     	 Node n = this.nodes.get(this.selectedNode);
     	 float current = n.hintAngles.get(this.currentView).x + (n.hintAngles.get(this.currentView).y - n.hintAngles.get(this.currentView).x);
 	   	 float next = n.hintAngles.get(this.nextView).x + (n.hintAngles.get(this.nextView).y - n.hintAngles.get(this.nextView).x);
