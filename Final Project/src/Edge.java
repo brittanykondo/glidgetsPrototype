@@ -60,6 +60,7 @@ public class Edge {
        * */  
       //TODO: experiment with different designs
       void drawGlobalPersistenceHighlights(Coordinate c1, Coordinate c2){
+    	 
     	  //Barchart gylphs along edges:
     	  Coordinate start = pointOnLine(c2.x,c2.y,c1.x,c1.y,-NODE_RADIUS/2);
     	  Coordinate end = pointOnLine(c1.x,c1.y,c2.x,c2.y,-NODE_RADIUS/2);    	  
@@ -70,7 +71,21 @@ public class Edge {
     	
     	  parent.stroke(67,162,202,150);  
     	  parent.line(end.x, end.y, endPoint1.x, endPoint1.y);
-    	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);    	  
+    	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);   	  
+    	  
+    	  //Short gylphs along edges with thickness encoding persistence
+    	  /**Coordinate start = pointOnLine(c2.x,c2.y,c1.x,c1.y,-NODE_RADIUS/2);
+    	  Coordinate end = pointOnLine(c1.x,c1.y,c2.x,c2.y,-NODE_RADIUS/2);    	  
+    	  
+    	  float lineHalfDist = euclideanDistance(start.x,start.y,end.x,end.y)/8;    	  
+    	  Coordinate endPoint1 = pointOnLine(start.x,start.y,end.x,end.y,-lineHalfDist*0.3f);    	  
+    	  Coordinate endPoint2 = pointOnLine(end.x,end.y,start.x,start.y,-lineHalfDist*0.3f);
+    	
+    	  parent.stroke(67,162,202,150);  
+    	  parent.strokeWeight(7*this.globalPersistence); 
+    	  parent.line(end.x, end.y, endPoint1.x, endPoint1.y);
+    	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);  */
+    	  
       }
       /** Calculates the distance between two points
        * (x1,y1) is the first point
@@ -185,7 +200,7 @@ public class Edge {
     	  }
     	  
     	  //Draw an indicator showing current time (perpendicular to the edge)
-          parent.stroke(67,162,202,255); 
+          /**parent.stroke(67,162,202,255); 
           parent.strokeWeight(4); 
           //A little bit of a hack, but set the points depending on which view to draw at
           Coordinate coord1,coord2;
@@ -197,7 +212,7 @@ public class Edge {
         	  coord1 = this.hintCoords.get(this.numTimeSlices-1);
           }
           ArrayList<Coordinate> coords = findPerpendicularLine(coord1.x,coord1.y,coord2.x,coord2.y,6.0f);                   
-          parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);	  
+          parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);	*/  
       }
       
     /**Finds the point on a line defined by x1-y1 and x2-y2 that is distance

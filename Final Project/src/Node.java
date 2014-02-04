@@ -17,6 +17,7 @@ public class Node {
       boolean dragging;
       int maxDegree; //For scaling visualizations of relative degree amount (only w.r.t to this node's degree changes)
       ArrayList <Coordinate> hintAngles; //View angles along the hint path
+      ArrayList <Integer> incidentEdges; //Edges that the node forms with other nodes over time
       
       //Class Constants
       static int MIN_WEIGHT = 4;
@@ -59,6 +60,7 @@ public class Node {
        * @param an array of all edges present in the graph (for each time slice) 
        * */
       void setNodeDegree(ArrayList<Edge> edges){
+    	  this.incidentEdges = new ArrayList <Integer>();
     	  //Initialize the array for saving degree over time
     	  for (int i=0;i<this.numTimeSlices;i++){
     		  this.degrees.add(0);
@@ -69,7 +71,8 @@ public class Node {
     	  
     	  for (int i=0;i<edges.size();i++){
     		  currentEdge = edges.get(i);
-    		  if (currentEdge.node1==this.id || currentEdge.node2 == this.id){    			 
+    		  if (currentEdge.node1==this.id || currentEdge.node2 == this.id){    
+    			  this.incidentEdges.add(i);    			  
     			  for (int t=0;t<this.numTimeSlices;t++){
     				  if (currentEdge.persistence.get(t)==1){
     					  degreeCount = this.degrees.get(t)+1;
@@ -85,24 +88,35 @@ public class Node {
        * */
       void setHintAngles(){
     	  this.hintAngles = new ArrayList<Coordinate>();
-    	  float interval = parent.TWO_PI/this.numTimeSlices;       	 
+    	  float interval = parent.TWO_PI/(this.numTimeSlices-1);       	 
     	  float startAngle, endAngle;    	 
     	  for (int i=0;i<this.numTimeSlices;i++){
     		  
     		  //First, calculate the angles for the current time interval
     		  startAngle = (i*interval);    		  
     		  endAngle = (startAngle + interval);      		 
-    		  
+    		  //startAngle = convertAngle(startAngle);
+    		  //endAngle = convertAngle(endAngle);
     		  //Then, convert all negative angles into positive ones
-    		  if (startAngle < 0)	startAngle = (float) ((Math.PI - startAngle*(-1))+Math.PI);
-    		  if (endAngle < 0)	endAngle = (float) ((Math.PI - endAngle*(-1))+Math.PI);
+    		  //if (startAngle < 0)	startAngle = (float) ((Math.PI - startAngle*(-1))+Math.PI);
+    		  //if (endAngle < 0)	endAngle = (float) ((Math.PI - endAngle*(-1))+Math.PI);
     		  
     		  //Add the start and end angles for the current time slice (i), off-setting it by half pi
     		  //So that the beginning of time is at the top of the node (like a clock)
-    		  this.hintAngles.add(new Coordinate(startAngle - parent.HALF_PI, endAngle - parent.HALF_PI));        	
+    		  this.hintAngles.add(new Coordinate(startAngle - parent.HALF_PI, endAngle - parent.HALF_PI));
+    		  //System.out.println(i+" "+startAngle*180/Math.PI+" "+endAngle*180/Math.PI);
     	  }
       }
-      
+      /**
+      public float convertAngle(float angle){
+    	  float convertedAngle;
+    	  if(angle>=0 && angle < parent.HALF_PI){
+    		  convertedAngle = (float) (angle + parent.PI*3.0/2.0);
+    	  }else{
+    		  convertedAngle = angle - parent.HALF_PI;
+    	  }
+    	  return convertedAngle;
+      }*/
       /** Renders the node at the specified position and saves the positions in class variables
        *  @param x,y the position coordinates
        *  @param alpha the amount of transparency (0 to 255)
@@ -188,7 +202,7 @@ public class Node {
       void drawHintPath(int currentView,float interpolation){    	 
     	  //int alpha;
     	  float startAngle,endAngle;
-    	  for (int i=0;i<this.numTimeSlices;i++){
+    	  for (int i=0;i<this.numTimeSlices-1;i++){
     		 
     		  if (this.coords.get(i)==null){
     			  parent.stroke(189, 189, 189,150);
@@ -206,15 +220,15 @@ public class Node {
         	  endAngle = this.hintAngles.get(i).y;
         	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle, endAngle);     
         	  
-        	   if (i==currentView){ //Draw an anchor showing current time
+        	  /** if (i==currentView){ //Draw an anchor showing current time
                   //parent.stroke(206,18,86,255); 
         		  parent.stroke(67,162,202,255); 
-                  parent.strokeWeight(MIN_WEIGHT);
+                  parent.strokeWeight(4);
                   float drawingAngle = endAngle-startAngle;
                   float x1 = (float) (this.x + RADIUS*Math.cos(startAngle+interpolation*drawingAngle));
                   float y1 = (float) (this.y + RADIUS*Math.sin(startAngle+interpolation*drawingAngle));                         
                   parent.line(x1, y1, this.x, this.y);
-               }
+               }*/
     	  }    	 
       }
       /**Animates the anchor around the hint path (when dragging around a selected node)
@@ -222,7 +236,7 @@ public class Node {
        * */
       void animateHintPath(float mouseAngle){
     	  float startAngle,endAngle;
-    	  for (int i=0;i<this.numTimeSlices;i++){
+    	  for (int i=0;i<this.numTimeSlices-1;i++){
     		 
     		  if (this.coords.get(i)==null){
     			  parent.stroke(189, 189, 189,255);
@@ -243,11 +257,12 @@ public class Node {
     	  //Animate the anchor
     	  //parent.stroke(206,18,86,255); 
     	  parent.stroke(67,162,202,255); 
-          parent.strokeWeight(MIN_WEIGHT);          
-          float x1 = (float) (this.x + RADIUS*Math.cos(mouseAngle));
-          float y1 = (float) (this.y + RADIUS*Math.sin(mouseAngle));                         
-          parent.line(x1, y1, this.x, this.y);
+          parent.strokeWeight(4);          
+          float x1 = (float) (this.x + RADIUS/2*Math.cos(mouseAngle));
+          float y1 = (float) (this.y + RADIUS/2*Math.sin(mouseAngle));                         
+          parent.line(x1, y1, parent.mouseX, parent.mouseY);
       }
+     
       /** Draws an aggregated hint path (following a persistence array)
        *  @param currentView current time slice of the visualization
        *  @param interpolation amount to animate the anchor by (if visible)     
@@ -255,7 +270,7 @@ public class Node {
        * */      
       void drawAggregatedHintPath(int currentView,float interpolation,ArrayList<Integer> persistence){    	  	 
     	  parent.strokeWeight(5);
-    	  for (int i=0;i<this.numTimeSlices;i++){    		 
+    	  for (int i=0;i<this.numTimeSlices-1;i++){    		 
     		  if (persistence.get(i)==0){
     			  parent.stroke(189, 189, 189,150);    			  
     		  }else{    			  	  

@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -104,18 +105,20 @@ public class ForceDirectedGraph {
      /**Finds the min distance from the mouse point to a point on the line and decides if the edge
       * is selected and dragged along
       * */
-     public void selectEdge(){    	 
-    	 Coordinate pt1 = this.draggingEdge.hintCoords.get(this.currentView);
-    	 if (parent.dist(pt1.x,pt1.y,parent.mouseX,parent.mouseY)<=3){ //Rough check to see if mouse was clicked on the anchor
+     public void selectEdge(){      	
+    	 Coordinate startPt = this.draggingEdge.hintCoords.get(0);
+    	 Coordinate endPt = this.draggingEdge.hintCoords.get(this.numTimeSlices-1);    	 
+    	 float [] minPoint = minDistancePoint(parent.mouseX,parent.mouseY,startPt.x,startPt.y,endPt.x,endPt.y);
+    	 if (parent.dist(minPoint[0],minPoint[1],parent.mouseX,parent.mouseY)<=5){ //Rough check to see if mouse was clicked on the anchor
     		 this.onDraggingEdge = true;
-    		 this.pinnedView = this.currentView;
+    		 this.pinnedView = this.drawingView;
     	 }else{
     		 //Re-set the interaction variables to clear the hint path
     		 this.onDraggingEdge = false;     
     		 this.releasedNode = -1;
         	 this.selectedEdge = -1;    	 
         	 this.selectedNode = -1; 
-        	 this.draggingEdge = null;        	
+        	 this.draggingEdge = null;           	
     	 }    	 
      }
      
@@ -123,7 +126,10 @@ public class ForceDirectedGraph {
       * */
      public void releaseEdge(){    	
     	 releaseEdgeAnchor();
-    	 this.onDraggingEdge = false;    	 
+    	 this.onDraggingEdge = false;
+    	 this.dragging = false;
+    	 this.draggingEdge = null;
+    	 System.out.println(this.draggingNode+" "+this.draggingEdge);
      }
      
      /**"Snaps" to a view when dragging along an edge is stopped
@@ -147,10 +153,10 @@ public class ForceDirectedGraph {
          Coordinate newPoint; //The new point to draw on the line
          float t = minDist[2]; //To test whether or not the dragged point will pass pt1 or pt2
        
-         if (t<0){ //Passed current        	 
+         if (t<0){ //Passed current   
              moveBackward();               
              newPoint = new Coordinate(pt1.x,pt1.y);
-         }else if (t>1){ //Passed next        	
+         }else if (t>1){ //Passed next         	 
              moveForward();                     
              newPoint= new Coordinate(pt2.x,pt2.y);
          }else{ //Some in between the views (pt1 and pt2)                         
@@ -223,25 +229,49 @@ public class ForceDirectedGraph {
 	   	 float opp = n.y - parent.mouseY;
 	   	 float mouseAngle = (float) Math.atan2(adj,opp);
 	 
-	   	 if (mouseAngle < 0)	mouseAngle = (float) ((Math.PI - mouseAngle*(-1))+Math.PI);
+	   	 if (mouseAngle < 0)	mouseAngle = (float) ((Math.PI - mouseAngle*(-1))+Math.PI);	   	 
 	   	 
 	   	 float currentAngle = n.hintAngles.get(this.currentView).x + Math.abs(n.hintAngles.get(this.currentView).y - n.hintAngles.get(this.currentView).x);
 	   	 float nextAngle = n.hintAngles.get(this.nextView).x + Math.abs(n.hintAngles.get(this.nextView).y - n.hintAngles.get(this.nextView).x);
 	   	 float bounds = checkBounds(mouseAngle,currentAngle,nextAngle);    
-	   	System.out.println(currentAngle*180/Math.PI+" "+nextAngle*180/Math.PI+" "+mouseAngle*180/Math.PI);
+	   	//System.out.println(currentAngle*180/Math.PI+" "+nextAngle*180/Math.PI+" "+mouseAngle*180/Math.PI);
 	        //Change views or update the view
 		    if (bounds == 0){		    
 		    	this.interpAmount = Math.abs(mouseAngle -currentAngle)/(nextAngle-currentAngle);		    	
 		    }else if (bounds == 1) { //At current	
 		    	moveBackward();			    				   
-		    }else{ //At next
+		    }else{ //At next		    	 
+		    	/**if (this.nextView == 5 && this.mouseAngle > Math.PI && this.mouseAngle <= Math.PI*2
+		    			&& mouseAngle >= 0 && mouseAngle < Math.PI){
+	        	  System.out.println("Wrapping around "+(mouseAngle*180/Math.PI)+" "+(this.mouseAngle*180/Math.PI));
+	        	 }*/
 		    	moveForward(); 			    		        
 		    }   
 		   //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView);
+		    highlightIncidentEdges(n,this.currentView);
 		    n.animateHintPath(mouseAngle-parent.HALF_PI);
 		    animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);
 		    
 		    this.mouseAngle = mouseAngle;
+     }
+     /**Highlights the edges incident on the dragged node to show degree changes and 
+      * make it easier to discern the edges
+      * @param view  the current view
+      * @param selectedNode  the node being dragged around
+      * */
+     void highlightIncidentEdges(Node selectedNode,int view){
+   	  Edge currentEdge;
+   	  Node n1,n2;
+   	  for (int i=0;i<selectedNode.incidentEdges.size();i++){
+   		  currentEdge = this.edges.get(selectedNode.incidentEdges.get(i));
+   		  if (currentEdge.persistence.get(view)!=0){ //Highlight the edge
+   			  parent.stroke(67,162,202,150); 
+		      parent.strokeWeight(2);   
+		      n1 = this.nodes.get(currentEdge.node1);
+		      n2 = this.nodes.get(currentEdge.node2);
+		      parent.line(n1.x,n1.y,n2.x,n2.y); 
+   		  }
+   	  }
      }
      /** Checks if the mouse is in bounds defined by a and b, updates the interpolation amount
       *  @param mouse: the mouse position
@@ -305,11 +335,11 @@ public class ForceDirectedGraph {
     	 int selected = -1;
     	 
     	 for (int i = 0;i<this.nodes.size();i++){
-    		selected = this.nodes.get(i).selectNode(this.currentView);     		
+    		selected = this.nodes.get(i).selectNode(this.drawingView);     		
             if (selected !=-1)	{
             	if (selected == previousNode && this.keyPressed==-1) {
             		this.draggingNode = true;
-            		this.pinnedView = this.currentView;
+            		this.pinnedView = this.drawingView;
             	}
             	this.selectedNode = selected;           	
             }
@@ -337,7 +367,7 @@ public class ForceDirectedGraph {
      public void findReleasedNode(){
     	 int released = -1;
 		 for (int i = 0;i<this.nodes.size();i++){
-	    		released = this.nodes.get(i).releaseNode(this.currentView,this.selectedNode);
+	    		released = this.nodes.get(i).releaseNode(this.drawingView,this.selectedNode);
 	    		if (released != -1) this.releasedNode = released;    		
 	    	 }
 	    	 
@@ -396,7 +426,7 @@ public class ForceDirectedGraph {
     	 this.selectedNode = -1;
     	 int selected = -1;
     	 for (int i = 0;i<this.nodes.size();i++){
-    		selected = this.nodes.get(i).selectNode(this.currentView); 
+    		selected = this.nodes.get(i).selectNode(this.drawingView); 
     		if (selected != -1) {
     			if (!this.aggregatedNodes.contains(i)){
     				this.aggregatedNodes.add(i);
@@ -505,10 +535,9 @@ public class ForceDirectedGraph {
     	
     	 for (int i = 0;i<this.nodes.size();i++){
   		      this.nodes.get(i).animate(start, end, interpolation,pinned,pinnedView);	
-  	     }
-    	 
-    	 this.currentView = start;
-    	 this.nextView = end;
+  	     }    	 
+    	// this.currentView = start;
+    	// this.nextView = end;
      }
      
      /** Calls functions for showing global persistence values for each edge and node
@@ -534,43 +563,39 @@ public class ForceDirectedGraph {
        	  this.nodes = new ArrayList<Node>();
        	  this.edges = new ArrayList <Edge>	();
        	  
-       	  //Read in the file
-       	  try {
-       			scan = new Scanner(new File(filename));
-       			while(scan.hasNext())
-       			{   				
-       				String line;
-       				line = scan.nextLine();
-       				String[] items = line.split(" ");
-       				if (items[0].equals("node")){ //Save the node
-       					nodeId = Integer.parseInt(items[1]);       					
-       					this.nodes.add(new Node(this.parent,nodeId,items[1],this.numTimeSlices));
-       				}else if (items[0].equals("time")){ //Save the time slice
-       					nodesDone = true;    
-       					time = Integer.parseInt(items[1]);       				
-       				}else{
-       					if (nodesDone){ //Save the edge information       						
-       						newEdge = new Edge (this.parent,"",Integer.parseInt(items[0]),Integer.parseInt(items[1]),this.numTimeSlices);
-       						foundEdge = find(this.edges,newEdge);
-       						if (foundEdge==-1){ //If edge doesn't exist, create it       							
-       							newEdge.persistence.set(time, 1);
-       							this.edges.add(newEdge);
-       						}else{//Otherwise just update the persistence info
-       							this.edges.get(foundEdge).persistence.set(time, 1);
-       						}           					
-           				}else{//Save the node coordinates
-           					if (items[0].equals("null")){ //Node does not appear for this time slice
-           						this.nodes.get(nodeId).coords.add(null);
-           					}else{           						
-           						this.nodes.get(nodeId).coords.add(new Coordinate(Float.parseFloat(items[0]),Float.parseFloat(items[1])));
-           					}            					
-           				}
-       				}       				
-       				
-       			}	       			
-       		} catch (FileNotFoundException e) {			
-       			e.printStackTrace();
-       		}
+       	  InputStream fs = this.getClass().getResourceAsStream(filename);
+		scan = new Scanner(fs);
+		while(scan.hasNext())
+		{   				
+			String line;
+			line = scan.nextLine();
+			String[] items = line.split(" ");
+			if (items[0].equals("node")){ //Save the node
+				nodeId = Integer.parseInt(items[1]);       					
+				this.nodes.add(new Node(this.parent,nodeId,items[1],this.numTimeSlices));
+			}else if (items[0].equals("time")){ //Save the time slice
+				nodesDone = true;    
+				time = Integer.parseInt(items[1]);       				
+			}else{
+				if (nodesDone){ //Save the edge information       						
+					newEdge = new Edge (this.parent,"",Integer.parseInt(items[0]),Integer.parseInt(items[1]),this.numTimeSlices);
+					foundEdge = find(this.edges,newEdge);
+					if (foundEdge==-1){ //If edge doesn't exist, create it       							
+						newEdge.persistence.set(time, 1);
+						this.edges.add(newEdge);
+					}else{//Otherwise just update the persistence info
+						this.edges.get(foundEdge).persistence.set(time, 1);
+					}           					
+				}else{//Save the node coordinates
+					if (items[0].equals("null")){ //Node does not appear for this time slice
+						this.nodes.get(nodeId).coords.add(null);
+					}else{           						
+						this.nodes.get(nodeId).coords.add(new Coordinate(Float.parseFloat(items[0]),Float.parseFloat(items[1])));
+					}            					
+				}
+			}       				
+			
+		}
        	  
        	  //Set the node degree changes over time
        	  for (int i=0;i<this.nodes.size();i++){

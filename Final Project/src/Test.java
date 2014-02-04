@@ -9,18 +9,18 @@ public class Test extends PApplet {
     public boolean slowDown;
     public float t;
     public int start, end;
-/**Initialize the view, draw the visualization
-   * */
+    
+/**Initialize the view, draw the visualization */
 public void setup() {
-    size(800,800);
+    size(1100,650);    
     //The screen size: size(displayWidth,displayHeight);
-    this.graph = new ForceDirectedGraph(this,"savedGraphData2.txt",6);    
+    this.graph = new ForceDirectedGraph(this,"savedGraphData4.txt",6);    
     //GraphManager g = new GraphManager(this,true);  //Creates the graph layout using JUNG library
 	ArrayList <String> testLabels = new ArrayList <String>();
 	for (int i=0;i<this.graph.numTimeSlices;i++){
 		testLabels.add(""+i);
 	}    
-    this.timeSlider = new Slider(this,testLabels,70,10,650);
+    this.timeSlider = new Slider(this,testLabels,70,10,550);
     this.slowDown = false;
     this.t = 0;
     this.start = -1;
@@ -47,9 +47,9 @@ public void setup() {
     }else if (graph.dragging){ //Issue query sketching   
     	sketch();
     }/**else if (slowDown){ //Released a node or edge anchor, slowly animate the graph
-    	background(25,25,25);
-    	drawGlobalButton();    	
+    	drawBackground();    		
     	timeSlider.drawSlider(); 
+    	timeSlider.animateTick(this.t, this.start, this.end);
     	this.graph.animateGraph(this.start, this.end, this.t, new int [] {-1, -1},-1);
     	slowDownAnimation();
     }*/else{ //Draw the graph (with hint paths if anything is selected)
@@ -58,6 +58,8 @@ public void setup() {
     	this.graph.drawGraph(this.graph.drawingView);
     }          
   }
+  /**Updates the parameter for a slow down animation which occurs after a dragged element is released
+   * */
   public void slowDownAnimation(){
 	  if (this.start == graph.currentView && this.end == graph.nextView){ //Snapped to current view, animate backwards
 		  this.t -=0.01;
@@ -77,7 +79,7 @@ public void setup() {
 	  background(25,25,25);
 	  fill(115,115,115,50); //Panel surrounding the slider and toggle options
 	  noStroke();
-	  rect(60,600,390,150);
+	  rect(60,500,390,140);
 	  drawGlobalButton();
 	  drawControlInstructions();
   }
@@ -85,7 +87,8 @@ public void setup() {
    * This is displayed when the mouse has dragged from one node to another
    * */
   public void sketch(){
-	  stroke(247,244,249,255);
+	  //stroke(67,162,202,150);
+	  stroke(255);
 	  strokeWeight(1);
 	  line(pmouseX,pmouseY,mouseX,mouseY);
   }
@@ -94,10 +97,11 @@ public void setup() {
   public void mousePressed(){
 	  timeSlider.selectTick(mouseX,mouseY);
 	  if (!timeSlider.dragging){ //Avoid interference between selecting node and slider tick	
+		  
 		if (graph.draggingEdge!=null){
 			graph.selectEdge();
 		}else{
-			graph.selectNodes();
+			graph.selectNodes();			
 		}				    
 	  }	 
 	  toggleGlobalButton();
@@ -116,7 +120,12 @@ public void setup() {
 		  graph.releaseEdge();
 		  timeSlider.updateView(graph.currentView,graph.nextView,graph.drawingView);		  
 	  }else { //Snap to view based on the node anchor	
-		  graph.releaseNodes(); 
+	      //Animation doesn't work..
+		 /** this.slowDown = true;
+		  this.t = graph.interpAmount;
+		  this.start = graph.currentView;
+		  this.end = graph.nextView;*/
+		  graph.releaseNodes(); 		  
 		  timeSlider.updateView(graph.currentView,graph.nextView,graph.drawingView);
 	  }     	 
   }     
@@ -147,8 +156,8 @@ public void setup() {
    	  textFont(font);	   	  
    	  fill(255);   	  
    	  textAlign(LEFT);
-   	  text("Hold 'n' to aggregate node query", 90,710);	   	 
-  	  text("Hold 'e' to aggregate edge query", 90,725);	
+   	  text("Hold 'n' to aggregate node query", 90,610);	   	 
+  	  text("Hold 'e' to aggregate edge query", 90,625);	
   }
   /**Draws a button used for toggling the global highlights on and off 
    * (for now, can only toggle when the graph is at a view (not during
@@ -163,22 +172,26 @@ public void setup() {
 		  fill(100);
 		  noStroke();
 	  }
-	  ellipse(80,690,10,10);
+	  ellipse(80,590,10,10);
 	  PFont font = createFont("Droid Serif",12,true);
    	  textFont(font);	   	  
    	  fill(255);   	  
    	  textAlign(LEFT);
-   	  text("Toggle Global Persistence", 90,695);	
+   	  text("Toggle Global Persistence", 90,595);	
   }
   /**Checks if the mouse was pressed on this button
    * */
   public void toggleGlobalButton(){
-	  if (dist(80,690,mouseX,mouseY)<=10 && this.toggleGlobalPersistence==0){    			    		 
+	  if (dist(80,590,mouseX,mouseY)<=10 && this.toggleGlobalPersistence==0){    			    		 
 		  this.toggleGlobalPersistence = 1;
 		  return;
 	  }  
 	  this.toggleGlobalPersistence = 0;
 	  return;	  
   }
+  
+  static public void main(String args[]) {
+	    PApplet.main("Test");
+	}
 }
 

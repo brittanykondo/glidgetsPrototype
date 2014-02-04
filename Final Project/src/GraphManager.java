@@ -61,7 +61,8 @@ public class GraphManager {
     		 }   		
         	
     		 this.layout = new SpringLayout <Integer,Edge>(this.graph);
-             this.layout.setSize(new Dimension(700,700));              
+             //this.layout.setSize(new Dimension(700,700));
+    		 this.layout.setSize(new Dimension(1085,485));
              saveNodePositions(i);              
     	 }         
      }
