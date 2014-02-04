@@ -90,7 +90,7 @@ public class Node {
     	  this.hintAngles = new ArrayList<Coordinate>();
     	  float interval = parent.TWO_PI/(this.numTimeSlices-1);       	 
     	  float startAngle, endAngle;    	 
-    	  for (int i=0;i<this.numTimeSlices;i++){
+    	  for (int i=0;i<this.numTimeSlices-1;i++){
     		  
     		  //First, calculate the angles for the current time interval
     		  startAngle = (i*interval);    		  
@@ -103,7 +103,8 @@ public class Node {
     		  
     		  //Add the start and end angles for the current time slice (i), off-setting it by half pi
     		  //So that the beginning of time is at the top of the node (like a clock)
-    		  this.hintAngles.add(new Coordinate(startAngle - parent.HALF_PI, endAngle - parent.HALF_PI));
+    		  
+    		  this.hintAngles.add(new Coordinate(startAngle, endAngle));
     		  //System.out.println(i+" "+startAngle*180/Math.PI+" "+endAngle*180/Math.PI);
     	  }
       }
@@ -218,7 +219,7 @@ public class Node {
         	  parent.noFill();   
         	  startAngle = this.hintAngles.get(i).x;
         	  endAngle = this.hintAngles.get(i).y;
-        	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle, endAngle);     
+        	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle-parent.HALF_PI, endAngle-parent.HALF_PI);     
         	  
         	  /** if (i==currentView){ //Draw an anchor showing current time
                   //parent.stroke(206,18,86,255); 
@@ -233,8 +234,9 @@ public class Node {
       }
       /**Animates the anchor around the hint path (when dragging around a selected node)
        * @param mouseAngle the angle to draw the anchor at 
+       * @param fixAnchor 1 if anchor should be fixed at the angle, 0 otherwise
        * */
-      void animateHintPath(float mouseAngle){
+      void animateHintPath(float mouseAngle,int fixAnchor){
     	  float startAngle,endAngle;
     	  for (int i=0;i<this.numTimeSlices-1;i++){
     		 
@@ -251,7 +253,7 @@ public class Node {
         	  parent.noFill();   
         	  startAngle = this.hintAngles.get(i).x;
         	  endAngle = this.hintAngles.get(i).y;
-        	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle, endAngle);      	   
+        	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle-parent.HALF_PI, endAngle-parent.HALF_PI);      	   
     	  }
     	  
     	  //Animate the anchor
@@ -259,8 +261,14 @@ public class Node {
     	  parent.stroke(67,162,202,255); 
           parent.strokeWeight(4);          
           float x1 = (float) (this.x + RADIUS/2*Math.cos(mouseAngle));
-          float y1 = (float) (this.y + RADIUS/2*Math.sin(mouseAngle));                         
-          parent.line(x1, y1, parent.mouseX, parent.mouseY);
+          float y1 = (float) (this.y + RADIUS/2*Math.sin(mouseAngle));     
+          
+          if (fixAnchor==1){
+        	  parent.line(x1, y1, x1, parent.mouseY);
+          }else{
+        	  parent.line(x1, y1, parent.mouseX, parent.mouseY);
+          }
+          
       }
      
       /** Draws an aggregated hint path (following a persistence array)

@@ -207,8 +207,9 @@ public class ForceDirectedGraph {
      public void moveForward(){
     	 if (this.nextView < this.numTimeSlices-1){ 
 	    		this.currentView = nextView;
-		    	this.nextView++;
+		    	this.nextView++;		    	
 	    	}
+    	 this.interpAmount = 0;
      }
      /**Moves the visualization back in time by one time step
       * Adjusts the view variables accordingly
@@ -218,6 +219,7 @@ public class ForceDirectedGraph {
     		 this.nextView = this.currentView;
 	    	 this.currentView--;
     	}
+    	 this.interpAmount = 1;
      }
      /** Checks where the mouse is w.r.t the hint path
       * */
@@ -230,26 +232,36 @@ public class ForceDirectedGraph {
 	   	 float mouseAngle = (float) Math.atan2(adj,opp);
 	 
 	   	 if (mouseAngle < 0)	mouseAngle = (float) ((Math.PI - mouseAngle*(-1))+Math.PI);	   	 
-	   	 
-	   	 float currentAngle = n.hintAngles.get(this.currentView).x + Math.abs(n.hintAngles.get(this.currentView).y - n.hintAngles.get(this.currentView).x);
-	   	 float nextAngle = n.hintAngles.get(this.nextView).x + Math.abs(n.hintAngles.get(this.nextView).y - n.hintAngles.get(this.nextView).x);
-	   	 float bounds = checkBounds(mouseAngle,currentAngle,nextAngle);    
+	   	
+	   	 int fixAnchor = 0;
+	   	 //Prevent looping around in time
+    	if (this.nextView == (this.numTimeSlices-1) && this.mouseAngle > Math.PI && this.mouseAngle <= Math.PI*2 //Prevent wrapping around from last view to first view
+    			&& mouseAngle >= 0 && mouseAngle < Math.PI){
+	   		mouseAngle = (float) (Math.PI*2-0.02); //Force the angle to be slightly before 360 deg, therefore it cannot pass the last view    	    
+    	    fixAnchor = 1;
+    	}else if (this.currentView ==0 && mouseAngle > Math.PI && mouseAngle <= Math.PI*2 //Prevent wrapping around from last view to first view
+     			&& this.mouseAngle >= 0 && this.mouseAngle < Math.PI){ //Prevent wrapping around from first to last view    		
+    		 mouseAngle = (float) 0.02;
+    		 fixAnchor = 1;
+    	 }
+    	
+	   	float currentAngle = n.hintAngles.get(this.currentView).x; 
+	   	float nextAngle = n.hintAngles.get(this.currentView).y;    	 
+	   	float bounds = checkBounds(mouseAngle,currentAngle,nextAngle);    	
+	   	
 	   	//System.out.println(currentAngle*180/Math.PI+" "+nextAngle*180/Math.PI+" "+mouseAngle*180/Math.PI);
-	        //Change views or update the view
+	   //	System.out.println(this.mouseAngle*180/Math.PI+" "+mouseAngle*180/Math.PI);   
+	   	//Change views or update the view
 		    if (bounds == 0){		    
 		    	this.interpAmount = Math.abs(mouseAngle -currentAngle)/(nextAngle-currentAngle);		    	
 		    }else if (bounds == 1) { //At current	
 		    	moveBackward();			    				   
-		    }else{ //At next		    	 
-		    	/**if (this.nextView == 5 && this.mouseAngle > Math.PI && this.mouseAngle <= Math.PI*2
-		    			&& mouseAngle >= 0 && mouseAngle < Math.PI){
-	        	  System.out.println("Wrapping around "+(mouseAngle*180/Math.PI)+" "+(this.mouseAngle*180/Math.PI));
-	        	 }*/
-		    	moveForward(); 			    		        
+		    }else{ //At next	    	
+		    	moveForward();		    	
 		    }   
-		   //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView);
+		    //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView+" "+this.interpAmount);
 		    highlightIncidentEdges(n,this.currentView);
-		    n.animateHintPath(mouseAngle-parent.HALF_PI);
+		    n.animateHintPath(mouseAngle-parent.HALF_PI,fixAnchor);
 		    animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);
 		    
 		    this.mouseAngle = mouseAngle;
@@ -379,8 +391,8 @@ public class ForceDirectedGraph {
       * */
      public void releaseNodeAnchor(){     	 
     	 Node n = this.nodes.get(this.selectedNode);
-    	 float current = n.hintAngles.get(this.currentView).x + (n.hintAngles.get(this.currentView).y - n.hintAngles.get(this.currentView).x);
-	   	 float next = n.hintAngles.get(this.nextView).x + (n.hintAngles.get(this.nextView).y - n.hintAngles.get(this.nextView).x);
+    	 float current = n.hintAngles.get(this.currentView).x;
+	   	 float next = n.hintAngles.get(this.currentView).y;
          
          float nextDist = Math.abs(this.mouseAngle - next);
   		 float currentDist = Math.abs(this.mouseAngle - current);
