@@ -158,7 +158,7 @@ public class Node {
       
       /**Checks to see if the mouse event is in the node's circular area
        * @param view  the current view       
-       * @return index of the selected, -1 otherwise
+       * @return [index of the selected, type of selection (2 is drawing around, 1 is clicking)], -1 otherwise
        * */
       int [] selectNode(int view){
     	  Coordinate coord = this.coords.get(view);    	 

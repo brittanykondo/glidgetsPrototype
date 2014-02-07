@@ -154,6 +154,27 @@ public class Edge {
     	  parent.stroke(253, 224, 221,alpha); 
 		  parent.line(x0, y0,x1,y1);		  
       }
+      /**Draws a dotted line from start to end
+       * */
+      void drawDottedLine(float startX,float startY,float endX, float endY){
+    	 
+    	  int numSegments = 5;
+    	  float interval = 0.2f;    	  
+    	  float interpX,interpY,interpolation=0,prevX=startX,prevY=startY;   
+    	  
+    	  for (int i=0;i<numSegments;i++){
+    		  
+    		  interpX = (endX - startX)*interpolation + startX;
+    		  interpY = startY +(endY-startY)*((interpX-startX)/(endX-startX)); 
+    		  if (i%2==0){     			  
+    			  parent.line(prevX,prevY,interpX,interpY);
+    		  }   		  
+    		  
+    		  interpolation +=interval;
+    		  prevX = interpX;
+    		  prevY = interpY; 
+    	  }
+      }
       /** Visualizes the edge persistence across all time slices to guide interaction
        *  @param nodes an array of all nodes in the graph    
        *  @param persistence an array of persistence values (if null, then set it to this object's persistence)
@@ -180,22 +201,26 @@ public class Edge {
     	  float interval = (float)1/(this.numTimeSlices-1);    	      	  
     	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;        	  
     	          	
-          ArrayList<Coordinate> coords1 = findPerpendicularLine(start.x,start.y,end.x,end.y,2.0f);   
+          /**ArrayList<Coordinate> coords1 = findPerpendicularLine(start.x,start.y,end.x,end.y,2.0f);   
           ArrayList<Coordinate> coords2 = findPerpendicularLine(end.x,end.y,start.x,start.y,2.0f); 
           start = coords1.get(0);
-          end = coords2.get(1);         
+          end = coords2.get(1); */        
+    	  
+    	  parent.strokeWeight(4);   
     	  
     	  for (int i=0;i<this.numTimeSlices;i++){     		  
     		  interpX = (end.x - start.x)*interpolation + start.x;
     		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x)); 
     		  if (persistence.get(i)==0){
     			  parent.stroke(189, 189, 189,255);
+    			  drawDottedLine(prevX,prevY,interpX,interpY);    			  
     		  }else{
     			 // parent.stroke(206,18,86,170);  
-    			  parent.stroke(67,162,202,255); 
+    			  parent.stroke(67,162,202,255);    
+    			  parent.line(prevX,prevY,interpX,interpY);  
     		  } 
-    		  parent.strokeWeight(2);   
-    		  parent.line(prevX,prevY,interpX,interpY);     		  
+    		  
+    		    		  
              
     		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path	 
     		 
@@ -207,7 +232,7 @@ public class Edge {
     	  }
     	  
     	  //Draw the other side of the highlight
-    	  start = coords1.get(1);
+    	  /**start = coords1.get(1);
     	  end = coords2.get(0);
     	  prevX=start.x;
     	  prevY=start.y;
@@ -228,7 +253,7 @@ public class Edge {
     		  interpolation +=interval;
     		  prevX = interpX;
     		  prevY = interpY;    		 
-    	  }     	  
+    	  }  */   	  
       }
       
     /**Finds the point on a line defined by x1-y1 and x2-y2 that is distance
