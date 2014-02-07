@@ -81,7 +81,7 @@ public void setup() {
 	  noStroke();
 	  rect(60,500,390,140);
 	  drawGlobalButton();
-	  drawControlInstructions();
+	  //drawControlInstructions();
   }
   /**Adds a trail to the mouse movement to simulate the appearance of sketching
    * This is displayed when the mouse has dragged from one node to another
@@ -96,8 +96,7 @@ public void setup() {
   /**Responds to a mouse down event on the canvas */
   public void mousePressed(){
 	  timeSlider.selectTick(mouseX,mouseY);
-	  if (!timeSlider.dragging){ //Avoid interference between selecting node and slider tick	
-		  
+	  if (!timeSlider.dragging){ //Avoid interference between selecting node and slider tick		  
 		if (graph.draggingEdge!=null){
 			graph.selectEdge();
 		}else{
@@ -128,27 +127,7 @@ public void setup() {
 		  graph.releaseNodes(); 		  
 		  timeSlider.updateView(graph.currentView,graph.nextView,graph.drawingView);
 	  }     	 
-  }     
- /** When a key is pressed, queries can be aggregated.  This means that either node or edge
-  *  persistence is combined into a single hint path (over time).  This shows when a set of
-  *  nodes appear together.
-  * */
-  public void keyPressed(){	 
-	  if (key=='n' || key=='N'){ //Aggregate nodes
-		  graph.selectMultipleNodes();	
-	  }	else if (key=='e'||key=='E'){ //Aggregate edges
-		  graph.selectMultipleEdges();
-	  }    	 
-  } 
-  /**Cancels the aggregated query by clearing the hint paths 
-   * */
-  public void keyReleased(){	 
-	  if (key=='n' || key=='N'){ //Aggregate nodes
-		  graph.releaseMultipleNodes();
-	  }	else if (key=='e'||key=='E'){ //Aggregate edges
-		  graph.releaseMultipleEdges();
-	  }
-  }
+  }   
   /**Displays the instructions for issuing aggregated queries
    * */
   public void drawControlInstructions(){

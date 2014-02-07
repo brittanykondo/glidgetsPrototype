@@ -101,10 +101,12 @@ public class Slider {
     		 float current = this.tickPositions.get(this.currentView);
     		 if (mx<=current && this.currentView >0){ //Passed current view, moving backward in time
     			 this.nextView = this.currentView;
-    			 this.currentView--;    			 
+    			 this.currentView--;  
+    			 this.interpAmount = 1;
     		 }else if (mx>=next && this.nextView<(this.numLabels-1)){ //Passed next view, moving forward in time
     			 this.currentView = this.nextView;
     			 this.nextView++;
+    			 this.interpAmount = 0;
     		 }else{
     			 this.interpAmount = Math.abs(mx -current)/(next-current);
     		 }

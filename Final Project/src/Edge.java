@@ -158,7 +158,7 @@ public class Edge {
        *  @param nodes an array of all nodes in the graph    
        *  @param persistence an array of persistence values (if null, then set it to this object's persistence)
        * */
-      void drawHintPath(ArrayList <Node> nodes,ArrayList<Integer>persistence,int view){
+      void drawHintPath(ArrayList <Node> nodes,ArrayList<Integer>persistence){
     	  this.hintCoords.clear();
     	  
     	  if (persistence == null)
@@ -178,41 +178,57 @@ public class Edge {
     	  }
     	  
     	  float interval = (float)1/(this.numTimeSlices-1);    	      	  
-    	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;    	  
+    	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;        	  
+    	          	
+          ArrayList<Coordinate> coords1 = findPerpendicularLine(start.x,start.y,end.x,end.y,2.0f);   
+          ArrayList<Coordinate> coords2 = findPerpendicularLine(end.x,end.y,start.x,start.y,2.0f); 
+          start = coords1.get(0);
+          end = coords2.get(1);         
     	  
     	  for (int i=0;i<this.numTimeSlices;i++){     		  
     		  interpX = (end.x - start.x)*interpolation + start.x;
     		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x)); 
     		  if (persistence.get(i)==0){
-    			  parent.stroke(189, 189, 189,150);
+    			  parent.stroke(189, 189, 189,255);
     		  }else{
     			 // parent.stroke(206,18,86,170);  
-    			  parent.stroke(67,162,202,150); 
+    			  parent.stroke(67,162,202,255); 
     		  } 
-    		  parent.strokeWeight(4);   
+    		  parent.strokeWeight(2);   
     		  parent.line(prevX,prevY,interpX,interpY);     		  
              
-    		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path	  
+    		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path	 
+    		 
+    		 // System.out.println(i+" "+this.hintCoords.get(i).x+" "+this.hintCoords.get(i).y);
     		  
     		  interpolation +=interval;
     		  prevX = interpX;
     		  prevY = interpY;    		 
     	  }
     	  
-    	  //Draw an indicator showing current time (perpendicular to the edge)
-          /**parent.stroke(67,162,202,255); 
-          parent.strokeWeight(4); 
-          //A little bit of a hack, but set the points depending on which view to draw at
-          Coordinate coord1,coord2;
-          if (view<this.numTimeSlices-1){
-        	  coord1 = this.hintCoords.get(view);
-        	  coord2 = this.hintCoords.get(this.numTimeSlices-1);
-          }else{
-        	  coord2 = this.hintCoords.get(view-1);
-        	  coord1 = this.hintCoords.get(this.numTimeSlices-1);
-          }
-          ArrayList<Coordinate> coords = findPerpendicularLine(coord1.x,coord1.y,coord2.x,coord2.y,6.0f);                   
-          parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);	*/  
+    	  //Draw the other side of the highlight
+    	  start = coords1.get(1);
+    	  end = coords2.get(0);
+    	  prevX=start.x;
+    	  prevY=start.y;
+    	  interpolation = 0;
+    	  
+    	  for (int i=0;i<this.numTimeSlices;i++){     		  
+    		  interpX = (end.x - start.x)*interpolation + start.x;
+    		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x)); 
+    		  if (persistence.get(i)==0){
+    			  parent.stroke(189, 189, 189,255);
+    		  }else{
+    			 // parent.stroke(206,18,86,170);  
+    			  parent.stroke(67,162,202,255); 
+    		  } 
+    		  parent.strokeWeight(2);   
+    		  parent.line(prevX,prevY,interpX,interpY);     	   		  
+
+    		  interpolation +=interval;
+    		  prevX = interpX;
+    		  prevY = interpY;    		 
+    	  }     	  
       }
       
     /**Finds the point on a line defined by x1-y1 and x2-y2 that is distance
@@ -241,7 +257,7 @@ public class Edge {
      * */
     void animateHintPath(ArrayList<Node> nodes,float newX, float newY){  	  	    	  
   	  //First, draw the hint path
-  	  for (int i=1;i<this.numTimeSlices;i++){   		 
+  	  /**for (int i=1;i<this.numTimeSlices;i++){   		 
   		  if (persistence.get(i)==0){
   			  parent.stroke(189, 189, 189,255);
   		  }else{
@@ -250,7 +266,8 @@ public class Edge {
   		  } 
   		  parent.strokeWeight(4);
   		  parent.line(this.hintCoords.get(i-1).x,this.hintCoords.get(i-1).y,this.hintCoords.get(i).x,this.hintCoords.get(i).y); 		   		 
-  	  }
+  	  }*/
+    	drawHintPath(nodes,persistence);
   	   //Then, animate the indicator according to mouse movement
         parent.stroke(67,162,202,255); 
         parent.strokeWeight(4);          
