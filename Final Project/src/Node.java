@@ -136,7 +136,7 @@ public class Node {
       void drawGlobalPersistenceHighlights(){
     	  //Piechart Glyph:
     	  //parent.stroke(206,18,86,170);   
-    	  parent.stroke(67,162,202,150);   
+    	  parent.stroke(67,162,202,255);   
     	  parent.strokeWeight(MIN_WEIGHT);
     	  parent.strokeCap(parent.SQUARE);
     	  parent.noFill();   
@@ -160,12 +160,14 @@ public class Node {
        * @param view  the current view       
        * @return index of the selected, -1 otherwise
        * */
-      int selectNode(int view){
+      int [] selectNode(int view){
     	  Coordinate coord = this.coords.get(view);    	 
-    	  if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=(RADIUS/2+MAX_WEIGHT)){    			    		 
-    		  return this.id;
-    	  }    	 
-    	  return -1;
+    	  if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)){  //Clicking directly on a node  			    		 
+    		  return new int [] {this.id,1};
+    	  } else if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)+MAX_WEIGHT){  //Drawing around a node or clicking near it  			    		 
+    		  return new int [] {this.id,2};
+    	  }   	 
+    	  return new int [] {-1,-1};
       }
       
       /**Checks to see if the mouse up event is in the node's circular area

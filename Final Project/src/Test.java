@@ -96,12 +96,8 @@ public void setup() {
   /**Responds to a mouse down event on the canvas */
   public void mousePressed(){
 	  timeSlider.selectTick(mouseX,mouseY);
-	  if (!timeSlider.dragging){ //Avoid interference between selecting node and slider tick		  
-		if (graph.draggingEdge!=null){
-			graph.selectEdge();
-		}else{
-			graph.selectNodes();			
-		}				    
+	  if (!timeSlider.dragging){ //Avoid interference between selecting graph elements and slider tick
+		 graph.selectElement(); //Select elements on the graph	     		    
 	  }	 
 	  toggleGlobalButton();
   }
@@ -111,25 +107,19 @@ public void setup() {
 	  if (timeSlider.dragging){ //Snap to view based on the slider		 
 		  timeSlider.releaseTick();		  
 		  this.graph.updateView(timeSlider.currentView, timeSlider.nextView, timeSlider.drawingView);		  
-	  } else if (graph.onDraggingEdge){ //Snap to view based on edge anchor
-		  this.slowDown = true;
-		  this.t = graph.interpAmount;
-		  this.start = graph.currentView;
-		  this.end = graph.nextView;
-		  graph.releaseEdge();
+	  } else {
+		  //Animation doesn't work..
+			 /** this.slowDown = true;
+			  this.t = graph.interpAmount;
+			  this.start = graph.currentView;
+			  this.end = graph.nextView;*/
+		  graph.releaseElements();
 		  timeSlider.updateView(graph.currentView,graph.nextView,graph.drawingView);		  
-	  }else { //Snap to view based on the node anchor	
-	      //Animation doesn't work..
-		 /** this.slowDown = true;
-		  this.t = graph.interpAmount;
-		  this.start = graph.currentView;
-		  this.end = graph.nextView;*/
-		  graph.releaseNodes(); 		  
-		  timeSlider.updateView(graph.currentView,graph.nextView,graph.drawingView);
-	  }     	 
+	  }
+		 	 
   }   
   /**Displays the instructions for issuing aggregated queries
-   * */
+   * 
   public void drawControlInstructions(){
 	  PFont font = createFont("Droid Serif",12,true);
    	  textFont(font);	   	  
@@ -137,7 +127,8 @@ public void setup() {
    	  textAlign(LEFT);
    	  text("Hold 'n' to aggregate node query", 90,610);	   	 
   	  text("Hold 'e' to aggregate edge query", 90,625);	
-  }
+  }*/
+  
   /**Draws a button used for toggling the global highlights on and off 
    * (for now, can only toggle when the graph is at a view (not during
    * interaction)

@@ -69,7 +69,7 @@ public class Edge {
     	  Coordinate endPoint1 = pointOnLine(start.x,start.y,end.x,end.y,-lineHalfDist*this.globalPersistence);    	  
     	  Coordinate endPoint2 = pointOnLine(end.x,end.y,start.x,start.y,-lineHalfDist*this.globalPersistence);
     	
-    	  parent.stroke(67,162,202,150);  
+    	  parent.stroke(67,162,202,255);  
     	  parent.line(end.x, end.y, endPoint1.x, endPoint1.y);
     	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);   	  
     	  

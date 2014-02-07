@@ -64,8 +64,24 @@ public class ForceDirectedGraph {
     	 this.draggingEdge = null;
     	 this.onDraggingEdge = false;
          readGraphDataFile(dataFile);            
-     }     
-     
+     }   
+     /**Handles mouse pressed event, to interact with the graph elements
+      * */
+     public void selectElement(){
+    	 this.selectEdge();	//See if an edge is dragged on	
+	     
+    	 if (!this.onDraggingEdge) //If not, look at the nodes
+			this.selectNodes();	
+     }
+     /** Handles the mouse released event, to interact with graph elements
+      * */
+     public void releaseElements(){
+    	 if (this.onDraggingEdge){
+    		 this.releaseEdge();
+    	 }else{
+    		 this.releaseNodes();
+    	 }
+     }
      /**Calls the display function for all nodes and edges, which will
       * render them onto the screen for a certain view
       * */
@@ -109,8 +125,22 @@ public class ForceDirectedGraph {
      /**Finds the min distance from the mouse point to a point on the line and decides if the edge
       * is selected and dragged along
       * */
-     public void selectEdge(){      	
-    	 Coordinate startPt = this.draggingEdge.hintCoords.get(0);
+     public void selectEdge(){   
+    	 
+    	 if (this.draggingEdge ==null) return;
+    	 this.onDraggingEdge = false;
+    	 
+    	 for (int i=0;i<this.aggregatedEdges.size();i++){
+    		 Coordinate startPt = this.draggingEdge.hintCoords.get(0);
+        	 Coordinate endPt = this.draggingEdge.hintCoords.get(this.numTimeSlices-1);    	 
+        	 float [] minPoint = minDistancePoint(parent.mouseX,parent.mouseY,startPt.x,startPt.y,endPt.x,endPt.y);
+        	 if (parent.dist(minPoint[0],minPoint[1],parent.mouseX,parent.mouseY)<=5){ //Rough check to see if mouse was clicked on the anchor
+        		 this.onDraggingEdge = true;
+        		 this.pinnedView = this.drawingView;
+        		 return;
+        	 }
+    	 }
+    	/** Coordinate startPt = this.draggingEdge.hintCoords.get(0);
     	 Coordinate endPt = this.draggingEdge.hintCoords.get(this.numTimeSlices-1);    	 
     	 float [] minPoint = minDistancePoint(parent.mouseX,parent.mouseY,startPt.x,startPt.y,endPt.x,endPt.y);
     	 if (parent.dist(minPoint[0],minPoint[1],parent.mouseX,parent.mouseY)<=5){ //Rough check to see if mouse was clicked on the anchor
@@ -119,11 +149,12 @@ public class ForceDirectedGraph {
     	 }else {
     		 //Re-set the interaction variables to clear the hint path    
     		 this.onDraggingEdge = false;     
-    		 this.releasedNode = -1;
-        	 this.selectedEdge = -1;    	 
-        	 this.selectedNode = -1; 
-        	 this.draggingEdge = null;           	
-    	 }    	 
+    		// this.releasedNode = -1;
+        	 //this.selectedEdge = -1;    	 
+        	 //this.selectedNode = -1; 
+        	 //this.draggingEdge = null;           	
+    	 }  */
+    	 System.out.println(this.onDraggingEdge);
      }
      
      /**Releases an edge after the dragging has stopped, snaps to the nearest view
@@ -349,23 +380,28 @@ public class ForceDirectedGraph {
     	 this.selectedEdge = -1;    	 
     	 this.selectedNode = -1;    	 
     	 int selected = -1;
+    	 int selectionType = -1;
+    	 int [] savedSelections;
     	 
     	 for (int i = 0;i<this.nodes.size();i++){
-    		selected = this.nodes.get(i).selectNode(this.drawingView);     		
+    		savedSelections = this.nodes.get(i).selectNode(this.drawingView);  
+    		selected = savedSelections[0];
+    		selectionType = savedSelections[1];
+    		
             if (selected !=-1)	{
-            	if (this.aggregatedNodes.size() <=1 && selected == previousNode) { //Dragging around a node, for now can only do this if there isn't an aggregated query
+            	if (selectionType==1 && selected == previousNode) { //Dragging around a node, for now can only do this if there isn't an aggregated query
             		this.draggingNode = true;
             		this.pinnedView = this.drawingView;
             	}
             	
             	//If two or more nodes are selected, aggregate them
-            	if (this.aggregatedNodes.size() > 1 && this.aggregatedNodes.contains(new Integer(selected))){ //Node has already been selected, de-select it
+            	if (selectionType==2 && this.aggregatedNodes.contains(new Integer(selected))){ //Node has already been selected, de-select it
             		this.aggregatedNodes.remove(new Integer(selected));
             	}else{ 
             		this.aggregatedNodes.add(selected);
             	}
             	
-            	this.selectedNode = selected;           	
+            	this.selectedNode = selected;              	
             }
     	 }    
     	 this.dragging = true;
@@ -393,7 +429,8 @@ public class ForceDirectedGraph {
 		 for (int i = 0;i<this.nodes.size();i++){
 	    		released = this.nodes.get(i).releaseNode(this.drawingView,this.selectedNode);
 	    		if (released != -1) this.releasedNode = released;    		
-	    	 }
+	      }
+		 System.out.println("finding released "+this.selectedNode+" "+this.releasedNode);
 	    	 
 	    	 if (this.selectedNode != -1 && this.releasedNode !=-1){    		 
 	    		 connectNodes();
@@ -432,18 +469,11 @@ public class ForceDirectedGraph {
       * Draws the hint path for the edge joined by selected and released node
       * */
      public void connectNodes(){
-    	 System.out.println("selecting");
+    	// System.out.println("selecting"+this.selectedEdge);
     	 Edge e = new Edge(this.parent,"",this.selectedNode,this.releasedNode,this.numTimeSlices);    	
          this.selectedEdge = findEdge(this.edges,e);  
          this.selectedEdge = (this.selectedEdge==-1)?-2:this.selectedEdge; //Need to know if no connection exists between the nodes, in this case set the selectedEdge to -2 
-                                                                           //(-1 already means no edge is currently selected)
-         /**if (this.keyPressed==2){ //Need to aggregate the hint path  
-        	     if (this.selectedEdge==-2){ //Non-existent edge
-        	    	 this.aggregatedEdges.add(e);
-        	     }else{
-        	    	 this.aggregatedEdges.add(this.edges.get(this.selectedEdge));   
-        	     }        		        	 
-         }*/
+                                                                          //(-1 already means no edge is currently selected)
          Edge toAdd;
          if (this.selectedEdge==-2){ //Non-existent edge
 	    	 toAdd = e;
@@ -457,22 +487,9 @@ public class ForceDirectedGraph {
          }else{ //Adding an edge to the aggregation
         	 this.aggregatedEdges.add(toAdd);
          }
+         this.aggregatedNodes.clear();
      }
-     /**Allows for multiple nodes to be selected if a key is held down.
-      * */
-     public void selectMultipleNodes(){
-    	 this.selectedNode = -1;
-    	 int selected = -1;
-    	 for (int i = 0;i<this.nodes.size();i++){
-    		selected = this.nodes.get(i).selectNode(this.drawingView); 
-    		if (selected != -1) {    			
-    			if (!this.aggregatedNodes.contains(i)){
-    				this.aggregatedNodes.add(i);
-    			}    			
-    		}
-    	 }	
-    	 this.keyPressed = 1;
-     }
+     
      /**Allows multiple edges to be selected if a key (e) is held down.
       * */
      public void selectMultipleEdges(){    	
