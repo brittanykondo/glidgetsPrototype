@@ -5,10 +5,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
 import processing.core.PApplet;
-
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
@@ -16,10 +17,11 @@ import edu.uci.ics.jung.graph.UndirectedSparseGraph;
  * */
 public class GraphManager {
 	 public Graph graph;
-	 public SpringLayout<Integer,Edge> layout;
+	 public FRLayout<Integer,Edge> layout;
 	 public ArrayList<Node> nodes;
      public ArrayList<ArrayList<Edge>> edges;
      public ArrayList<ArrayList<Integer>> nodesWithEdges;
+     
      PApplet parent;
      public int numTimeSlices;
      
@@ -32,7 +34,8 @@ public class GraphManager {
     	 this.parent = p;      	
          //readVanDeBunt2();
     	 readVanDeBunt();
-         generateGraphs();
+         //generateGraphs();
+         generateAverageGraph();
          if (saveData){
         	saveGraphData("savedData.txt"); //Doesn't work
          }    	  		   	 
@@ -60,13 +63,87 @@ public class GraphManager {
     			 }
     		 }   		
         	
-    		 this.layout = new SpringLayout <Integer,Edge>(this.graph);
+    		 this.layout = new FRLayout <Integer,Edge>(this.graph);
              //this.layout.setSize(new Dimension(700,700));
     		 this.layout.setSize(new Dimension(1085,485));
              saveNodePositions(i);              
     	 }         
      }
-     
+     public void generateAverageGraph (){
+    	 //Assuming the edges and nodes have already been read from the original file..
+    	 ArrayList <Integer> allNodes = new ArrayList<Integer>();
+    	 ArrayList <Edge> allEdges = new ArrayList<Edge>();
+    	 
+    	 ArrayList <Edge> timeSliceEdge;
+    	 ArrayList <Integer> timeSliceNode;
+    	 int edgeNum = 0;
+    	 this.graph = new UndirectedSparseGraph<Integer,Edge>();  
+    	 Integer currentNode;
+    	 Edge currentEdge;
+    	 
+    	 for (int i=0;i<this.numTimeSlices;i++){
+    		 timeSliceEdge = this.edges.get(i);    		
+    		 if (timeSliceEdge!=null){    			
+    			 for (int j=0;j<timeSliceEdge.size();j++){  
+    				 currentEdge = timeSliceEdge.get(j);    				 
+    				 if (!findEdge(allEdges,currentEdge)){
+    					 allEdges.add(currentEdge); 
+    					 this.graph.addEdge(edgeNum,currentEdge.node1,currentEdge.node2);
+    					 edgeNum++;
+    				 }    				    	        	
+    			 }
+    		 }
+    		 timeSliceNode = this.nodesWithEdges.get(i);
+    		 if (timeSliceNode !=null){
+    			 for (int j=0;j<timeSliceNode.size();j++){
+    				 currentNode = timeSliceNode.get(j);
+    				 if (!allNodes.contains(currentNode)){
+    					 allNodes.add(currentNode); 
+    					// System.out.println(currentNode+" "+allNodes.size());
+    					 this.graph.addVertex(currentNode);
+    				 }
+    			 }
+    		 }
+    	 }     	
+    	 //Hack here: node 17 does not have any edges (not stored in nodeswithedges array), add it at the very end
+    	 this.layout = new FRLayout <Integer,Edge>(this.graph);         
+		 this.layout.setSize(new Dimension(1085,485));
+		 allNodes.add(new Integer(17));
+		 Collections.sort(allNodes);
+		 
+		 //Print out the average graph info (ideally, should save to a text file)
+		 //Print out the node, nodeId, position and persistence at each time slice
+		 for (int i=0;i<allNodes.size();i++){	
+			 System.out.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i));		
+			 for (int j=0;j<this.numTimeSlices;j++){
+				  if (this.nodesWithEdges.get(j).contains(i)){	   	   			
+			   	      System.out.println("1");		       		  	
+		   		  }else{	   			
+		   			  System.out.println("0");
+		   		  }
+			 }
+		 }
+		//Print out the edge info
+			for (int i=0;i<this.numTimeSlices;i++){				
+				System.out.println("time "+i);
+				for (int j=0;j<this.edges.get(i).size();j++){
+					currentEdge = this.edges.get(i).get(j);					
+					System.out.println(currentEdge.node1+" "+currentEdge.node2);
+				}
+			}
+		 
+     }
+     /**Finds an edge in an arraylist of edges
+      * */
+     public boolean findEdge(ArrayList<Edge> edges,Edge e){
+    	 for (int i=0;i<edges.size();i++){    					
+			 if ((e.node1 == edges.get(i).node1 && e.node2 == edges.get(i).node2) ||
+					 (e.node2 == edges.get(i).node1 && e.node2 == edges.get(i).node1)){
+				    return true;			
+			 }
+		 } 
+    	 return false;
+     }
      /** Writes each node's position (x,y) for every time slice and the edges
       *  that exist in each time slice to a file.
       *  Might want to save this information because the force directed layout is random

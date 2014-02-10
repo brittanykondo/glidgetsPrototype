@@ -291,18 +291,21 @@ public class Node {
     	  Coordinate endPosition = this.coords.get(end);    	  
     	  Coordinate interpPosition;
     	 
-    	  if (startPosition != null && endPosition !=null){    		
+    	  /**if (startPosition != null && endPosition !=null){    		
     		  if (pinned[0] == this.id || pinned[1]==this.id){    			  
     			  drawNode(this.coords.get(pinnedView).x,this.coords.get(pinnedView).y,255); 
     		  }else{
     			  interpPosition = interpolatePosition(startPosition,endPosition,interpolation);
         		  drawNode(interpPosition.x,interpPosition.y,255); 
     		  }
+    	  }*/
+    	  if (startPosition != null && endPosition !=null){   
+    		  drawNode(endPosition.x,endPosition.y,255);
     	  }else if (startPosition==null && endPosition!=null){ //Node is fading in    		  
     		  drawNode(endPosition.x,endPosition.y,(int)(interpolation*255));
     	  }else if (startPosition!=null && endPosition==null){ //Node is fading out
     		  drawNode(startPosition.x,startPosition.y,(int)(interpolation*255));
-    	  }     	  
+    	  } 
       }  
       
       /**Linearly interpolates the position of a node 

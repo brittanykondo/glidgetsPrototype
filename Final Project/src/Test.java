@@ -14,8 +14,9 @@ public class Test extends PApplet {
 public void setup() {
     size(1100,650);    
     //The screen size: size(displayWidth,displayHeight);
-    this.graph = new ForceDirectedGraph(this,"savedGraphData4.txt",6);    
-    //GraphManager g = new GraphManager(this,true);  //Creates the graph layout using JUNG library
+    //GraphManager g = new GraphManager(this,false);  //Creates the graph layout using JUNG library
+    this.graph = new ForceDirectedGraph(this,"savedGraphData6.txt",6);    
+    
 	ArrayList <String> testLabels = new ArrayList <String>();
 	for (int i=0;i<this.graph.numTimeSlices;i++){
 		testLabels.add(""+i);
@@ -119,7 +120,7 @@ public void setup() {
 		 	 
   }   
   /**Displays the instructions for issuing aggregated queries
-   * 
+   
   public void drawControlInstructions(){
 	  PFont font = createFont("Droid Serif",12,true);
    	  textFont(font);	   	  

@@ -153,8 +153,7 @@ public class ForceDirectedGraph {
         	 //this.selectedEdge = -1;    	 
         	 //this.selectedNode = -1; 
         	 //this.draggingEdge = null;           	
-    	 }  */
-    	 System.out.println(this.onDraggingEdge);
+    	 }  */    	
      }
      
      /**Releases an edge after the dragging has stopped, snaps to the nearest view
@@ -430,7 +429,7 @@ public class ForceDirectedGraph {
 	    		released = this.nodes.get(i).releaseNode(this.drawingView,this.selectedNode);
 	    		if (released != -1) this.releasedNode = released;    		
 	      }
-		 System.out.println("finding released "+this.selectedNode+" "+this.releasedNode);
+		// System.out.println("finding released "+this.selectedNode+" "+this.releasedNode);
 	    	 
 	    	 if (this.selectedNode != -1 && this.releasedNode !=-1){    		 
 	    		 connectNodes();
@@ -621,12 +620,14 @@ public class ForceDirectedGraph {
        	  boolean nodesDone = false;
        	  Edge newEdge;
        	  int foundEdge;
+       	  float nodeX=0.0f, nodeY=0.0f;
        	  
        	  this.nodes = new ArrayList<Node>();
        	  this.edges = new ArrayList <Edge>	();
        	  
-       	  InputStream fs = this.getClass().getResourceAsStream(filename);
+       	InputStream fs = this.getClass().getResourceAsStream(filename);
 		scan = new Scanner(fs);
+		
 		while(scan.hasNext())
 		{   				
 			String line;
@@ -635,6 +636,9 @@ public class ForceDirectedGraph {
 			if (items[0].equals("node")){ //Save the node
 				nodeId = Integer.parseInt(items[1]);       					
 				this.nodes.add(new Node(this.parent,nodeId,items[1],this.numTimeSlices));
+				//When the node positions are fixed....
+				nodeX = Float.parseFloat(items[2]);
+				nodeY = Float.parseFloat(items[3]);
 			}else if (items[0].equals("time")){ //Save the time slice
 				nodesDone = true;    
 				time = Integer.parseInt(items[1]);       				
@@ -649,11 +653,18 @@ public class ForceDirectedGraph {
 						this.edges.get(foundEdge).persistence.set(time, 1);
 					}           					
 				}else{//Save the node coordinates
-					if (items[0].equals("null")){ //Node does not appear for this time slice
+					//When the node postions are changing 
+					/**if (items[0].equals("null")){ //Node does not appear for this time slice
 						this.nodes.get(nodeId).coords.add(null);
 					}else{           						
 						this.nodes.get(nodeId).coords.add(new Coordinate(Float.parseFloat(items[0]),Float.parseFloat(items[1])));
-					}            					
+					} */        
+					//When the node positions are fixed
+					if (items[0].equals("0")){ //Node does not appear for this time slice
+						this.nodes.get(nodeId).coords.add(null);
+					}else{           						
+						this.nodes.get(nodeId).coords.add(new Coordinate(nodeX,nodeY));
+					}
 				}
 			}       				
 			
