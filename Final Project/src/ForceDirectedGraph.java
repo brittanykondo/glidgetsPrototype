@@ -19,6 +19,8 @@ public class ForceDirectedGraph {
      public ArrayList<Edge> edges;  
      public ArrayList <Integer> aggregatedNodes; //Only stores the id's of the nodes
      public ArrayList <Edge> aggregatedEdges;
+     public ArrayList<Integer> aggregatedPersistence;
+     
      PApplet parent;
      public int numTimeSlices;
      public int currentView;
@@ -60,6 +62,8 @@ public class ForceDirectedGraph {
     	
     	 this.aggregatedNodes = new ArrayList<Integer>();
     	 this.aggregatedEdges = new ArrayList<Edge>();
+    	 this.aggregatedPersistence = new ArrayList<Integer>();
+    	 
     	 this.keyPressed = -1;
     	 this.draggingEdge = null;
     	 this.onDraggingEdge = false;
@@ -89,20 +93,11 @@ public class ForceDirectedGraph {
     	 
 	     if (selectedEdge !=-1){ //Case 1: Need to draw an edge hint path
 			 renderEdges(view);
-			 renderNodes(view);		
-			 if (this.aggregatedEdges.size() <=1){
-				 resolveEdgeHintPath();
-			 }else{
-				 aggregateEdgeHintPaths();
-			 }
-			 		 
+			 renderNodes(view);			 
+			 this.drawEdgeHintPaths();						 		 
 		 }else if (this.selectedNode != -1){ //Case 2: draw node hint paths			 
-			 renderEdges(view);			
-			 if (this.aggregatedNodes.size() <= 1){
-				 this.nodes.get(this.selectedNode).drawHintPath(view,0);	
-			 }else{
-				 aggregateNodeHintPaths();
-			 }			 
+			 renderEdges(view);				
+			 drawNodeHintPaths();
 			 renderNodes(view);
 		 }else{ //Case 3: Just render both edges and nodes without hint paths
 			 clearQueries();			 
@@ -110,32 +105,21 @@ public class ForceDirectedGraph {
 			 renderNodes(view);		 
 		 }		   	      
      } 
-     /** Determines which edge hint path to draw 
-      */
-     public void resolveEdgeHintPath(){
-    	 if (this.selectedEdge ==-2){ //Show that two nodes are never connected
-			 Edge blankEdge = new Edge(this.parent,"",this.selectedNode,this.releasedNode,this.numTimeSlices);
-			 blankEdge.drawHintPath(this.nodes,null);
-			 this.draggingEdge = blankEdge;
-		 }else{ //Otherwise draw the regular hint path
-			 this.edges.get(selectedEdge).drawHintPath(this.nodes,null);
-			 this.draggingEdge = this.edges.get(selectedEdge);
-		 }
-     }
+    
      /**Finds the min distance from the mouse point to a point on the line and decides if the edge
       * is selected and dragged along
       * */
-     public void selectEdge(){   
-    	 
-    	 if (this.draggingEdge ==null) return;
+     public void selectEdge(){     	 
+    	 //if (this.draggingEdge ==null) return;
     	 this.onDraggingEdge = false;
     	 
     	 for (int i=0;i<this.aggregatedEdges.size();i++){
-    		 Coordinate startPt = this.draggingEdge.hintCoords.get(0);
-        	 Coordinate endPt = this.draggingEdge.hintCoords.get(this.numTimeSlices-1);    	 
+    		 Coordinate startPt = this.aggregatedEdges.get(i).hintCoords.get(0);
+        	 Coordinate endPt = this.aggregatedEdges.get(i).hintCoords.get(this.numTimeSlices-1);    	 
         	 float [] minPoint = minDistancePoint(parent.mouseX,parent.mouseY,startPt.x,startPt.y,endPt.x,endPt.y);
         	 if (parent.dist(minPoint[0],minPoint[1],parent.mouseX,parent.mouseY)<=5){ //Rough check to see if mouse was clicked on the anchor
         		 this.onDraggingEdge = true;
+        		 this.draggingEdge = this.aggregatedEdges.get(i);
         		 this.pinnedView = this.drawingView;
         		 return;
         	 }
@@ -196,10 +180,10 @@ public class ForceDirectedGraph {
              newPoint= new Coordinate (minDist[0],minDist[1]);             
              this.interpAmount = t;              
          }
-         
-         this.draggingEdge.animateHintPath(this.nodes, newPoint.x,newPoint.y);
+         this.drawEdgeHintPaths();
+         this.draggingEdge.animateAnchor(newPoint.x,newPoint.y);
          this.animateGraph(this.currentView, this.nextView, this.interpAmount, new int []{this.draggingEdge.node1,this.draggingEdge.node2}, this.pinnedView); 
-    	 //System.out.println("dragging edge"+t+" "+this.currentView+" "+this.nextView);
+    	 System.out.println("dragging edge"+t+" "+this.currentView+" "+this.nextView);
      }
      
      /** Finds the minimum distance between a point at (x,y), with respect
@@ -293,8 +277,10 @@ public class ForceDirectedGraph {
 		    	moveForward();		    	
 		    }   
 		    //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView+" "+this.interpAmount);
-		    highlightIncidentEdges(n,this.currentView);
-		    n.animateHintPath(mouseAngle-parent.HALF_PI,fixAnchor);
+		    highlightIncidentEdges(n,this.currentView);		    
+		
+		    this.drawNodeHintPaths();
+		    n.animateAnchor(mouseAngle-parent.HALF_PI,fixAnchor);
 		    animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);
 		    
 		    this.mouseAngle = mouseAngle;
@@ -399,7 +385,7 @@ public class ForceDirectedGraph {
             	}else{ 
             		this.aggregatedNodes.add(selected);
             	}
-            	
+            	this.aggregateNodeHintPaths();
             	this.selectedNode = selected;              	
             }
     	 }    
@@ -481,11 +467,12 @@ public class ForceDirectedGraph {
 	     }
          
          //Aggregate the edge hint paths if more than one edge is selected
-         if (this.aggregatedEdges.size() > 1 && findEdge(this.aggregatedEdges,toAdd)!=-1){  //De-selecting an edge
+         if (findEdge(this.aggregatedEdges,toAdd)!=-1){  //De-selecting an edge
     	     this.aggregatedEdges = removeEdge(this.aggregatedEdges,toAdd);    		        	 
          }else{ //Adding an edge to the aggregation
         	 this.aggregatedEdges.add(toAdd);
          }
+         this.aggregateEdgeHintPaths();
          this.aggregatedNodes.clear();
      }
      
@@ -498,7 +485,8 @@ public class ForceDirectedGraph {
       * */
      public void clearQueries(){
     	//this.keyPressed = -1;    	
-    	this.aggregatedNodes.clear();   
+    	this.aggregatedNodes.clear();
+    	this.aggregatedPersistence.clear();
     	this.aggregatedEdges.clear();  
     	this.selectedEdge = -1;
     	this.selectedNode = -1;
@@ -513,22 +501,29 @@ public class ForceDirectedGraph {
     	 
     	 if (this.aggregatedNodes.size()==0) return;
     	 
-    	 ArrayList<Integer> aggregatedPersistence = new ArrayList<Integer>();
+    	 this.aggregatedPersistence.clear();    	 
     	 Node currentNode;
     	 for (int i=0;i<this.aggregatedNodes.size();i++){    		 
     		 currentNode = this.nodes.get(this.aggregatedNodes.get(i));
     		 for (int t=0;t<this.numTimeSlices;t++){
     			 if (i==0) {
-    				 aggregatedPersistence.add((currentNode.coords.get(t)!=null)?1:0);
-    			 }else if (aggregatedPersistence.get(t)==1 && currentNode.coords.get(t)==null){
-    				aggregatedPersistence.set(t, 0);    				 				 
+    				 this.aggregatedPersistence.add((currentNode.coords.get(t)!=null)?1:0);
+    			 }else if (this.aggregatedPersistence.get(t)==1 && currentNode.coords.get(t)==null){
+    				this.aggregatedPersistence.set(t, 0);    				 				 
     			 }
     		 }    		
     	 }    	
     	//Draw the hint paths for the aggregated nodes
-    	 for (int i=0;i<this.aggregatedNodes.size();i++){
+    	 /**for (int i=0;i<this.aggregatedNodes.size();i++){
     		 this.nodes.get(this.aggregatedNodes.get(i)).drawAggregatedHintPath(0, 0, aggregatedPersistence);
-    	 }    	
+    	 } */   	
+     }
+     /** Draws the hint path of node(s) selected
+      * */
+     public void drawNodeHintPaths(){
+    	 for (int i=0;i<this.aggregatedNodes.size();i++){
+    		 this.nodes.get(this.aggregatedNodes.get(i)).drawAggregatedHintPath(this.aggregatedPersistence);
+    	 }
      }
      /**When multiple edges are selected and the key is released,
       * an aggregated hint path is drawn on all of them to show 
@@ -538,23 +533,25 @@ public class ForceDirectedGraph {
     	 
     	 if (this.aggregatedEdges.size()==0) return;
     	 
-    	 ArrayList<Integer> aggregatedPersistence = new ArrayList<Integer>();
+    	 this.aggregatedPersistence.clear();    	 
     	 Edge currentEdge;
     	 for (int i=0;i<this.aggregatedEdges.size();i++){      		
     			 currentEdge =this.aggregatedEdges.get(i);
         		 for (int t=0;t<this.numTimeSlices;t++){
         			 if (i==0) {
-        				 aggregatedPersistence.add(currentEdge.persistence.get(t));
+        				 this.aggregatedPersistence.add(currentEdge.persistence.get(t));
         			 }else if (aggregatedPersistence.get(t)==1 && currentEdge.persistence.get(t)==0){
-        				aggregatedPersistence.set(t, 0);    				 				 
+        				this.aggregatedPersistence.set(t, 0);    				 				 
         			 }
         		 } 	    		    		
-    	 }   
-    	 
-    	//Draw the hint paths for the aggregated edges
+    	 }   	  	
+     }
+     /**Draws hint paths for all selected edge(s)
+      * */
+     public void drawEdgeHintPaths(){    	 
     	 for (int i=0;i<this.aggregatedEdges.size();i++){
-    		 this.aggregatedEdges.get(i).drawHintPath(this.nodes, aggregatedPersistence);
-    	 }    	
+    		 this.aggregatedEdges.get(i).drawHintPath(this.nodes, this.aggregatedPersistence);
+    	 }
      }
      /** Finds an edge in an ArrayList of edges
       *  @param Arraylist of edges to search within

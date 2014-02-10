@@ -184,62 +184,13 @@ public class Node {
     	  return -1;
       }
      
-      /** Visualizes the node persistence across all time slices to guide interaction        
-       *  @param currentView current time slice of the visualization       
-       * */      
-      void drawHintPath(int currentView,float interpolation){    	 
-    	  //int alpha;
-    	  float startAngle,endAngle,weight;
-    	  for (int i=0;i<this.numTimeSlices-1;i++){
-    		 
-    		  if (this.coords.get(i)==null){
-    			  parent.stroke(189, 189, 189,255);
-    			  parent.strokeWeight(MIN_WEIGHT);
-    			  weight = MIN_WEIGHT;
-    		  }else{
-    			  //alpha= (int)(((float)this.degrees.get(i)/this.maxDegree)*255); Experiment with transparency encoding the persistence   			  
-    			  //parent.stroke(206,18,86,170); 
-    			  parent.stroke(67,162,202,255); 
-    			  weight = MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT);
-    			  parent.strokeWeight(weight);
-    		  }    		  
-        	  
-        	  parent.strokeCap(parent.SQUARE);
-        	  parent.noFill();   
-        	  startAngle = this.hintAngles.get(i).x;
-        	  endAngle = this.hintAngles.get(i).y;
-        	  parent.arc(this.x, this.y, RADIUS+weight, RADIUS+weight, startAngle-parent.HALF_PI, endAngle-parent.HALF_PI);          	  
-        	 
-    	  }    	 
-      }
-      /**Animates the anchor around the hint path (when dragging around a selected node)
-       * @param mouseAngle the angle to draw the anchor at 
-       * @param fixAnchor 1 if anchor should be fixed at the angle, 0 otherwise
-       * */
-      void animateHintPath(float mouseAngle,int fixAnchor){
-    	  float startAngle,endAngle,weight;
-    	  for (int i=0;i<this.numTimeSlices-1;i++){
-    		 
-    		  if (this.coords.get(i)==null){
-    			  parent.stroke(189, 189, 189,255);
-    			  parent.strokeWeight(MIN_WEIGHT);
-    			  weight = MIN_WEIGHT;
-    		  }else{    			  		  
-    			  //parent.stroke(206,18,86,170); 
-    			  parent.stroke(67,162,202,255);
-    			  weight = MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT);
-    			  parent.strokeWeight(weight);
-    		  }    		  
-        	  
-        	  parent.strokeCap(parent.SQUARE);
-        	  parent.noFill();   
-        	  startAngle = this.hintAngles.get(i).x;
-        	  endAngle = this.hintAngles.get(i).y;
-        	  parent.arc(this.x, this.y, RADIUS+weight, RADIUS+weight, startAngle-parent.HALF_PI, endAngle-parent.HALF_PI);      	   
-    	  }
-    	  
-    	  //Animate the anchor
-    	  //parent.stroke(206,18,86,255); 
+      
+      /**Draws the anchor as an elastic attached to the mouse when it is dragging around a node
+       * @param mouseAngle the angle of the mouse w.r.t to the center of the node
+       * @param fixAnchor, if 1, anchor should only extend vertically (staying at a fixed angle)
+       *                   if 0, anchor should move with the mouse angle
+       **/
+      void animateAnchor(float mouseAngle, int fixAnchor){
     	  parent.stroke(67,162,202,255); 
           parent.strokeWeight(4);          
           float x1 = (float) (this.x + RADIUS/2*Math.cos(mouseAngle));
@@ -249,16 +200,13 @@ public class Node {
         	  parent.line(x1, y1, x1, parent.mouseY);
           }else{
         	  parent.line(x1, y1, parent.mouseX, parent.mouseY);
-          }
-          
+          }    	  
       }
      
-      /** Draws an aggregated hint path (following a persistence array)
-       *  @param currentView current time slice of the visualization
-       *  @param interpolation amount to animate the anchor by (if visible)     
+      /** Draws an aggregated hint path (following a persistence array)          
        *  @param persistence Array of persistence information for the aggregated nodes  
        * */      
-      void drawAggregatedHintPath(int currentView,float interpolation,ArrayList<Integer> persistence){    	  	 
+      void drawAggregatedHintPath(ArrayList<Integer> persistence){    	  	 
     	  // parent.strokeWeight(5);
     	  for (int i=0;i<this.numTimeSlices-1;i++){ 
     		  //For now, just drawing the original degree amount when node is present, not aggregating it

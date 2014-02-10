@@ -277,22 +277,10 @@ public class Edge {
     	return new Coordinate(px,py);
     }
     /** Draws the hint path, then animates the indicator according to mouse dragging along the edge
-     *  @param nodes a list of all nodes in the dataset
      *  @param newX,newY the position of the mouse projected onto the hint path (according to the min distance)     *  
      * */
-    void animateHintPath(ArrayList<Node> nodes,float newX, float newY){  	  	    	  
-  	  //First, draw the hint path
-  	  /**for (int i=1;i<this.numTimeSlices;i++){   		 
-  		  if (persistence.get(i)==0){
-  			  parent.stroke(189, 189, 189,255);
-  		  }else{
-  			  //parent.stroke(206,18,86,255);
-  			  parent.stroke(67,162,202,255);
-  		  } 
-  		  parent.strokeWeight(4);
-  		  parent.line(this.hintCoords.get(i-1).x,this.hintCoords.get(i-1).y,this.hintCoords.get(i).x,this.hintCoords.get(i).y); 		   		 
-  	  }*/
-    	drawHintPath(nodes,persistence);
+    void animateAnchor(float newX, float newY){  	  	 
+    	//drawHintPath(nodes,persistence);
   	   //Then, animate the indicator according to mouse movement
         parent.stroke(67,162,202,255); 
         parent.strokeWeight(4);          
