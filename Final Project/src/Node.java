@@ -22,7 +22,7 @@ public class Node {
       //Class Constants
       static int MIN_WEIGHT = 4;
       static int MAX_WEIGHT = 15;
-      static final float RADIUS = 30;
+      static final float RADIUS = 28;
       
       /** Constructor for creating a Node
        * @param p Reference to processing applet for drawing with processing commands
@@ -110,7 +110,8 @@ public class Node {
       void drawNode(float x, float y,int alpha){    	  
     	  
     	  parent.fill(206,18,86,alpha);
-    	  parent.noStroke();
+    	  parent.stroke(206,18,86,alpha);
+    	  parent.strokeWeight(3);
     	  parent.ellipse(x,y,RADIUS,RADIUS);  
     	  
     	  PFont font = parent.createFont("Droid Sans",12,true);
@@ -231,10 +232,8 @@ public class Node {
        * @param start the starting time slice
        * @param end the ending time slice
        * @param interpolation the amount to interpolate by
-       * @param pinned the node that should be pinned during the animation (set to -1 if none)
-       * @param pinnedView the view to pin their position to (set to -1 if none)
        * */
-      void animate(int start,int end, float interpolation,int [] pinned,int pinnedView){
+      void animate(int start,int end, float interpolation){
     	  Coordinate startPosition = this.coords.get(start);
     	  Coordinate endPosition = this.coords.get(end);    	 
     	 
@@ -250,19 +249,20 @@ public class Node {
     	 /** if (this.id==11){
     		  System.out.println(startPosition+" "+start+" "+endPosition+" "+end);
     	  }*/
+    	 
     	  
     	  if (startPosition != null && endPosition !=null){   
     		  drawNode(endPosition.x,endPosition.y,255);
     	  }else if (startPosition==null && endPosition!=null){ //Node is fading in 
     		  interpolationAmt = easeInExpo(interpolation,0,255,1);
-    		  drawNode(endPosition.x,endPosition.y,interpolationAmt);
+    		  drawNode(endPosition.x,endPosition.y,interpolationAmt);    		  
     	  }else if (startPosition!=null && endPosition==null){ //Node is fading out    		  
     		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);    		 
     		  /**if (this.id==11){
         		  System.out.println("fade out"+interpolationAmt);
         		  }*/
-    		  drawNode(startPosition.x,startPosition.y,interpolationAmt);
-    	  } 
+    		  drawNode(startPosition.x,startPosition.y,interpolationAmt);    		
+    	  }     
       }  
       /** Function to compute the transparency of a node fading in
        *  From: http://www.gizma.com/easing/#cub1

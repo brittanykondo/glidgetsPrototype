@@ -128,8 +128,9 @@ public class Edge {
        * @param start the starting time slice
        * @param end the ending time slice
        * @param interpolation the amount to interpolate by
+       * @param highlight  whether or not to highlight the edge (if incident on a dragged node)
        * */
-      void animate(ArrayList<Node> nodes,int start,int end, float interpolation){
+      void animate(ArrayList<Node> nodes,int start,int end, float interpolation,boolean highlight){
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  int startPersistence = this.persistence.get(start);
@@ -137,15 +138,35 @@ public class Edge {
     	  
     	  int interpolationAmt;      
     	  
+    	  //TODO: not very elegant way of drawing the edge (check highlight each time), refactor this later
     	  if (startPersistence!=0 && endPersistence!=0){      		  
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,150,1);
+    		  if (highlight){
+        		  parent.strokeWeight(3);    	
+            	  parent.stroke(67,162,202,255); 
+        		  parent.line(n1.x,n1.y,n2.x,n2.y);
+        	  }else{
+        		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1);
+        	  }
     	  }else if (startPersistence==0 && endPersistence==1){ //Fading in
-    		  interpolationAmt = easeInExpo(interpolation,0,150,1);
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1);
+    		  interpolationAmt = easeInExpo(interpolation,0,255,1);
+    		  if (highlight){
+        		  parent.strokeWeight(2);    	
+            	  parent.stroke(67,162,202,interpolationAmt); 
+        		  parent.line(n1.x,n1.y,n2.x,n2.y);
+        	  }else{
+        		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1);
+        	  }
+
     	  } else if (startPersistence==1 && endPersistence==0) { //Fading out    		  
-    		  interpolationAmt = easeOutExpo((1-interpolation),0,150,1);
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1);
-    	  }
+    		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);
+    		  if (highlight){
+        		  parent.strokeWeight(3);    	
+            	  parent.stroke(67,162,202,interpolationAmt); 
+        		  parent.line(n1.x,n1.y,n2.x,n2.y);
+        	  }else{
+        		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1);
+        	  }
+    	  }     	 
       }
       /** Renders the edge between the specified coordinates
        *  @param x0,y0,x1,y1 the coordinates

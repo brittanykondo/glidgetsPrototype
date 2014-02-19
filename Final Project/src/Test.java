@@ -48,32 +48,11 @@ public void setup() {
     	this.graph.dragAlongEdge();    		
     }else if (graph.dragging){ //Issue query sketching   
     	sketch();
-    }/**else if (slowDown){ //Released a node or edge anchor, slowly animate the graph
-    	drawBackground();    		
-    	timeSlider.drawSlider(); 
-    	timeSlider.animateTick(this.t, this.start, this.end);
-    	this.graph.animateGraph(this.start, this.end, this.t, new int [] {-1, -1},-1);
-    	slowDownAnimation();
-    }*/else{ //Draw the graph (with hint paths if anything is selected)
+    }else{ //Draw the graph (with hint paths if anything is selected)
     	drawBackground();    	
         timeSlider.drawSlider();  
     	this.graph.drawGraph(this.graph.drawingView);
     }          
-  }
-  /**Updates the parameter for a slow down animation which occurs after a dragged element is released
-   * */
-  public void slowDownAnimation(){
-	  if (this.start == graph.currentView && this.end == graph.nextView){ //Snapped to current view, animate backwards
-		  this.t -=0.01;
-	      if (this.t<0){
-	    	  this.slowDown = false;
-	       }		  
-	  }else{ //Otherwise animate forward
-		  this.t +=0.01;
-	      if (this.t>1){
-	    	  this.slowDown = false;
-	      }
-	  }
   }
   /**Draws the background and other interface components
    * */
@@ -103,18 +82,17 @@ public void setup() {
 	  }	 
 	  toggleGlobalButton();
   }
+  /**Responds to a mouse dragging event (mouse pressed + mouse move ) on the canvas */
+  public void mouseDragged(){
+	  graph.isNodeDragged();//Just check if the node should be dragged around or de-selected	 
+  }
   
   /**Responds to a mouse up event on the canvas */
   public void mouseReleased(){
 	  if (timeSlider.dragging){ //Snap to view based on the slider		 
 		  timeSlider.releaseTick();		  
 		  this.graph.updateView(timeSlider.currentView, timeSlider.nextView, timeSlider.drawingView);		  
-	  } else {
-		  //Animation doesn't work..
-			 /** this.slowDown = true;
-			  this.t = graph.interpAmount;
-			  this.start = graph.currentView;
-			  this.end = graph.nextView;*/
+	  } else {		 
 		  graph.releaseElements();
 		  timeSlider.updateView(graph.currentView,graph.nextView,graph.drawingView);		  
 	  }
