@@ -236,8 +236,7 @@ public class Node {
        * */
       void animate(int start,int end, float interpolation,int [] pinned,int pinnedView){
     	  Coordinate startPosition = this.coords.get(start);
-    	  Coordinate endPosition = this.coords.get(end);    	  
-    	  Coordinate interpPosition;
+    	  Coordinate endPosition = this.coords.get(end);    	 
     	 
     	  /**if (startPosition != null && endPosition !=null){    		
     		  if (pinned[0] == this.id || pinned[1]==this.id){    			  
@@ -247,14 +246,43 @@ public class Node {
         		  drawNode(interpPosition.x,interpPosition.y,255); 
     		  }
     	  }*/
+    	  int interpolationAmt;
+    	 /** if (this.id==11){
+    		  System.out.println(startPosition+" "+start+" "+endPosition+" "+end);
+    	  }*/
+    	  
     	  if (startPosition != null && endPosition !=null){   
     		  drawNode(endPosition.x,endPosition.y,255);
-    	  }else if (startPosition==null && endPosition!=null){ //Node is fading in    		  
-    		  drawNode(endPosition.x,endPosition.y,(int)(interpolation*255));
-    	  }else if (startPosition!=null && endPosition==null){ //Node is fading out
-    		  drawNode(startPosition.x,startPosition.y,(int)(interpolation*255));
+    	  }else if (startPosition==null && endPosition!=null){ //Node is fading in 
+    		  interpolationAmt = easeInExpo(interpolation,0,255,1);
+    		  drawNode(endPosition.x,endPosition.y,interpolationAmt);
+    	  }else if (startPosition!=null && endPosition==null){ //Node is fading out    		  
+    		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);    		 
+    		  /**if (this.id==11){
+        		  System.out.println("fade out"+interpolationAmt);
+        		  }*/
+    		  drawNode(startPosition.x,startPosition.y,interpolationAmt);
     	  } 
       }  
+      /** Function to compute the transparency of a node fading in
+       *  From: http://www.gizma.com/easing/#cub1
+       *  @param t current time
+       *  @param b start value
+       *  @param c change in value
+       *  @param d duration
+       * */
+      int easeInExpo(float t, float b, float c, float d) {
+    	  return (int)(c * Math.pow( 2, 10 * (t/d - 1) ) + b);    	   
+      }
+      /** Function to compute the transparency of a node fading out
+       *  From: http://www.gizma.com/easing/#cub1
+       *  @param see easeInExpo();
+       * */
+      int easeOutExpo(float t, float b, float c, float d) {
+    	 // t /= d;
+    		//return (int)(-c * t*(t-2) + b);
+    	  return (int) (c * ( -Math.pow( 2, -10 * t/d ) + 1 ) + b);
+    	}
       
       /**Linearly interpolates the position of a node 
        * @param c0 first coordinate of a point on the line

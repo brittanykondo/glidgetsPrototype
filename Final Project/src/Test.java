@@ -43,6 +43,7 @@ public void setup() {
     }else if (graph.onDraggingEdge){
     	drawBackground();    	
     	timeSlider.drawSlider();
+    	System.out.println(graph.interpAmount);
     	timeSlider.animateTick(graph.interpAmount, graph.currentView, graph.nextView);
     	this.graph.dragAlongEdge();    		
     }else if (graph.dragging){ //Issue query sketching   

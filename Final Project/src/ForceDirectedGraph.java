@@ -92,9 +92,9 @@ public class ForceDirectedGraph {
      public void drawGraph(int view){      	
     	 
 	     if (selectedEdge !=-1){ //Case 1: Need to draw an edge hint path
+	    	 this.drawEdgeHintPaths();	
 			 renderEdges(view);
-			 renderNodes(view);			 
-			 this.drawEdgeHintPaths();						 		 
+			 renderNodes(view);				 					 		 
 		 }else if (this.selectedNode != -1){ //Case 2: draw node hint paths			 
 			 renderEdges(view);				
 			 drawNodeHintPaths();
@@ -153,9 +153,9 @@ public class ForceDirectedGraph {
       * */
      public void releaseEdgeAnchor(){    	 
     	 Coordinate pt1 = this.draggingEdge.hintCoords.get(this.currentView);
-    	 Coordinate pt2 = this.draggingEdge.hintCoords.get(this.nextView);         
-         float nextDist = calculateDistance(pt1.x,pt1.y,parent.mouseX,parent.mouseY);
-  		 float currentDist = calculateDistance(pt2.x,pt2.y,parent.mouseX,parent.mouseY);
+    	 Coordinate pt2 = this.draggingEdge.hintCoords.get(this.nextView);        	 
+         float currentDist = calculateDistance(pt1.x,pt1.y,parent.mouseX,parent.mouseY);
+  		 float nextDist = calculateDistance(pt2.x,pt2.y,parent.mouseX,parent.mouseY);  		
   		 setDrawingView(currentDist,nextDist);
      }
      
@@ -183,7 +183,7 @@ public class ForceDirectedGraph {
          this.drawEdgeHintPaths();
          this.draggingEdge.animateAnchor(newPoint.x,newPoint.y);
          this.animateGraph(this.currentView, this.nextView, this.interpAmount, new int []{this.draggingEdge.node1,this.draggingEdge.node2}, this.pinnedView); 
-    	 System.out.println("dragging edge"+t+" "+this.currentView+" "+this.nextView);
+    	 //System.out.println("dragging edge"+t+" "+this.currentView+" "+this.nextView);
      }
      
      /** Finds the minimum distance between a point at (x,y), with respect
@@ -215,8 +215,8 @@ public class ForceDirectedGraph {
       * */
      public float calculateDistance (float x1,float y1, float x2,float y2){
     	    float term1 = x1 - x2;
-    	    float term2 = y1 - y2;
-    	    return (term1*term1)+(term2*term2);
+    	    float term2 = y1 - y2;    	    
+    	    return ((term1*term1)+(term2*term2));
       }
      /**Moves the visualization forward by one time step
       * Adjusts the view variables accordingly
@@ -224,9 +224,9 @@ public class ForceDirectedGraph {
      public void moveForward(){
     	 if (this.nextView < this.numTimeSlices-1){ 
 	    		this.currentView = nextView;
-		    	this.nextView++;		    	
-	    	}
-    	 this.interpAmount = 0;
+		    	this.nextView++;
+		    	this.interpAmount = 0;
+	    	}    	 
      }
      /**Moves the visualization back in time by one time step
       * Adjusts the view variables accordingly
@@ -235,8 +235,8 @@ public class ForceDirectedGraph {
     	 if (this.currentView >0){
     		 this.nextView = this.currentView;
 	    	 this.currentView--;
-    	}
-    	 this.interpAmount = 1;
+	    	 this.interpAmount = 1;
+    	}    	 
      }
      /** Checks where the mouse is w.r.t the hint path
       * */
@@ -296,7 +296,7 @@ public class ForceDirectedGraph {
    	  for (int i=0;i<selectedNode.incidentEdges.size();i++){
    		  currentEdge = this.edges.get(selectedNode.incidentEdges.get(i));
    		  if (currentEdge.persistence.get(view)!=0){ //Highlight the edge
-   			  parent.stroke(67,162,202,150); 
+   			  parent.stroke(67,162,202,255); 
 		      parent.strokeWeight(2);   
 		      n1 = this.nodes.get(currentEdge.node1);
 		      n2 = this.nodes.get(currentEdge.node2);
@@ -448,7 +448,7 @@ public class ForceDirectedGraph {
   			 }else{
   				 this.drawingView = this.nextView;
   			 }
-  		 } 
+  		 }     	 
      }
      /**Re-sets the selected and released node after the edge hint path is drawn.
       * Draws the hint path for the edge joined by selected and released node
@@ -511,12 +511,10 @@ public class ForceDirectedGraph {
     			 }else if (this.aggregatedPersistence.get(t)==1 && currentNode.coords.get(t)==null){
     				this.aggregatedPersistence.set(t, 0);    				 				 
     			 }
+    			 System.out.println(this.aggregatedPersistence.get(t));
     		 }    		
-    	 }    	
-    	//Draw the hint paths for the aggregated nodes
-    	 /**for (int i=0;i<this.aggregatedNodes.size();i++){
-    		 this.nodes.get(this.aggregatedNodes.get(i)).drawAggregatedHintPath(0, 0, aggregatedPersistence);
-    	 } */   	
+    	 }   	
+    	  	
      }
      /** Draws the hint path of node(s) selected
       * */

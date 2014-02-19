@@ -37,7 +37,7 @@ public class Edge {
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){ //Safety Check
-    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,1,1);
+    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1);
     	  }
       } 
       /** Visualizes the overall edge persistence (how often is it displayed?) 
@@ -121,11 +121,6 @@ public class Edge {
     	  }
     	  return false;
       }
-      
-      /**Prints the contents of an edge */
-      void print(){
-    	  System.out.println("Id "+this.label+" node 1: "+this.node1+" node 2: "+this.node2);
-      }
      
       /**Animates an edge by re-drawing it according to the interpolated position of
        * the nodes it is attached to
@@ -137,23 +132,49 @@ public class Edge {
       void animate(ArrayList<Node> nodes,int start,int end, float interpolation){
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
-    	  if (this.persistence.get(start)!=0 && this.persistence.get(end)!=0){ //Safety Check     		  
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,1,1);
-    	  }else if (this.persistence.get(start)==1 || this.persistence.get(end)==1){ //Should appear in either of the neighbor time slices
-    		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolation,1);
-    	  }    	  
+    	  int startPersistence = this.persistence.get(start);
+    	  int endPersistence = this.persistence.get(end);
+    	  
+    	  int interpolationAmt;      
+    	  
+    	  if (startPersistence!=0 && endPersistence!=0){      		  
+    		  drawEdge(n1.x,n1.y,n2.x,n2.y,150,1);
+    	  }else if (startPersistence==0 && endPersistence==1){ //Fading in
+    		  interpolationAmt = easeInExpo(interpolation,0,150,1);
+    		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1);
+    	  } else if (startPersistence==1 && endPersistence==0) { //Fading out    		  
+    		  interpolationAmt = easeOutExpo((1-interpolation),0,150,1);
+    		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1);
+    	  }
       }
       /** Renders the edge between the specified coordinates
        *  @param x0,y0,x1,y1 the coordinates
        *  @param interp amount for setting the alpha value
        *  @param weight the thickness of the stroke
        * */
-      void drawEdge(float x0, float y0, float x1, float y1,double interp,float weight){
-    	  int alpha = (int)(interp*100); //Scale down the transparency
+      void drawEdge(float x0, float y0, float x1, float y1,int interp,float weight){
+    	  //int alpha = (int)(interp*100); //Scale down the transparency    	  
     	  parent.strokeWeight(weight);    	
-    	  parent.stroke(253, 224, 221,alpha); 
+    	  parent.stroke(253, 224, 221,interp); 
 		  parent.line(x0, y0,x1,y1);		  
       }
+      /** Function to compute the transparency of a node fading in
+       *  From: http://www.gizma.com/easing/#cub1
+       *  @param t current time
+       *  @param b start value
+       *  @param c change in value
+       *  @param d duration
+       * */
+      int easeInExpo(float t, float b, float c, float d) {
+    	  return (int)(c * Math.pow( 2, 10 * (t/d - 1) ) + b);    	   
+      }
+      /** Function to compute the transparency of a node fading out
+       *  From: http://www.gizma.com/easing/#cub1
+       *  @param see easeInExpo();
+       * */
+      int easeOutExpo(float t, float b, float c, float d) {
+    	  return (int) (c * ( -Math.pow( 2, -10 * t/d ) + 1 ) + b);
+    	}
       /**Draws a dotted line from start to end
        * */
       void drawDottedLine(float startX,float startY,float endX, float endY){
@@ -201,10 +222,38 @@ public class Edge {
     	  float interval = (float)1/(this.numTimeSlices-1);    	      	  
     	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;        	  
     	          	
-          /**ArrayList<Coordinate> coords1 = findPerpendicularLine(start.x,start.y,end.x,end.y,2.0f);   
-          ArrayList<Coordinate> coords2 = findPerpendicularLine(end.x,end.y,start.x,start.y,2.0f); 
-          start = coords1.get(0);
-          end = coords2.get(1); */        
+          //ArrayList<Coordinate> coords1 = findPerpendicularLine(start.x,start.y,end.x,end.y,3.0f);   
+         // ArrayList<Coordinate> coords2 = findPerpendicularLine(end.x,end.y,start.x,start.y,3.0f); 
+          
+          //start = coords1.get(1);
+    	  //end = coords2.get(0);
+    	  prevX=start.x;
+    	  prevY=start.y;
+    	  interpolation = 0;
+    	  parent.strokeWeight(15);
+    	  
+    	  for (int i=0;i<this.numTimeSlices;i++){     		  
+    		  interpX = (end.x - start.x)*interpolation + start.x;
+    		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x)); 
+    		  if (persistence.get(i)==0){
+    			  parent.stroke(189, 189, 189,255);
+    		  }else{
+    			 // parent.stroke(206,18,86,170);  
+    			  parent.stroke(67,162,202,255); 
+    		  }     
+    		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path
+    		  parent.line(prevX,prevY,interpX,interpY);     	   		  
+
+    		  interpolation +=interval;
+    		  prevX = interpX;
+    		  prevY = interpY;    		 
+    	  }
+    	  
+    	  parent.strokeWeight(4);
+    	  parent.stroke(25,25,25,255);
+    	  parent.line(start.x, start.y, end.x, end.y);
+          /**start = coords1.get(0);
+          end = coords2.get(1);        
     	  
     	  parent.strokeWeight(4);   
     	  
@@ -213,13 +262,13 @@ public class Edge {
     		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x)); 
     		  if (persistence.get(i)==0){
     			  parent.stroke(189, 189, 189,255);
-    			  drawDottedLine(prevX,prevY,interpX,interpY);    			  
+    			  //drawDottedLine(prevX,prevY,interpX,interpY);    			  
     		  }else{
     			 // parent.stroke(206,18,86,170);  
     			  parent.stroke(67,162,202,255);    
-    			  parent.line(prevX,prevY,interpX,interpY);  
+    			  
     		  } 
-    		  
+    		  parent.line(prevX,prevY,interpX,interpY); 
     		    		  
              
     		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path	 
@@ -232,7 +281,7 @@ public class Edge {
     	  }
     	  
     	  //Draw the other side of the highlight
-    	  /**start = coords1.get(1);
+    	  start = coords1.get(1);
     	  end = coords2.get(0);
     	  prevX=start.x;
     	  prevY=start.y;
@@ -246,14 +295,14 @@ public class Edge {
     		  }else{
     			 // parent.stroke(206,18,86,170);  
     			  parent.stroke(67,162,202,255); 
-    		  } 
-    		  parent.strokeWeight(2);   
+    		  }     
+    		  
     		  parent.line(prevX,prevY,interpX,interpY);     	   		  
 
     		  interpolation +=interval;
     		  prevX = interpX;
     		  prevY = interpY;    		 
-    	  }  */   	  
+    	  }    */	  
       }
       
     /**Finds the point on a line defined by x1-y1 and x2-y2 that is distance
