@@ -282,64 +282,48 @@ public class Edge {
     	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;     	          	
          
     	  prevX=start.x;
-    	  prevY=start.y;
-    	  interpolation = 0;    	 
+    	  prevY=start.y;    	  	 
     	  parent.strokeCap(parent.SQUARE);
     	  parent.strokeWeight(12);
     	  
-    	  //Highlight surrounding the edge
-    	  /**
-    	  for (int i=0;i<this.numTimeSlices;i++){ 
-    		 
+    	  //Calculate the hint path coordinates
+    	  for (int i=0;i<this.numTimeSlices;i++){   
+    		  System.out.println(persistence.get(i)+" "+i);
     		  interpX = (end.x - start.x)*interpolation + start.x;
-    		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x));  		  
-    		  
-    		  
-    		  if (persistence.get(i)==0){
+    		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x));             
+    		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path   		  
+    		  interpolation +=interval;
+    		  prevX = interpX;
+    		  prevY = interpY;    		 
+    	  }	  
+    	  
+    	  //Draw hint path: Highlight surrounding the edge    	  
+    	 /** for (int i=1;i<this.hintCoords.size();i++){     		  
+    		  if (persistence.get(i-1)==0){
     			  parent.stroke(189, 189, 189,255);
     		  }else{
     			 // parent.stroke(206,18,86,170);  
     			  parent.stroke(67,162,202,255); 
     		  }     
-    		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path    		  
-    		  parent.line(prevX,prevY,interpX,interpY);
     		  
-    		  interpX = (end.x - start.x)*interpolation + start.x;
-    		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x)); 
-    		  
-    		  interpolation +=interval;
-    		  prevX = interpX;
-    		  prevY = interpY;    		 
+    		  parent.line(this.hintCoords.get(i-1).x,this.hintCoords.get(i-1).y,this.hintCoords.get(i).x,this.hintCoords.get(i).y);   		  		 
     	  }
     	  
     	  parent.strokeWeight(5);
     	  parent.stroke(25,25,25,255);
-    	  parent.line(start.x, start.y, end.x, end.y);
-    	  */
-    	  parent.strokeWeight(4);
-    	  //Dotted line
-    	  for (int i=0;i<this.numTimeSlices;i++){     		  
-    		  interpX = (end.x - start.x)*interpolation + start.x;
-    		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x)); 
-    		  if (persistence.get(i)==0){
+    	  parent.line(start.x, start.y, end.x, end.y);*/
+    	     	   	  
+    	  //Draw hint path: Dotted line   
+    	  parent.strokeWeight(4);  
+    	  for (int i=1;i<this.hintCoords.size();i++){      		 		 
+    		  if (persistence.get(i-1)==0){
     			  parent.stroke(189, 189, 189,255);
-    			  drawDottedLine(prevX,prevY,interpX,interpY);    			  
-    		  }else{
-    			 // parent.stroke(206,18,86,170);  
+    			  drawDottedLine(this.hintCoords.get(i-1).x,this.hintCoords.get(i-1).y,this.hintCoords.get(i).x,this.hintCoords.get(i).y);    			  
+    		  }else{    			 
     			  parent.stroke(67,162,202,255); 
-    			  parent.line(prevX,prevY,interpX,interpY);    		
-    			  
-    		  }     		      		  
-             
-    		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path	 
-    		 
-    		 // System.out.println(i+" "+this.hintCoords.get(i).x+" "+this.hintCoords.get(i).y);
-    		  
-    		  interpolation +=interval;
-    		  prevX = interpX;
-    		  prevY = interpY;    		 
-    	  }	  
-    	    
+    			  parent.line(this.hintCoords.get(i-1).x,this.hintCoords.get(i-1).y,this.hintCoords.get(i).x,this.hintCoords.get(i).y);     			  
+    		  }    		  		 
+    	  }   	 
       }
       
     /**Finds the point on a line defined by x1-y1 and x2-y2 that is distance
