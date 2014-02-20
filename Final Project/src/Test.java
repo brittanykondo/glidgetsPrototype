@@ -34,6 +34,7 @@ public void setup() {
     	drawBackground();    	    	
     	timeSlider.drawSlider();  
     	timeSlider.drag(mouseX);
+    	this.graph.clearQueries();
     	this.graph.animateGraph(timeSlider.currentView, timeSlider.nextView, timeSlider.interpAmount,new int[] {-1,-1},-1);
     }else if (graph.draggingNode){ //Dragging around a node
     	drawBackground();    	
@@ -83,7 +84,7 @@ public void setup() {
 	  toggleGlobalButton();
   }
   /**Responds to a mouse dragging event (mouse pressed + mouse move ) on the canvas */
-  public void mouseDragged(){
+  public void mouseDragged(){	  
 	  graph.isNodeDragged();//Just check if the node should be dragged around or de-selected	 
   }
   

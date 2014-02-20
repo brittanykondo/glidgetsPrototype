@@ -167,7 +167,7 @@ public class ForceDirectedGraph {
      /** Checks where the mouse is w.r.t the edge
       * */
      public void dragAlongEdge(){ 	 
-    	 //System.out.println(this.currentView+" "+this.nextView);
+    	
     	 //Get the two points of the line segment currently dragged along
     	 Coordinate pt1 = this.draggingEdge.hintCoords.get(this.currentView);
     	 Coordinate pt2 = this.draggingEdge.hintCoords.get(this.nextView);
@@ -188,8 +188,7 @@ public class ForceDirectedGraph {
          this.animateGraph(this.currentView, this.nextView, this.interpAmount, new int []{this.draggingEdge.node1,this.draggingEdge.node2}, this.pinnedView); 
          this.drawEdgeHintPaths();
          this.draggingEdge.animateAnchor(newPoint.x,newPoint.y);        
-         this.keepDisappearingNodes(1);
-    	 //System.out.println("dragging edge"+t+" "+this.currentView+" "+this.nextView);
+         this.keepDisappearingNodes(1);    	 
      }
      /**Draws partial versions of nodes when dragging along a hint path
       * @param type:
@@ -524,25 +523,28 @@ public class ForceDirectedGraph {
       * hint paths where a node does not exist (which could cancel the entire query)
       * */
      public void removeDisappearedNodes(){
-    	 ArrayList <Integer> savedNodes = this.aggregatedNodes;
-    	 for (int i=0;i<savedNodes.size();i++){
-    		 Node currentNode = this.nodes.get(savedNodes.get(i));
-    		 if (currentNode.coords.get(this.drawingView)==null){
-    			 this.aggregatedNodes.remove(i);
+    	 ArrayList <Integer> removedNodes = new ArrayList <Integer>();
+    	 for (int i=0;i<this.aggregatedNodes.size();i++){
+    		 Node currentNode = this.nodes.get(this.aggregatedNodes.get(i));    		 
+    		 if (currentNode.coords.get(this.drawingView)==null){    			
+    			 removedNodes.add(currentNode.id);    			 
     		 }
     	 }
+    	 this.aggregatedNodes.removeAll(removedNodes);
     	 this.aggregateNodeHintPaths();
      }
      /**When "snapping" to a view after dragging around a node, need to remove the node
       * hint paths where a node does not exist (which could cancel the entire query)
       * */
      public void removeDisappearedEdges(){
-    	 ArrayList <Edge> savedEdges = this.aggregatedEdges;
-    	 for (int i=0;i<savedEdges.size();i++){
-    		if (savedEdges.get(i).persistence.get(this.drawingView)==0){
-    			this.aggregatedEdges.remove(i);
+    	 ArrayList <Edge> newEdges = new ArrayList <Edge>();
+    	 for (int i=0;i<this.aggregatedEdges.size();i++){
+    		if (this.aggregatedEdges.get(i).persistence.get(this.drawingView)==1){
+    			newEdges.add(this.aggregatedEdges.get(i));
     		}
     	 }
+    	 this.aggregatedEdges.clear();
+    	 this.aggregatedEdges = newEdges;
     	 this.aggregateEdgeHintPaths();
      }
      /**Re-sets the selected and released node after the edge hint path is drawn.
@@ -569,12 +571,6 @@ public class ForceDirectedGraph {
          }
          this.aggregateEdgeHintPaths();
          this.aggregatedNodes.clear();
-     }
-     
-     /**Allows multiple edges to be selected if a key (e) is held down.
-      * */
-     public void selectMultipleEdges(){    	
-    	 this.keyPressed = 2;
      }
      /**Clears all queries on the screen (this is triggered when the background is clicked)
       * */
@@ -614,7 +610,7 @@ public class ForceDirectedGraph {
      /** Draws the hint path of node(s) selected
       * */
      public void drawNodeHintPaths(){
-    	 for (int i=0;i<this.aggregatedNodes.size();i++){
+    	 for (int i=0;i<this.aggregatedNodes.size();i++){    		 
     		 this.nodes.get(this.aggregatedNodes.get(i)).drawAggregatedHintPath(this.aggregatedPersistence);
     	 }
      }
