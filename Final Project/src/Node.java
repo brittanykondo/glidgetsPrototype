@@ -13,7 +13,8 @@ public class Node {
       ArrayList<Coordinate> coords; //Ordered by time
       ArrayList<Integer> degrees; //Ordered by time, degree of the node
       float globalPersistence; //Percentage of time the node does not disappear
-      int numTimeSlices;      
+      int numTimeSlices; 
+      float hintSegmentAngle; //The angle of each segment along the hint path
       boolean dragging;
       int maxDegree; //For scaling visualizations of relative degree amount (only w.r.t to this node's degree changes)
       ArrayList <Coordinate> hintAngles; //View angles along the hint path
@@ -37,6 +38,7 @@ public class Node {
     	  this.parent = p;
     	  this.id = id;    
     	  this.numTimeSlices = t; 
+    	  this.hintSegmentAngle = 0.0f;
     	  
     	  //Initialize other class variables
     	  this.x = 0;
@@ -88,9 +90,9 @@ public class Node {
        * */
       void setHintAngles(){
     	  this.hintAngles = new ArrayList<Coordinate>();
-    	  float interval = parent.TWO_PI/(this.numTimeSlices-1);       	 
+    	  float interval = parent.TWO_PI/this.numTimeSlices;       	 
     	  float startAngle, endAngle;    	 
-    	  for (int i=0;i<this.numTimeSlices-1;i++){    		  
+    	  for (int i=0;i<this.numTimeSlices;i++){    		  
     		  //First, calculate the angles for the current time interval
     		  startAngle = (i*interval);    		  
     		  endAngle = (startAngle + interval);       		 
@@ -101,6 +103,7 @@ public class Node {
     		  this.hintAngles.add(new Coordinate(startAngle, endAngle));
     		  //System.out.println(i+" "+startAngle*180/Math.PI+" "+endAngle*180/Math.PI);
     	  }
+    	  this.hintSegmentAngle = interval;
       }
 
       /** Renders the node at the specified position and saves the positions in class variables
@@ -192,7 +195,9 @@ public class Node {
        *                   if 0, anchor should move with the mouse angle
        **/
       void animateAnchor(float mouseAngle, int fixAnchor){
-    	  parent.stroke(67,162,202,255); 
+    	  //parent.stroke(67,162,202,255); 
+    	  parent.strokeCap(parent.ROUND);
+    	  parent.stroke(206,18,86,255);
           parent.strokeWeight(4);          
           float x1 = (float) (this.x + RADIUS/2*Math.cos(mouseAngle));
           float y1 = (float) (this.y + RADIUS/2*Math.sin(mouseAngle));     
@@ -209,9 +214,11 @@ public class Node {
        * */      
       void drawAggregatedHintPath(ArrayList<Integer> persistence){    	  	 
     	  // parent.strokeWeight(5);
-    	  for (int i=0;i<this.numTimeSlices-1;i++){ 
-    		  //For now, just drawing the original degree amount when node is present, not aggregating it
-    		  float weight;
+    	  float angleOffset = parent.HALF_PI + this.hintSegmentAngle/2;
+    	  float x1,y1,x2,y2,weight; //For drawing the ticks in middle of segments    	 
+    	  
+    	  for (int i=0;i<this.numTimeSlices;i++){ 
+    		  //For now, just drawing the original degree amount when node is present, not aggregating it    		 
     		  if (persistence.get(i)==0){
     			  parent.stroke(189, 189, 189,255);
     			  parent.strokeWeight(MIN_WEIGHT);
@@ -220,14 +227,29 @@ public class Node {
     			  parent.stroke(67,162,202,255); 
     			  weight = MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT);
     			  parent.strokeWeight(weight);
-    		  }    		     		  
+    		  }      		  
         	  
-        	  parent.strokeCap(parent.SQUARE);
+        	  parent.strokeCap(parent.SQUARE);        	 
         	  parent.noFill();
-        	//Offset by half pi so that beginning of time lies on top of the node (like a clock layout)
-        	  parent.arc(this.x, this.y, RADIUS+weight, RADIUS+weight, this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI);        	
-    	  }    	 
+        	  //Offset by half pi so that beginning of time lies on top of the node (like a clock layout)
+        	  //parent.arc(this.x, this.y, RADIUS+weight, RADIUS+weight,this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI); 
+        	
+        	  //New hint path design: offset the segments by half a hint path segment angle
+        	  //TODO: 0.05 is just a value determined by eye-balling the glyph, it's added to remove the gaps between arc segments along the hint path        	
+        	  parent.arc(this.x, this.y, RADIUS+weight, RADIUS+weight,this.hintAngles.get(i).x-angleOffset, ((this.hintAngles.get(i).y+0.05f)-angleOffset));         	  
+        	  
+        	  //Draw the ticks along the segments
+        	  x1 = (float) (this.x + RADIUS/2*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
+              y1 = (float) (this.y + RADIUS/2*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
+              
+              x2 = (float) (this.x + (RADIUS/2+weight)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
+              y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
+        	  parent.stroke(25,25,25,255); //background colour
+        	  parent.strokeWeight(1);
+        	  parent.line(x1, y1, x2, y2);
+    	  }     	
       }
+      
       /**Animates a node by interpolating its position between two time slices
        * @param start the starting time slice
        * @param end the ending time slice

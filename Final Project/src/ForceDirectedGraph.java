@@ -332,35 +332,14 @@ public class ForceDirectedGraph {
 		    }else{ //At next	    	
 		    	moveForward();		    	
 		    }   
-		    //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView+" "+this.interpAmount);
-		    //highlightIncidentEdges(n,this.currentView);		    
+		    //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView+" "+this.interpAmount);	       
 		    
 		    animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);
 		    this.drawNodeHintPaths();
 		    n.animateAnchor(mouseAngle-parent.HALF_PI,fixAnchor);		   
-		    this.keepDisappearingNodes(0);
-		    
+		    this.keepDisappearingNodes(0);		    
 		    this.mouseAngle = mouseAngle;
-     }
-     /**Highlights the edges incident on the dragged node to show degree changes and 
-      * make it easier to discern the edges
-      * @param view  the current view
-      * @param selectedNode  the node being dragged around
-      * */
-     void highlightIncidentEdges(Node selectedNode,int view){
-   	  Edge currentEdge;
-   	  Node n1,n2;
-   	  for (int i=0;i<selectedNode.incidentEdges.size();i++){
-   		  currentEdge = this.edges.get(selectedNode.incidentEdges.get(i));
-   		  if (currentEdge.persistence.get(view)!=0){ //Highlight the edge
-   			  parent.stroke(67,162,202,255); 
-		      parent.strokeWeight(2);   
-		      n1 = this.nodes.get(currentEdge.node1);
-		      n2 = this.nodes.get(currentEdge.node2);
-		      parent.line(n1.x,n1.y,n2.x,n2.y); 
-   		  }
-   	  }
-     }
+     }     
      /** Checks if the mouse is in bounds defined by a and b, updates the interpolation amount
       *  @param mouse: the mouse position
       *  @return 0 if in between views

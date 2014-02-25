@@ -37,7 +37,7 @@ public class Edge {
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){ //Safety Check
-    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1);
+    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1.5f);
     	  }
       } 
       /** Visualizes the overall edge persistence (how often is it displayed?) 
@@ -141,11 +141,11 @@ public class Edge {
     	  //TODO: not very elegant way of drawing the edge (check highlight each time), refactor this later
     	  if (startPersistence!=0 && endPersistence!=0){      		  
     		  if (highlight){
-        		  parent.strokeWeight(3);    	
+        		  parent.strokeWeight(2);    	
             	  parent.stroke(67,162,202,255); 
         		  parent.line(n1.x,n1.y,n2.x,n2.y);
         	  }else{
-        		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1);
+        		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1.5f);
         	  }
     	  }else if (startPersistence==0 && endPersistence==1){ //Fading in
     		  interpolationAmt = easeInExpo(interpolation,0,255,1);
@@ -154,17 +154,17 @@ public class Edge {
             	  parent.stroke(67,162,202,interpolationAmt); 
         		  parent.line(n1.x,n1.y,n2.x,n2.y);
         	  }else{
-        		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1);
+        		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1.5f);
         	  }
 
     	  } else if (startPersistence==1 && endPersistence==0) { //Fading out    		  
     		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);
     		  if (highlight){
-        		  parent.strokeWeight(3);    	
+        		  parent.strokeWeight(2);    	
             	  parent.stroke(67,162,202,interpolationAmt); 
         		  parent.line(n1.x,n1.y,n2.x,n2.y);
         	  }else{
-        		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1);
+        		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1.5f);
         	  }
     	  }     	 
       }
@@ -311,8 +311,7 @@ public class Edge {
     	  
     	  parent.strokeWeight(5);
     	  parent.stroke(25,25,25,255);
-    	  parent.line(start.x, start.y, end.x, end.y);*/
-    	     	   	  
+    	  parent.line(start.x, start.y, end.x, end.y);*/    	     	   	  
     	  //Draw hint path: Dotted line   
     	  parent.strokeWeight(4);  
     	  for (int i=1;i<this.hintCoords.size();i++){      		 		 
