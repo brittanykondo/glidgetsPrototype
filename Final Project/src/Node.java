@@ -21,7 +21,7 @@ public class Node {
       ArrayList <Integer> incidentEdges; //Edges that the node forms with other nodes over time
       
       //Class Constants
-      static int MIN_WEIGHT = 4;
+      static int MIN_WEIGHT = 5;
       static int MAX_WEIGHT = 15;
       static final float RADIUS = 28;
       
@@ -210,9 +210,10 @@ public class Node {
       }
      
       /** Draws an aggregated hint path (following a persistence array)          
-       *  @param persistence Array of persistence information for the aggregated nodes  
+       *  @param persistence Array of persistence information for the aggregated nodes 
+       *  @param view the current view of the visualization 
        * */      
-      void drawAggregatedHintPath(ArrayList<Integer> persistence){    	  	 
+      void drawAggregatedHintPath(ArrayList<Integer> persistence,int view){    	  	 
     	  // parent.strokeWeight(5);
     	  float angleOffset = parent.HALF_PI + this.hintSegmentAngle/2;
     	  float x1,y1,x2,y2,weight; //For drawing the ticks in middle of segments    	 
@@ -243,9 +244,17 @@ public class Node {
               y1 = (float) (this.y + RADIUS/2*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
               
               x2 = (float) (this.x + (RADIUS/2+weight)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
-              y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
-        	  parent.stroke(25,25,25,255); //background colour
-        	  parent.strokeWeight(1);
+              y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI)); 
+              
+              if (i==view){
+            	  parent.stroke(206,18,86,255);
+            	  parent.strokeWeight(3);
+              }else{
+            	  parent.stroke(25,25,25,255); //background colour
+            	  parent.strokeWeight(1);
+              }
+        	  
+        	  
         	  parent.line(x1, y1, x2, y2);
     	  }     	
       }

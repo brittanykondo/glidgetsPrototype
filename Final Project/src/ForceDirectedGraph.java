@@ -101,7 +101,7 @@ public class ForceDirectedGraph {
 			 this.drawEdgeHintPaths();
 		 }else if (this.selectedNode != -1){ //Case 2: draw node hint paths			 
 			 renderEdges(view);				
-			 drawNodeHintPaths();
+			 drawNodeHintPaths(view);
 			 renderNodes(view);
 		 }else{ //Case 3: Just render both edges and nodes without hint paths
 			 clearQueries();			 
@@ -335,7 +335,7 @@ public class ForceDirectedGraph {
 		    //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView+" "+this.interpAmount);	       
 		    
 		    animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);
-		    this.drawNodeHintPaths();
+		    this.drawNodeHintPaths(-1);
 		    n.animateAnchor(mouseAngle-parent.HALF_PI,fixAnchor);		   
 		    this.keepDisappearingNodes(0);		    
 		    this.mouseAngle = mouseAngle;
@@ -587,10 +587,11 @@ public class ForceDirectedGraph {
     	  	
      }
      /** Draws the hint path of node(s) selected
+      * @view the current view of the visualization
       * */
-     public void drawNodeHintPaths(){
+     public void drawNodeHintPaths(int view){
     	 for (int i=0;i<this.aggregatedNodes.size();i++){    		 
-    		 this.nodes.get(this.aggregatedNodes.get(i)).drawAggregatedHintPath(this.aggregatedPersistence);
+    		 this.nodes.get(this.aggregatedNodes.get(i)).drawAggregatedHintPath(this.aggregatedPersistence,view);
     	 }
      }
      /**When multiple edges are selected and the key is released,
