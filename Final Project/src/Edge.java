@@ -226,7 +226,7 @@ public class Edge {
     	  }
     	  
     	  float interval = desiredDashLength/segmentLength;
-          System.out.println(interval+" segment "+segmentLength);
+          //System.out.println(interval+" segment "+segmentLength);
     	  
           float interpX,interpY,interpolation=0,prevX=startX,prevY=startY; 
     	  int i=0;
@@ -278,24 +278,24 @@ public class Edge {
     		  end = temp;
     	  }
     	  
-    	  float interval = (float)1/(this.numTimeSlices-1);    	      	  
-    	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;     	          	
+    	  float interval = (float)1/(this.numTimeSlices);    	      	  
+    	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;          	
          
-    	  prevX=start.x;
-    	  prevY=start.y;    	  	 
+    	     	  	 
     	  parent.strokeCap(parent.SQUARE);
     	  parent.strokeWeight(12);
     	  
     	  //Calculate the hint path coordinates
     	  for (int i=0;i<this.numTimeSlices;i++){   
-    		  System.out.println(persistence.get(i)+" "+i);
+    		  //System.out.println(persistence.get(i)+" "+i);
     		  interpX = (end.x - start.x)*interpolation + start.x;
     		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x));             
     		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path   		  
     		  interpolation +=interval;
     		  prevX = interpX;
     		  prevY = interpY;    		 
-    	  }	  
+    	  }	
+    	  this.hintCoords.add(new Coordinate(end.x,end.y)); //Add the last point to join the last segment	  
     	  
     	  //Draw hint path: Highlight surrounding the edge    	  
     	 /** for (int i=1;i<this.hintCoords.size();i++){     		  
@@ -314,13 +314,13 @@ public class Edge {
     	  parent.line(start.x, start.y, end.x, end.y);*/    	     	   	  
     	  //Draw hint path: Dotted line   
     	  parent.strokeWeight(4);  
-    	  for (int i=1;i<this.hintCoords.size();i++){      		 		 
-    		  if (persistence.get(i-1)==0){
+    	  for (int i=0;i<this.numTimeSlices;i++){      		 		 
+    		  if (persistence.get(i)==0){
     			  parent.stroke(189, 189, 189,255);
-    			  drawDottedLine(this.hintCoords.get(i-1).x,this.hintCoords.get(i-1).y,this.hintCoords.get(i).x,this.hintCoords.get(i).y);    			  
+    			  drawDottedLine(this.hintCoords.get(i).x,this.hintCoords.get(i).y,this.hintCoords.get(i+1).x,this.hintCoords.get(i+1).y);    			  
     		  }else{    			 
     			  parent.stroke(67,162,202,255); 
-    			  parent.line(this.hintCoords.get(i-1).x,this.hintCoords.get(i-1).y,this.hintCoords.get(i).x,this.hintCoords.get(i).y);     			  
+    			  parent.line(this.hintCoords.get(i).x,this.hintCoords.get(i).y,this.hintCoords.get(i+1).x,this.hintCoords.get(i+1).y);     			  
     		  }    		  		 
     	  }   	 
       }
@@ -348,11 +348,10 @@ public class Edge {
     /** Draws the hint path, then animates the indicator according to mouse dragging along the edge
      *  @param newX,newY the position of the mouse projected onto the hint path (according to the min distance)     *  
      * */
-    void animateAnchor(float newX, float newY){  	  	 
-    	//drawHintPath(nodes,persistence);
-  	   //Then, animate the indicator according to mouse movement
-        parent.stroke(67,162,202,255); 
-        parent.strokeWeight(4);          
+    void animateAnchor(float newX, float newY){  	   	
+    	 parent.strokeCap(parent.ROUND);
+   	     parent.stroke(206,18,86,255);
+   	     parent.strokeWeight(7);
         Coordinate endC = this.hintCoords.get(this.numTimeSlices-1);       	
         ArrayList<Coordinate> coords = findPerpendicularLine(newX,newY,endC.x,endC.y,6.0f);                   
         parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);   

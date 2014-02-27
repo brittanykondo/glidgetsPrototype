@@ -121,7 +121,7 @@ public class ForceDirectedGraph {
     		 Coordinate startPt = this.aggregatedEdges.get(i).hintCoords.get(0);
         	 Coordinate endPt = this.aggregatedEdges.get(i).hintCoords.get(this.numTimeSlices-1);    	 
         	 float [] minPoint = minDistancePoint(parent.mouseX,parent.mouseY,startPt.x,startPt.y,endPt.x,endPt.y);
-        	 if (parent.dist(minPoint[0],minPoint[1],parent.mouseX,parent.mouseY)<=5){ //Rough check to see if mouse was clicked on the anchor
+        	 if (parent.dist(minPoint[0],minPoint[1],parent.mouseX,parent.mouseY)<=10){ //Rough check to see if mouse was clicked on the anchor
         		 this.onDraggingEdge = true;
         		 this.draggingEdge = this.aggregatedEdges.get(i);
         		 this.pinnedView = this.drawingView;
@@ -185,6 +185,7 @@ public class ForceDirectedGraph {
              newPoint= new Coordinate (minDist[0],minDist[1]);             
              this.interpAmount = t;              
          }
+         System.out.println(newPoint.x+" "+newPoint.y);
          this.animateGraph(this.currentView, this.nextView, this.interpAmount, new int []{this.draggingEdge.node1,this.draggingEdge.node2}, this.pinnedView); 
          this.drawEdgeHintPaths();
          this.draggingEdge.animateAnchor(newPoint.x,newPoint.y);        
@@ -304,36 +305,39 @@ public class ForceDirectedGraph {
 	   	 float opp = n.y - parent.mouseY;
 	   	 float mouseAngle = (float) Math.atan2(adj,opp);
 	 
-	   	 if (mouseAngle < 0)	mouseAngle = (float) ((Math.PI - mouseAngle*(-1))+Math.PI);	   	 
+	   	 if (mouseAngle < 0)	mouseAngle = (float) ((Math.PI - mouseAngle*(-1))+Math.PI);	 
+	   	 
+	   	float currentAngle = n.hintAngles.get(this.currentView).x; 
+	   	float nextAngle = n.hintAngles.get(this.currentView).y;    	 
+	   	float bounds = checkBounds(mouseAngle,currentAngle,nextAngle);
 	   	
-	   	 int fixAnchor = 0;
-	   	 //Prevent looping around in time
-    	if (this.nextView == (this.numTimeSlices-1) && this.mouseAngle > Math.PI && this.mouseAngle <= Math.PI*2 //Prevent wrapping around from last view to first view
-    			&& mouseAngle >= 0 && mouseAngle < Math.PI){
-	   		mouseAngle = (float) (Math.PI*2-0.02); //Force the angle to be slightly before 360 deg, therefore it cannot pass the last view    	    
-    	    fixAnchor = 1;
-    	}else if (this.currentView ==0 && mouseAngle > Math.PI && mouseAngle <= Math.PI*2 //Prevent wrapping around from last view to first view
+	   	//Prevent wrapping around the node hint path
+	   	float lastAngle = n.hintAngles.get(this.numTimeSlices-1).x;
+	   	int fixAnchor = 0;
+	   	
+	   	if (this.nextView == (this.numTimeSlices-1) && 
+	   			(this.mouseAngle<=lastAngle && this.mouseAngle>Math.PI  && 
+	   			((mouseAngle >lastAngle && mouseAngle <= Math.PI*2)||(mouseAngle>=0 && mouseAngle < Math.PI)))){ //Prevent wrapping around from last view to first vie
+	   		fixAnchor = 1;
+	   		mouseAngle = lastAngle;	   	   		
+	   	}else if (this.currentView ==0 && mouseAngle > Math.PI && mouseAngle <= Math.PI*2 
      			&& this.mouseAngle >= 0 && this.mouseAngle < Math.PI){ //Prevent wrapping around from first to last view    		
     		 mouseAngle = (float) 0.02;
     		 fixAnchor = 1;
     	 }
-    	
-	   	float currentAngle = n.hintAngles.get(this.currentView).x; 
-	   	float nextAngle = n.hintAngles.get(this.currentView).y;    	 
-	   	float bounds = checkBounds(mouseAngle,currentAngle,nextAngle);    	
 	   	
-	   	//System.out.println(currentAngle*180/Math.PI+" "+nextAngle*180/Math.PI+" "+mouseAngle*180/Math.PI);
-	   //	System.out.println(this.mouseAngle*180/Math.PI+" "+mouseAngle*180/Math.PI);   
 	   	//Change views or update the view
+	   	if (fixAnchor !=1){
 		    if (bounds == 0){		    
 		    	this.interpAmount = Math.abs(mouseAngle -currentAngle)/(nextAngle-currentAngle);		    	
 		    }else if (bounds == 1) { //At current	
 		    	moveBackward();			    				   
 		    }else{ //At next	    	
 		    	moveForward();		    	
-		    }   
+		   } 
+	    }
 		    //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView+" "+this.interpAmount);	       
-		    
+	   	   
 		    animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);
 		    this.drawNodeHintPaths(-1);
 		    n.animateAnchor(mouseAngle-parent.HALF_PI,fixAnchor);		   

@@ -203,7 +203,10 @@ public class Node {
           float y1 = (float) (this.y + RADIUS/2*Math.sin(mouseAngle));     
           
           if (fixAnchor==1){
-        	  parent.line(x1, y1, x1, parent.mouseY);
+        	  float dist = parent.dist(x1, y1, parent.mouseX, parent.mouseY);
+        	  float x2 = (float) (this.x + dist*Math.cos(mouseAngle));
+              float y2 = (float) (this.y + dist*Math.sin(mouseAngle));              
+        	  parent.line(x1, y1, x2, y2);
           }else{
         	  parent.line(x1, y1, parent.mouseX, parent.mouseY);
           }    	  
@@ -218,7 +221,8 @@ public class Node {
     	  float angleOffset = parent.HALF_PI + this.hintSegmentAngle/2;
     	  float x1,y1,x2,y2,weight; //For drawing the ticks in middle of segments    	 
     	  
-    	  for (int i=0;i<this.numTimeSlices;i++){ 
+    	  //Alternative Design: Split the node segments in half and make these the years
+    	  /**for (int i=0;i<this.numTimeSlices;i++){ 
     		  //For now, just drawing the original degree amount when node is present, not aggregating it    		 
     		  if (persistence.get(i)==0){
     			  parent.stroke(189, 189, 189,255);
@@ -252,11 +256,46 @@ public class Node {
               }else{
             	  parent.stroke(25,25,25,255); //background colour
             	  parent.strokeWeight(1);
-              }
-        	  
-        	  
+              }        	  
         	  parent.line(x1, y1, x2, y2);
-    	  }     	
+    	  } */ 
+    	  
+    	  for (int i=0;i<this.numTimeSlices;i++){ 
+    		  //For now, just drawing the original degree amount when node is present, not aggregating it    		 
+    		  if (persistence.get(i)==0){
+    			  parent.stroke(189, 189, 189,255);
+    			  parent.strokeWeight(MIN_WEIGHT);
+    			  weight = MIN_WEIGHT;
+    		  }else{    			  
+    			  parent.stroke(67,162,202,255); 
+    			  weight = MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT);
+    			  parent.strokeWeight(weight);
+    		  }      		  
+        	  
+        	  parent.strokeCap(parent.SQUARE);        	 
+        	  parent.noFill();
+        	  //Offset by half pi so that beginning of time lies on top of the node (like a clock layout)
+        	  parent.arc(this.x, this.y, RADIUS+weight, RADIUS+weight,this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI);         	
+        	
+        	  //Draw the ticks along the segments
+        	  x1 = (float) (this.x + RADIUS/2*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
+              y1 = (float) (this.y + RADIUS/2*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
+              
+              x2 = (float) (this.x + (RADIUS/2+weight)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
+              y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));               
+     
+              if (i==view){ //Pink indicator showing current year
+            	  parent.stroke(206,18,86,255);
+            	  parent.strokeWeight(3);
+              }else if (persistence.get(i)==0){
+    			  parent.stroke(134, 134, 134,255);
+    			  parent.strokeWeight(2.5f);
+    		  }else{    			  
+    			  parent.stroke(0,128,183,255);
+    			  parent.strokeWeight(2.5f);
+    		  }               
+        	  parent.line(x1, y1, x2, y2);
+    	  }    	  
       }
       
       /**Animates a node by interpolating its position between two time slices
