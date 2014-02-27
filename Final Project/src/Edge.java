@@ -352,9 +352,16 @@ public class Edge {
     	 parent.strokeCap(parent.ROUND);
    	     parent.stroke(206,18,86,255);
    	     parent.strokeWeight(7);
-        Coordinate endC = this.hintCoords.get(this.numTimeSlices-1);       	
-        ArrayList<Coordinate> coords = findPerpendicularLine(newX,newY,endC.x,endC.y,6.0f);                   
-        parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);   
+         Coordinate endC = this.hintCoords.get(this.numTimeSlices-1);        
+         ArrayList<Coordinate> coords = findPerpendicularLine(newX,newY,endC.x,endC.y,6.0f);
+         
+         if (coords==null){ //At the last path segment
+        	 endC = this.hintCoords.get(this.numTimeSlices);        
+        	 coords = findPerpendicularLine(newX,newY,endC.x,endC.y,6.0f);     
+        	 System.out.println("badd");
+         }
+         
+         parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);        
     }
    /**Finds the unit vector perpendicular to a line defined by the given points.
     * Unit vector can be multiplied by a factor to increase it's length
@@ -370,6 +377,9 @@ public class Edge {
 	   float dx = x1-x2;
        float dy = y1-y2;
        float dist = (float) Math.sqrt(dx*dx + dy*dy);
+       
+       if (dist==0) return null; //Avoid divide by zero
+
         dx = dx/dist;
         dy = dy/dist;
         lineCoords.add(new Coordinate(x1 + weight*dy, y1 - weight*dx));

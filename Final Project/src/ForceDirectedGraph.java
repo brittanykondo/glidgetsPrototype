@@ -185,7 +185,7 @@ public class ForceDirectedGraph {
              newPoint= new Coordinate (minDist[0],minDist[1]);             
              this.interpAmount = t;              
          }
-         System.out.println(newPoint.x+" "+newPoint.y);
+         System.out.println(this.currentView+" "+this.nextView);
          this.animateGraph(this.currentView, this.nextView, this.interpAmount, new int []{this.draggingEdge.node1,this.draggingEdge.node2}, this.pinnedView); 
          this.drawEdgeHintPaths();
          this.draggingEdge.animateAnchor(newPoint.x,newPoint.y);        
