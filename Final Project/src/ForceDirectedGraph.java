@@ -98,7 +98,7 @@ public class ForceDirectedGraph {
 	    	 //this.drawEdgeHintPaths();	
 			 renderEdges(view);
 			 renderNodes(view);	
-			 this.drawEdgeHintPaths();
+			 this.drawEdgeHintPaths(this.drawingView);
 		 }else if (this.selectedNode != -1){ //Case 2: draw node hint paths			 
 			 renderEdges(view);				
 			 drawNodeHintPaths(view);
@@ -187,7 +187,7 @@ public class ForceDirectedGraph {
          }
          System.out.println(this.currentView+" "+this.nextView);
          this.animateGraph(this.currentView, this.nextView, this.interpAmount, new int []{this.draggingEdge.node1,this.draggingEdge.node2}, this.pinnedView); 
-         this.drawEdgeHintPaths();
+         this.drawEdgeHintPaths(-1);
          this.draggingEdge.animateAnchor(newPoint.x,newPoint.y);        
          this.keepDisappearingNodes(1);    	 
      }
@@ -620,9 +620,9 @@ public class ForceDirectedGraph {
     	 }   	  	
      }
      /**Draws hint paths for all selected edge(s) */
-     public void drawEdgeHintPaths(){    	 
+     public void drawEdgeHintPaths(int view){    	 
     	 for (int i=0;i<this.aggregatedEdges.size();i++){
-    		 this.aggregatedEdges.get(i).drawHintPath(this.nodes, this.aggregatedPersistence);
+    		 this.aggregatedEdges.get(i).drawHintPath(this.nodes, this.aggregatedPersistence,view);
     	 }
      }
      /** Finds an edge in an ArrayList of edges

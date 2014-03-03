@@ -258,8 +258,9 @@ public class Edge {
       /** Visualizes the edge persistence across all time slices to guide interaction
        *  @param nodes an array of all nodes in the graph    
        *  @param persistence an array of persistence values (if null, then set it to this object's persistence)
+       *  @param view the current (drawing) view
        * */
-      void drawHintPath(ArrayList <Node> nodes,ArrayList<Integer>persistence){
+      void drawHintPath(ArrayList <Node> nodes,ArrayList<Integer>persistence,int view){
     	  this.hintCoords.clear();
     	  
     	  if (persistence == null)
@@ -318,17 +319,23 @@ public class Edge {
     	  Coordinate startArrow,endArrow;
     	 
     	  //Draw the first arrow at beginning of the path (might not be necessary..)
-    	  /**startArrow = new Coordinate(n1.x,n1.y); 
+    	  startArrow = new Coordinate(n1.x,n1.y); 
 		  endArrow = this.hintCoords.get(0);         
 		  
 		  if (persistence.get(0)==0){
-			  parent.stroke(189, 189, 189,255);			  
+			  parent.stroke(189, 189, 189,255);
+			  if (view==0){
+				  parent.stroke(206,18,86,255);
+			  }
 		      this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
 		  }else{
 			  parent.stroke(67,162,202,255); 
+			  if (view==0){
+				  parent.stroke(206,18,86,255);
+			  }
 			  this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
 			  
-		  }*/
+		  }
 		  
     	  //Draw hint path: Dotted line      	 
     	  for (int i=0;i<this.numTimeSlices-1;i++){      		 
@@ -339,11 +346,17 @@ public class Edge {
     			  parent.stroke(189, 189, 189,255);
     			  parent.strokeWeight(4);
     			  drawDottedLine(startArrow.x,startArrow.y,endArrow.x,endArrow.y); 
+    			  if (view==(i+1)){
+    				  parent.stroke(206,18,86,255);
+    			  }
     			  this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
     		  }else{    			 
     			  parent.stroke(67,162,202,255); 
     			  parent.strokeWeight(4);
     			  parent.line(startArrow.x,startArrow.y,endArrow.x,endArrow.y); 
+    			  if (view==(i+1)){
+    				  parent.stroke(206,18,86,255);
+    			  }
     			  this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
     		  }       		 
     	  }   	 
