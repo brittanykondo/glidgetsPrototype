@@ -52,10 +52,14 @@ public class Node {
       
       /**Renders the node at its position at a certain moment in time
        * */
-      void display(int view){       	
-    	  if (this.coords.get(view)!=null){
-    		  drawNode(this.coords.get(view).x, this.coords.get(view).y,255);    		  
-    	  }    	  	  
+      void display(int view,boolean showDisappeared){ 
+    	  if (showDisappeared){
+    		  drawNode(this.x, this.y,255);    	
+    	  }else{
+    		  if (this.coords.get(view)!=null){
+        		  drawNode(this.x, this.y,255);    		  
+        	  } 
+    	  }    	    	  	  
       }
       /**Finds and saved the degree (number of edges incident on the node) of the node
        * for each time slice
@@ -153,19 +157,24 @@ public class Node {
      
       /** Visualizes the overall node persistence (how often is it displayed?) 
        *  at a certain time slice
+       *  @param the current view to draw at
+       *  @param showAllHighlights true, if all node persistence highlights should be drawn
        * */ 
-      void drawGlobalPersistenceHighlights(int view){
-    	  if (this.coords.get(view)==null) return;
-    	  parent.strokeCap(parent.SQUARE);        	 
-    	  parent.noFill();
-    	  parent.stroke(67,162,202,255);
-		  parent.strokeWeight(MIN_WEIGHT);
-    	  for (int i=0;i<this.numTimeSlices;i++){     		   		 
-    		  if (this.coords.get(i)!=null){    			  
-            	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT,this.hintAngles.get(i).x-parent.HALF_PI, 
-            			  this.hintAngles.get(i).y-parent.HALF_PI);       			      			  
-    		  }       	  	
-    	  }      	  
+      void drawGlobalPersistenceHighlights(int view,boolean showAllHighlights){
+    	  
+    	  if (showAllHighlights || this.coords.get(view)!=null){
+    		  parent.strokeCap(parent.SQUARE);        	 
+        	  parent.noFill();
+        	  parent.stroke(67,162,202,255);
+    		  parent.strokeWeight(MIN_WEIGHT);
+        	  for (int i=0;i<this.numTimeSlices;i++){     		   		 
+        		  if (this.coords.get(i)!=null){    			  
+                	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT,this.hintAngles.get(i).x-parent.HALF_PI, 
+                			  this.hintAngles.get(i).y-parent.HALF_PI);       			      			  
+        		  }       	  	
+        	  }
+    	  }
+    	        	  
       }     
       /**Checks to see if the mouse event is in the node's circular area
        * @param view  the current view       

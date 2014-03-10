@@ -32,58 +32,67 @@ public class Edge {
       /**Draws an edge at a certain moment in time
        * @param nodes indexed list of all nodes in the graph
        * @param view the current time slice to draw
+       * @param showDisappeared true if edges not in the current view should be drawn
        * */
-      void display(ArrayList<Node> nodes, int view){   	     	 
+      void display(ArrayList<Node> nodes, int view,boolean showDisappeared){   	     	 
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
-    	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){ //Safety Check
-    		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1.5f);
-    	  }
+    	  if (showDisappeared){
+    		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1.5f);
+    	  }else{
+    		  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){ //Safety Check
+        		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1.5f);
+        	  }
+    	  }    	  
       } 
       /** Adds highlights to the edges to show global persistence
+       *  @param nodes all nodes in the network
+       *  @param view  the view to show the highlights for
+       *  @param showAllHighlights true if all highlights for every edge should be drawn  
        *  */      
-      void drawGlobalPersistenceHighlights(ArrayList<Node>nodes,int view){
-    	  if (this.persistence.get(view)==0) return;
+      void drawGlobalPersistenceHighlights(ArrayList<Node>nodes,int view,boolean showAllHighlights){
+    	  if (showAllHighlights || this.persistence.get(view)!=0) {    	  
+	          this.hintCoords.clear();    	  
+	    	  Node n1 = nodes.get(this.node1);
+	    	  Node n2 = nodes.get(this.node2);     	  
+	    	 
+	    	  Coordinate start = pointOnLine(n2.x,n2.y,n1.x,n1.y,-NODE_RADIUS/2);
+	    	  Coordinate end = pointOnLine(n1.x,n1.y,n2.x,n2.y,-NODE_RADIUS/2);
+	    	  
+	    	  //Want the first time slice on the hint path to be the node thats closest to the left side of the screen
+	    	  //(this corresponds to the layout of the time slider)
+	    	  if (start.x > end.x){ //Swap them
+	    		  Coordinate temp = start;
+	    		  start = end;
+	    		  end = temp;    		  
+	    	  }
+	    	  
+	    	  float interval = (float)1/(this.numTimeSlices);    	      	  
+	    	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;         
+	    	     	  	 
+	    	  parent.strokeCap(parent.SQUARE);   
+	    	  
+	    	  //Calculate the hint path coordinates
+	    	  for (int i=0;i<this.numTimeSlices;i++){   
+	    		  //System.out.println(persistence.get(i)+" "+i);
+	    		  interpX = (end.x - start.x)*interpolation + start.x;
+	    		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x));             
+	    		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path   		  
+	    		  interpolation +=interval;
+	    		  prevX = interpX;
+	    		  prevY = interpY;    		 
+	    	  }	    	 
+	    	  this.hintCoords.add(new Coordinate(end.x,end.y));   	
+	    	  parent.strokeWeight(5);
+	    	  parent.stroke(67,162,202,150);
+	    	        	 
+	    	  for (int i=0;i<this.numTimeSlices;i++){     		         		  
+	    		  if (persistence.get(i)==1){
+	    			  parent.line(this.hintCoords.get(i).x,this.hintCoords.get(i).y,this.hintCoords.get(i+1).x,this.hintCoords.get(i+1).y);    			      			
+	    		  }       		 
+	    	  }   
     	  
-          this.hintCoords.clear();    	  
-    	  Node n1 = nodes.get(this.node1);
-    	  Node n2 = nodes.get(this.node2);     	  
-    	 
-    	  Coordinate start = pointOnLine(n2.x,n2.y,n1.x,n1.y,-NODE_RADIUS/2);
-    	  Coordinate end = pointOnLine(n1.x,n1.y,n2.x,n2.y,-NODE_RADIUS/2);
-    	  
-    	  //Want the first time slice on the hint path to be the node thats closest to the left side of the screen
-    	  //(this corresponds to the layout of the time slider)
-    	  if (start.x > end.x){ //Swap them
-    		  Coordinate temp = start;
-    		  start = end;
-    		  end = temp;    		  
     	  }
-    	  
-    	  float interval = (float)1/(this.numTimeSlices);    	      	  
-    	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;         
-    	     	  	 
-    	  parent.strokeCap(parent.SQUARE);   
-    	  
-    	  //Calculate the hint path coordinates
-    	  for (int i=0;i<this.numTimeSlices;i++){   
-    		  //System.out.println(persistence.get(i)+" "+i);
-    		  interpX = (end.x - start.x)*interpolation + start.x;
-    		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x));             
-    		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path   		  
-    		  interpolation +=interval;
-    		  prevX = interpX;
-    		  prevY = interpY;    		 
-    	  }	    	 
-    	  this.hintCoords.add(new Coordinate(end.x,end.y));   	
-    	  parent.strokeWeight(5);
-    	  parent.stroke(67,162,202,150);
-    	        	 
-    	  for (int i=0;i<this.numTimeSlices;i++){     		         		  
-    		  if (persistence.get(i)==1){
-    			  parent.line(this.hintCoords.get(i).x,this.hintCoords.get(i).y,this.hintCoords.get(i+1).x,this.hintCoords.get(i+1).y);    			      			
-    		  }       		 
-    	  }     	  
       }
       
       /** Visualizes the overall edge persistence (how often is it displayed?) 

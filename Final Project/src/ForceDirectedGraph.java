@@ -384,7 +384,7 @@ public class ForceDirectedGraph {
       * */
      public void renderNodes(int view){    	
 		 for (int i = 0;i<this.nodes.size();i++)
-			 this.nodes.get(i).display(view); 
+			 this.nodes.get(i).display(view,false); 
      }
      
      /**Draws all the edges on the screen for the specified view
@@ -392,7 +392,7 @@ public class ForceDirectedGraph {
       * */
      public void renderEdges(int view){
     	 for (int row = 0;row<this.edges.size();row++)
-			 this.edges.get(row).display(this.nodes,view); 
+			 this.edges.get(row).display(this.nodes,view,false); 
      }
      /**Handles the mouse down listener for all nodes in the graph.
       * For now, only one node can be clicked at the same time
@@ -678,16 +678,31 @@ public class ForceDirectedGraph {
   		      this.nodes.get(i).animate(start, end, interpolation);	
   	     }         	
      }     
-     /** Calls functions for showing global persistence values for each edge and node
+     /** Calls functions for showing global persistence values for each node and edge
       * */
-     public void drawLocalPersistence(int view){
-    	 for (int i = 0;i<this.nodes.size();i++){
-    		   this.nodes.get(i).drawGlobalPersistenceHighlights(view); 	
-    	  }
+     public void showLocalPersistence(int view){
     	 for (int i = 0;i<this.edges.size();i++){
-  		      this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,view);  	
-  	     }
-     }
+    		  this.edges.get(i).display(this.nodes,view,false);
+		      this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,view,false);  	
+	     }
+    	 
+    	 for (int i = 0;i<this.nodes.size();i++){
+    		   this.nodes.get(i).drawGlobalPersistenceHighlights(view,false);
+    		   this.nodes.get(i).display(view,false); 
+    	  }     	 
+     }  
+     /** Calls functions for showing global persistence values for EVERY node and edge (slider disabled)
+      * */
+     public void showGlobalPersistence(){
+    	 for (int i = 0;i<this.edges.size();i++){
+   		      this.edges.get(i).display(this.nodes,-1,true);
+		      this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,-1,true);  	
+	     }   	 
+	   	 for (int i = 0;i<this.nodes.size();i++){
+	   		   this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true);
+	   		   this.nodes.get(i).display(-1,true); 
+	   	  }     				 
+     } 
      /**Reads the text file containing the node positions and edges for each time slice
       * */
      public void readGraphDataFile(String filename){    	 
@@ -698,7 +713,7 @@ public class ForceDirectedGraph {
        	  Edge newEdge;
        	  int foundEdge;
        	  float nodeX=0.0f, nodeY=0.0f;
-       	  
+       	  Node newNode;
        	  this.nodes = new ArrayList<Node>();
        	  this.edges = new ArrayList <Edge>	();
        	  
@@ -711,11 +726,14 @@ public class ForceDirectedGraph {
 			line = scan.nextLine();
 			String[] items = line.split(" ");
 			if (items[0].equals("node")){ //Save the node
-				nodeId = Integer.parseInt(items[1]);       					
-				this.nodes.add(new Node(this.parent,nodeId,items[1],this.numTimeSlices));
+				nodeId = Integer.parseInt(items[1]);  
+				newNode = new Node(this.parent,nodeId,items[1],this.numTimeSlices);				
 				//When the node positions are fixed....
 				nodeX = Float.parseFloat(items[2]);
 				nodeY = Float.parseFloat(items[3]);
+				newNode.x = nodeX;
+				newNode.y = nodeY;
+				this.nodes.add(newNode);
 			}else if (items[0].equals("time")){ //Save the time slice
 				nodesDone = true;    
 				time = Integer.parseInt(items[1]);       				
