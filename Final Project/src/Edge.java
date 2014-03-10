@@ -40,12 +40,57 @@ public class Edge {
     		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1.5f);
     	  }
       } 
+      /** Adds highlights to the edges to show global persistence
+       *  */      
+      void drawGlobalPersistenceHighlights(ArrayList<Node>nodes,int view){
+    	  if (this.persistence.get(view)==0) return;
+    	  
+          this.hintCoords.clear();    	  
+    	  Node n1 = nodes.get(this.node1);
+    	  Node n2 = nodes.get(this.node2);     	  
+    	 
+    	  Coordinate start = pointOnLine(n2.x,n2.y,n1.x,n1.y,-NODE_RADIUS/2);
+    	  Coordinate end = pointOnLine(n1.x,n1.y,n2.x,n2.y,-NODE_RADIUS/2);
+    	  
+    	  //Want the first time slice on the hint path to be the node thats closest to the left side of the screen
+    	  //(this corresponds to the layout of the time slider)
+    	  if (start.x > end.x){ //Swap them
+    		  Coordinate temp = start;
+    		  start = end;
+    		  end = temp;    		  
+    	  }
+    	  
+    	  float interval = (float)1/(this.numTimeSlices);    	      	  
+    	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;         
+    	     	  	 
+    	  parent.strokeCap(parent.SQUARE);   
+    	  
+    	  //Calculate the hint path coordinates
+    	  for (int i=0;i<this.numTimeSlices;i++){   
+    		  //System.out.println(persistence.get(i)+" "+i);
+    		  interpX = (end.x - start.x)*interpolation + start.x;
+    		  interpY = start.y +(end.y-start.y)*((interpX-start.x)/(end.x-start.x));             
+    		  this.hintCoords.add(new Coordinate(interpX,interpY)); //Save the coordinates along the hint path   		  
+    		  interpolation +=interval;
+    		  prevX = interpX;
+    		  prevY = interpY;    		 
+    	  }	    	 
+    	  this.hintCoords.add(new Coordinate(end.x,end.y));   	
+    	  parent.strokeWeight(5);
+    	  parent.stroke(67,162,202,150);
+    	        	 
+    	  for (int i=0;i<this.numTimeSlices;i++){     		         		  
+    		  if (persistence.get(i)==1){
+    			  parent.line(this.hintCoords.get(i).x,this.hintCoords.get(i).y,this.hintCoords.get(i+1).x,this.hintCoords.get(i+1).y);    			      			
+    		  }       		 
+    	  }     	  
+      }
+      
       /** Visualizes the overall edge persistence (how often is it displayed?) 
        *  at a certain time slice
        *  @param nodes all nodes in the graph
        *  @param view  the view to draw the edges at
-       * */
-      //TODO: what about edges that are not in the current view?
+       *      
       void displayGlobalPersistence(ArrayList<Node> nodes,int view){   
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
@@ -57,8 +102,7 @@ public class Edge {
     	  }     	  
       }
       /** Adds highlights to the edges to show global persistence
-       * */  
-      //TODO: experiment with different designs
+       *        
       void drawGlobalPersistenceHighlights(Coordinate c1, Coordinate c2){
     	 
     	  //Barchart gylphs along edges:
@@ -84,9 +128,9 @@ public class Edge {
     	  parent.stroke(67,162,202,150);  
     	  parent.strokeWeight(7*this.globalPersistence); 
     	  parent.line(end.x, end.y, endPoint1.x, endPoint1.y);
-    	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);  */
-    	  
-      }
+    	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);      	  
+      }*/
+      
       /** Calculates the distance between two points
        * (x1,y1) is the first point
        * (x2,y2) is the second point
@@ -240,20 +284,7 @@ public class Edge {
     		  i++;
     		  prevX = interpX;
     		  prevY = interpY; 
-    	  }
-    	 /** for (int i=0;i<numSegments;i++){
-    		  
-    		  interpX = (endX - startX)*interpolation + startX;
-    		  interpY = startY +(endY-startY)*((interpX-startX)/(endX-startX)); 
-    		  if (i%2==0){     			  
-    			  parent.line(prevX,prevY,interpX,interpY);
-    			  System.out.println(parent.dist(prevX, prevY, interpX, interpY));
-    		  }   		  
-    		  
-    		  interpolation +=interval;
-    		  prevX = interpX;
-    		  prevY = interpY; 
-    	  }*/
+    	  }    	 
       }
       /** Visualizes the edge persistence across all time slices to guide interaction
        *  @param nodes an array of all nodes in the graph    
@@ -286,9 +317,7 @@ public class Edge {
     	  }
     	  
     	  float interval = (float)1/(this.numTimeSlices);    	      	  
-    	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;          	
-         
-    	     	  	 
+    	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;     	     	  	 
     	  parent.strokeCap(parent.SQUARE);   
     	  
     	  //Calculate the hint path coordinates

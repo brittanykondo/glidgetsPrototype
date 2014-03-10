@@ -125,18 +125,9 @@ public class Node {
 	   	 
     	  this.x = x;
 	   	  this.y = y;
-      }
-      /** Visualizes the overall node persistence (how often is it displayed?) 
-       *  at a certain time slice
-       * */     
-      void displayGlobalPersistence(int view){    	  
-    	  if (this.coords.get(view)!=null){
-    		  this.globalPersistence = calculateGlobalPersistence();  
-    		  drawGlobalPersistenceHighlights();    		     
-    	  }     	  
-      }
+      }    
       /** Adds highlights to the nodes to show global persistence
-       * */       
+       *     
       void drawGlobalPersistenceHighlights(){
     	  //Piechart Glyph:
     	  //parent.stroke(206,18,86,170);   
@@ -147,19 +138,35 @@ public class Node {
     	  float startAngle = 0;
     	  float endAngle = parent.TWO_PI*this.globalPersistence;
     	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT, startAngle-parent.HALF_PI, endAngle-parent.HALF_PI);        	  
-      }
+      }*/
       /**Calculates the overall persistence: 
        * (number of time slices - number of disappearances)/number of time slices
        * @return the global persistence measure (as probability)
-       * */
+       * 
       float calculateGlobalPersistence(){    	  
     	  int disappearanceCount = 0;
     	  for (int i=0;i<this.coords.size();i++){
     		  if (this.coords.get(i)==null) disappearanceCount++;
     	  }    	 
     	  return (float)(this.numTimeSlices - disappearanceCount)/this.numTimeSlices;
-      }
-      
+      }*/
+     
+      /** Visualizes the overall node persistence (how often is it displayed?) 
+       *  at a certain time slice
+       * */ 
+      void drawGlobalPersistenceHighlights(int view){
+    	  if (this.coords.get(view)==null) return;
+    	  parent.strokeCap(parent.SQUARE);        	 
+    	  parent.noFill();
+    	  parent.stroke(67,162,202,255);
+		  parent.strokeWeight(MIN_WEIGHT);
+    	  for (int i=0;i<this.numTimeSlices;i++){     		   		 
+    		  if (this.coords.get(i)!=null){    			  
+            	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT,this.hintAngles.get(i).x-parent.HALF_PI, 
+            			  this.hintAngles.get(i).y-parent.HALF_PI);       			      			  
+    		  }       	  	
+    	  }      	  
+      }     
       /**Checks to see if the mouse event is in the node's circular area
        * @param view  the current view       
        * @return [index of the selected, type of selection (2 is drawing around, 1 is clicking)], -1 otherwise
@@ -186,9 +193,7 @@ public class Node {
     		  return this.id;   		  
     	  }    	 
     	  return -1;
-      }
-     
-      
+      }      
       /**Draws the anchor as an elastic attached to the mouse when it is dragging around a node
        * @param mouseAngle the angle of the mouse w.r.t to the center of the node
        * @param fixAnchor, if 1, anchor should only extend vertically (staying at a fixed angle)

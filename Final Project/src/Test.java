@@ -5,23 +5,24 @@ import processing.core.*;
 public class Test extends PApplet {   	
     public Slider timeSlider;
     public ForceDirectedGraph graph;   
-    public int toggleGlobalPersistence;  
+    public int toggleLocalPersistence;  
     public boolean slowDown;
     public float t;
     public int start, end;
     
 /**Initialize the view, draw the visualization */
 public void setup() {
-    size(1100,650);    
-    //The screen size: size(displayWidth,displayHeight);
+    //size(1100,650);
+	size(displayWidth,displayHeight);
+    //The screen size: size(displayWidth,displayHeight);   
     //GraphManager g = new GraphManager(this,false);  //Creates the graph layout using JUNG library
-    this.graph = new ForceDirectedGraph(this,"savedGraphData6.txt",6);    
+    this.graph = new ForceDirectedGraph(this,"savedGraphData7.txt",6);    
     
 	ArrayList <String> testLabels = new ArrayList <String>();
 	for (int i=0;i<this.graph.numTimeSlices;i++){
 		testLabels.add(""+i);
 	}    
-    this.timeSlider = new Slider(this,testLabels,70,10,550);
+    this.timeSlider = new Slider(this,testLabels,70,10,650);
     this.slowDown = false;
     this.t = 0;
     this.start = -1;
@@ -61,8 +62,8 @@ public void setup() {
 	  background(25,25,25);
 	  fill(115,115,115,50); //Panel surrounding the slider and toggle options
 	  noStroke();
-	  rect(60,500,390,140);
-	  drawGlobalButton();
+	  rect(60,600,800,150);
+	  drawLocalButton();
 	  //drawControlInstructions();
   }
   /**Adds a trail to the mouse movement to simulate the appearance of sketching
@@ -81,7 +82,7 @@ public void setup() {
 	  if (!timeSlider.dragging){ //Avoid interference between selecting graph elements and slider tick
 		 graph.selectElement(); //Select elements on the graph	     		    
 	  }	 
-	  toggleGlobalButton();
+	  toggleLocalButton();
   }
   /**Responds to a mouse dragging event (mouse pressed + mouse move ) on the canvas */
   public void mouseDragged(){	  
@@ -114,35 +115,35 @@ public void setup() {
    * (for now, can only toggle when the graph is at a view (not during
    * interaction)
    * */
-  public void drawGlobalButton(){
-	  if (this.toggleGlobalPersistence==1){
-		  this.graph.drawGlobalPersistence(timeSlider.drawingView); //Draw the global highlights on the graph
+  public void drawLocalButton(){
+	  if (this.toggleLocalPersistence==1){
+		  this.graph.drawLocalPersistence(timeSlider.drawingView); //Draw the local highlights for all elements at the current time slice
 		  fill(255);
 		  stroke(255,255,255,100);
 	  }else{
 		  fill(100);
 		  noStroke();
 	  }
-	  ellipse(80,590,10,10);
+	  ellipse(80,690,10,10);
 	  PFont font = createFont("Droid Serif",12,true);
    	  textFont(font);	   	  
    	  fill(255);   	  
    	  textAlign(LEFT);
-   	  text("Toggle Global Persistence", 90,595);	
+   	  text("Toggle Local Persistence", 90,695);	
   }
   /**Checks if the mouse was pressed on this button
    * */
-  public void toggleGlobalButton(){
-	  if (dist(80,590,mouseX,mouseY)<=10 && this.toggleGlobalPersistence==0){    			    		 
-		  this.toggleGlobalPersistence = 1;
+  public void toggleLocalButton(){
+	  if (dist(80,690,mouseX,mouseY)<=10 && this.toggleLocalPersistence==0){    			    		 
+		  this.toggleLocalPersistence = 1;
 		  return;
 	  }  
-	  this.toggleGlobalPersistence = 0;
+	  this.toggleLocalPersistence = 0;
 	  return;	  
   }
   
   static public void main(String args[]) {
-	    PApplet.main("Test");
+	    PApplet.main(new String[] { "--present", "Test" });
 	}
 }
 

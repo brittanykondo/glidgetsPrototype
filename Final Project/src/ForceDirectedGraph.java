@@ -680,12 +680,12 @@ public class ForceDirectedGraph {
      }     
      /** Calls functions for showing global persistence values for each edge and node
       * */
-     public void drawGlobalPersistence(int view){
+     public void drawLocalPersistence(int view){
     	 for (int i = 0;i<this.nodes.size();i++){
-    		   this.nodes.get(i).displayGlobalPersistence(view) ;   	
+    		   this.nodes.get(i).drawGlobalPersistenceHighlights(view); 	
     	  }
     	 for (int i = 0;i<this.edges.size();i++){
-  		      this.edges.get(i).displayGlobalPersistence(this.nodes,view) ;   	
+  		      this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,view);  	
   	     }
      }
      /**Reads the text file containing the node positions and edges for each time slice

@@ -107,7 +107,7 @@ public class GraphManager {
     	 }     	
     	 //Hack here: node 17 does not have any edges (not stored in nodeswithedges array), add it at the very end
     	 this.layout = new FRLayout <Integer,Edge>(this.graph);         
-		 this.layout.setSize(new Dimension(1085,485));
+		 this.layout.setSize(new Dimension(1250,600));
 		 this.layout.setRepulsionMultiplier(0.4);
 		 this.layout.setMaxIterations(1000);
 		 allNodes.add(new Integer(17));
