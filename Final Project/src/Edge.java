@@ -268,7 +268,8 @@ public class Edge {
     	  
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);   
-    	  float bufferSpace = -NODE_RADIUS/2-4;
+    	  float edgeLength = parent.dist(n1.x,n1.y,n2.x,n2.y);
+    	  float bufferSpace = -NODE_RADIUS/2-(0.03f*edgeLength);
     	  Coordinate start = pointOnLine(n2.x,n2.y,n1.x,n1.y,bufferSpace);
     	  Coordinate end = pointOnLine(n1.x,n1.y,n2.x,n2.y,bufferSpace);
     	  
@@ -284,7 +285,7 @@ public class Edge {
     		  n2 = tempNode;
     	  }
     	  
-    	  float interval = (float)1/(this.numTimeSlices-1);    	      	  
+    	  float interval = (float)1/(this.numTimeSlices);    	      	  
     	  float interpX,interpY,interpolation=0,prevX=start.x,prevY=start.y;          	
          
     	     	  	 
@@ -300,7 +301,7 @@ public class Edge {
     		  prevX = interpX;
     		  prevY = interpY;    		 
     	  }	    	 
-    	  this.hintCoords.add(new Coordinate(n2.x,n2.y));
+    	  this.hintCoords.add(new Coordinate(end.x,end.y));
     	  //Draw hint path: Highlight surrounding the edge    	  
     	 /** for (int i=1;i<this.hintCoords.size();i++){     		  
     		  if (persistence.get(i-1)==0){
@@ -317,49 +318,46 @@ public class Edge {
     	  parent.stroke(25,25,25,255);
     	  parent.line(start.x, start.y, end.x, end.y);*/   
     	  Coordinate startArrow,endArrow;
-    	 
-    	  //Draw the first arrow at beginning of the path (might not be necessary..)
-    	  startArrow = new Coordinate(n1.x,n1.y); 
-		  endArrow = this.hintCoords.get(0);         
-		  
-		  if (persistence.get(0)==0){
-			  parent.stroke(189, 189, 189,255);
-			  if (view==0){
-				  parent.stroke(206,18,86,255);
-			  }
-		      this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
-		  }else{
-			  parent.stroke(67,162,202,255); 
-			  if (view==0){
-				  parent.stroke(206,18,86,255);
-			  }
-			  this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
-			  
-		  }
+    	  parent.strokeWeight(3);
 		  
     	  //Draw hint path: Dotted line      	 
-    	  for (int i=0;i<this.numTimeSlices-1;i++){      		 
+    	  for (int i=0;i<this.numTimeSlices;i++){ 
     		startArrow = this.hintCoords.get(i);
-    	    endArrow = this.hintCoords.get(i+1);    		  		 
+      	    endArrow = this.hintCoords.get(i+1);    	   		 		  		 
     		  
     		  if (persistence.get(i)==0){
-    			  parent.stroke(189, 189, 189,255);
-    			  parent.strokeWeight(4);
-    			  drawDottedLine(startArrow.x,startArrow.y,endArrow.x,endArrow.y); 
+    			  parent.stroke(189, 189, 189,255);    			  
+    			  drawDottedLine(startArrow.x,startArrow.y,endArrow.x,endArrow.y);     			
+    		  }else{    			 
+    			  parent.stroke(67,162,202,255);     			 
+    			  parent.line(startArrow.x,startArrow.y,endArrow.x,endArrow.y);     			 
+    		  }       		 
+    	  }   
+    	  
+    	  //Draw arrows along the path     	 
+    	  for (int i=0;i<this.numTimeSlices;i++){ 
+    		  if (i==0){
+    			  startArrow = new Coordinate(n1.x,n1.y); 
+        		  endArrow = this.hintCoords.get(i); 
+    		  }else{
+    			  startArrow = this.hintCoords.get(i-1);
+    	    	  endArrow = this.hintCoords.get(i);   
+    		  }     				  		 
+    		  
+    		  if (persistence.get(i)==0){
+    			  parent.stroke(189, 189, 189,255);    			     			  
     			  if (view==(i+1)){
     				  parent.stroke(206,18,86,255);
     			  }
     			  this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
     		  }else{    			 
-    			  parent.stroke(67,162,202,255); 
-    			  parent.strokeWeight(4);
-    			  parent.line(startArrow.x,startArrow.y,endArrow.x,endArrow.y); 
+    			  parent.stroke(67,162,202,255);     			  			 
     			  if (view==(i+1)){
     				  parent.stroke(206,18,86,255);
     			  }
     			  this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
     		  }       		 
-    	  }   	 
+    	  }
       }
       
     /**Finds the point on a line defined by x1-y1 and x2-y2 that is distance
@@ -394,8 +392,7 @@ public class Edge {
          
          if (coords==null){ //At the last path segment
         	 endC = this.hintCoords.get(this.numTimeSlices);        
-        	 coords = findPerpendicularLine(newX,newY,endC.x,endC.y,6.0f);     
-        	 System.out.println("badd");
+        	 coords = findPerpendicularLine(newX,newY,endC.x,endC.y,6.0f);             	
          }
          
          parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);        
@@ -408,7 +405,7 @@ public class Edge {
     void drawArrow(float x1,float y1, float x2, float y2) {   
     	  float lineLength = 6;
     	  parent.pushMatrix();
-    	  parent.strokeWeight(2);
+    	  //parent.strokeWeight(2);
     	  //parent.strokeJoin(parent.ROUND);
     	  parent.translate(x2, y2);
     	  float a = parent.atan2(x1-x2, y2-y1);
