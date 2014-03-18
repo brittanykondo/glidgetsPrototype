@@ -384,13 +384,13 @@ public class Edge {
     		  
     		  if (persistence.get(i)==0){
     			  parent.stroke(189, 189, 189,255);    			     			  
-    			  if (view==(i+1)){
+    			  if (view==(i)){
     				  parent.stroke(206,18,86,255);
     			  }
     			  this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
     		  }else{    			 
     			  parent.stroke(67,162,202,255);     			  			 
-    			  if (view==(i+1)){
+    			  if (view==(i)){
     				  parent.stroke(206,18,86,255);
     			  }
     			  this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);

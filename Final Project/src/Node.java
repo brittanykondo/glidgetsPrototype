@@ -234,7 +234,7 @@ public class Node {
     	  // parent.strokeWeight(5);
     	  float angleOffset = parent.HALF_PI + this.hintSegmentAngle/2;
     	  float x1,y1,x2,y2,weight; //For drawing the ticks in middle of segments    	 
-    	  
+    	  float nodeStrokeWeight=0;
     	  //Alternative Design: Split the node segments in half and make these the years
     	  /**for (int i=0;i<this.numTimeSlices;i++){ 
     		  //For now, just drawing the original degree amount when node is present, not aggregating it    		 
@@ -277,9 +277,9 @@ public class Node {
     	  for (int i=0;i<this.numTimeSlices;i++){ 
     		  //For now, just drawing the original degree amount when node is present, not aggregating it    		 
     		  if (persistence.get(i)==0){
-    			  parent.stroke(189, 189, 189,255);
-    			  parent.strokeWeight(MIN_WEIGHT);
+    			  parent.stroke(189, 189, 189,255);    			 
     			  weight = MIN_WEIGHT;
+    			  parent.strokeWeight(weight);
     		  }else{    			  
     			  parent.stroke(67,162,202,255); 
     			  weight = MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT);
@@ -289,11 +289,12 @@ public class Node {
         	  parent.strokeCap(parent.SQUARE);        	 
         	  parent.noFill();
         	  //Offset by half pi so that beginning of time lies on top of the node (like a clock layout)
-        	  parent.arc(this.x, this.y, RADIUS+weight, RADIUS+weight,this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI);         	
+        	  parent.arc(this.x, this.y, RADIUS+weight+nodeStrokeWeight, RADIUS+weight+nodeStrokeWeight,
+        			  this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI);         	
         	
         	  //Draw the ticks along the segments
-        	  x1 = (float) (this.x + RADIUS/2*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
-              y1 = (float) (this.y + RADIUS/2*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
+        	  x1 = (float) (this.x + (RADIUS/2)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
+              y1 = (float) (this.y + (RADIUS/2)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
               
               x2 = (float) (this.x + (RADIUS/2+weight)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
               y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));               

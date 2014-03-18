@@ -197,7 +197,7 @@ public class ForceDirectedGraph {
       * 1: if dragging along an edge hint path (show label + wireframe outline of node(s))
       * */
      public void keepDisappearingNodes(int type){
-    	 if (type ==0){           	 
+    	 if (type ==0){  
     		 for (int i=0;i<this.aggregatedNodes.size();i++){
     			 PFont font = parent.createFont("Droid Sans",12,true);
     			 parent.textFont(font);	   	  
@@ -337,9 +337,8 @@ public class ForceDirectedGraph {
 		   } 
 	    }
 		    //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView+" "+this.interpAmount);	       
-	   	   
-		    animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);
-		    this.drawNodeHintPaths(-1);
+	        animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);	    
+		    this.drawNodeHintPaths(-1);		   
 		    n.animateAnchor(mouseAngle-parent.HALF_PI,fixAnchor);		   
 		    this.keepDisappearingNodes(0);		    
 		    this.mouseAngle = mouseAngle;
@@ -678,6 +677,40 @@ public class ForceDirectedGraph {
   		      this.nodes.get(i).animate(start, end, interpolation);	
   	     }         	
      }     
+     /**Updates the node's position when the user drags it to a new positon (in drag and
+      * drop mode)
+      * */
+     public void updateNodePosition(float x,float y){
+    
+    	 //First see which node is selected    	 
+    	 int nodeId = -1;
+    	 Node currentNode;
+    	 for (int i = 0;i<this.nodes.size();i++){
+     		currentNode = this.nodes.get(i);   
+     		if (parent.dist(x, y, currentNode.x, currentNode.y)<=(currentNode.RADIUS/2)){
+     			nodeId = currentNode.id;
+     			break;
+     		}            
+     	 }   
+    	 
+    	 if (nodeId==-1) return;
+    	 
+    	 //Then, update the position in array of nodes
+    	 this.nodes.get(nodeId).x = x;
+    	 this.nodes.get(nodeId).y = y;
+    	 Coordinate newCoord = new Coordinate(x,y);
+    	 //TODO: remove the need for an array of all positions (since it is fixed)
+    	 ArrayList<Coordinate> coords = this.nodes.get(nodeId).coords;
+    	 ArrayList<Coordinate> newCoords = new ArrayList<Coordinate>();
+    	 for (int i=0;i<coords.size();i++){
+    		 if (coords.get(i)!=null){
+    			 newCoords.add(newCoord);
+    		 }else{
+    			 newCoords.add(null);
+    		 }
+    	 }
+    	 this.nodes.get(nodeId).coords = newCoords;
+     }
      /** Calls functions for showing global persistence values for each node and edge
       * */
      public void showLocalPersistence(int view){
@@ -703,6 +736,16 @@ public class ForceDirectedGraph {
 	   		   this.nodes.get(i).display(-1,true); 
 	   	  }     				 
      } 
+     /**Draws all elements that ever existed in the network
+      * */
+     public void drawAllElements(){
+    	 for (int i = 0;i<this.edges.size();i++){
+  		      this.edges.get(i).display(this.nodes,-1,true);		       	
+	     }   	 
+	   	 for (int i = 0;i<this.nodes.size();i++){	   		   
+	   		   this.nodes.get(i).display(-1,true); 
+	   	  } 
+     }
      /**Reads the text file containing the node positions and edges for each time slice
       * */
      public void readGraphDataFile(String filename){    	 
