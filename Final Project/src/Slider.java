@@ -11,7 +11,7 @@ public class Slider {
      int spacing; //Between ticks
      float yPos; //Of the slider
      float xPos; //Spacing from edge
-     float dragTickHeight = 20, dragTickWidth=10; //Of the draggable tick
+     float dragTickHeight = 30, dragTickWidth=20; //Of the draggable tick
      float tickHeight, tickWidth; //Of the ticks along the main slider
      int currentView,nextView,drawingView;
      boolean dragging;

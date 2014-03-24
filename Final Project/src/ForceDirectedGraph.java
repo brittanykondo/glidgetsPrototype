@@ -338,7 +338,7 @@ public class ForceDirectedGraph {
 	    }
 		    //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView+" "+this.interpAmount);	       
 	        animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);	    
-		    this.drawNodeHintPaths(-1);		   
+		    this.drawNodeHintPaths(this.drawingView);		   
 		    n.animateAnchor(mouseAngle-parent.HALF_PI,fixAnchor);		   
 		    this.keepDisappearingNodes(0);		    
 		    this.mouseAngle = mouseAngle;

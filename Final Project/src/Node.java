@@ -277,11 +277,17 @@ public class Node {
     	  for (int i=0;i<this.numTimeSlices;i++){ 
     		  //For now, just drawing the original degree amount when node is present, not aggregating it    		 
     		  if (persistence.get(i)==0){
-    			  parent.stroke(189, 189, 189,255);    			 
+    			  parent.stroke(189, 189, 189,255); 
+    			  if (i==view){
+    				  parent.stroke(134, 134, 134,255);
+    			  }
     			  weight = MIN_WEIGHT;
     			  parent.strokeWeight(weight);
     		  }else{    			  
     			  parent.stroke(67,162,202,255); 
+    			  if (i==view){
+    				  parent.stroke(0,128,183,255);
+    			  }
     			  weight = MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT);
     			  parent.strokeWeight(weight);
     		  }      		  
@@ -299,7 +305,7 @@ public class Node {
               x2 = (float) (this.x + (RADIUS/2+weight)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
               y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));               
      
-              if (i==view){ //Pink indicator showing current year
+             /** if (i==view){ //Pink indicator showing current year
             	  parent.stroke(206,18,86,255);
             	  parent.strokeWeight(3);
               }else if (persistence.get(i)==0){
@@ -309,7 +315,8 @@ public class Node {
     			  parent.stroke(0,128,183,255);
     			  parent.strokeWeight(2.5f);
     		  }               
-        	  parent.line(x1, y1, x2, y2);
+        	  parent.line(x1, y1, x2, y2);*/      
+              
     	  }    	  
       }
       

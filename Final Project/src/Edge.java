@@ -229,7 +229,8 @@ public class Edge {
       void drawEdge(float x0, float y0, float x1, float y1,int interp,float weight){
     	  //int alpha = (int)(interp*100); //Scale down the transparency    	  
     	  parent.strokeWeight(weight);    	
-    	  parent.stroke(253, 224, 221,interp); 
+    	  //parent.stroke(253, 224, 221,interp); 
+    	  parent.stroke(200, 200, 200,interp); 
 		  parent.line(x0, y0,x1,y1);		  
       }
       /** Function to compute the transparency of a node fading in
