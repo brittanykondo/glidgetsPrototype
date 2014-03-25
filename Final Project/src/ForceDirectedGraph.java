@@ -261,12 +261,12 @@ public class ForceDirectedGraph {
      public void keepDisappearingNodes(int type){
     	 if (type ==0){  
     		 for (int i=0;i<this.aggregatedNodes.size();i++){
+    			 Node n = this.nodes.get(this.aggregatedNodes.get(i));
     			 PFont font = parent.createFont("Droid Sans",12,true);
     			 parent.textFont(font);	   	  
-    			 parent.fill(247,244,249,255);
-    			 parent.textAlign(parent.CENTER);
-    			 int nodeId = this.aggregatedNodes.get(i);
-       	   	  	 parent.text(nodeId, this.nodes.get(nodeId).x, this.nodes.get(nodeId).y +4); 
+    			 parent.fill(n.nodeLabelColour.getRGB());
+    			 parent.textAlign(parent.CENTER);    			 
+       	   	  	 parent.text(n.id, n.x, n.y +4); 
     		 }        	  
     	 }else if (type==1){
     		 ArrayList<Integer> nodes = new ArrayList<Integer>();
@@ -277,13 +277,13 @@ public class ForceDirectedGraph {
     				  Node n = this.nodes.get(currentEdge.node1);
     				 
     				  parent.noFill();
-    		    	  parent.stroke(206,18,86,255);
-    		    	  parent.strokeWeight(3);    		    	  
+    		    	  parent.stroke(n.nodeColour.getRGB());
+    		    	  parent.strokeWeight(2);    		    	  
     		    	  parent.ellipse(n.x,n.y,n.RADIUS,n.RADIUS);  
     		    	  
     		    	  PFont font = parent.createFont("Droid Sans",12,true);
     			   	  parent.textFont(font);	   	  
-    			   	  parent.fill(247,244,249,255);
+    			   	  parent.fill(n.nodeLabelColour.getRGB());
     			   	  parent.textAlign(parent.CENTER);
     			   	  parent.text(n.label, n.x,n.y+4); 
     			 }
@@ -291,13 +291,13 @@ public class ForceDirectedGraph {
 	    		      Node n = this.nodes.get(currentEdge.node2);
 	    		     
 	    		      parent.noFill(); 
-	   		    	  parent.stroke(206,18,86,255);
-	   		    	  parent.strokeWeight(3);    		    	  
+	   		    	  parent.stroke(n.nodeColour.getRGB());
+	   		    	  parent.strokeWeight(2);    		    	  
 	   		    	  parent.ellipse(n.x,n.y,n.RADIUS,n.RADIUS);  
 	   		    	  
 	   		    	  PFont font = parent.createFont("Droid Sans",12,true);
 	   			   	  parent.textFont(font);	   	  
-	   			   	  parent.fill(247,244,249,255);
+	   			   	  parent.fill(n.nodeLabelColour.getRGB());
 	   			   	  parent.textAlign(parent.CENTER);
 	   			   	  parent.text(n.label, n.x,n.y+4); 
     			 }

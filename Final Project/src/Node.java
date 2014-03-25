@@ -25,7 +25,7 @@ public class Node {
       //Class Constants
       static int MIN_WEIGHT = 6;
       static int MAX_WEIGHT = 15;
-      static final float RADIUS = 28;
+      static final float RADIUS = 30;
       
       //Display colours
       static Color presentColour = new Color(67,162,202,255);
@@ -40,6 +40,12 @@ public class Node {
      
      //static Color anchorColour = new Color(43,172,130,255);
      static Color anchorColour = new Color(66, 219, 128, 255).darker();
+     
+    /** static Color nodeColour = new Color(206,18,86,255);
+     static Color nodeLabelColour = new Color(247,244,249,255);*/
+     static Color nodeColour = new Color(255,158,84,255);
+     static Color nodeLabelColour = new Color(0,0,0,255);    
+
       
       /** Constructor for creating a Node
        * @param p Reference to processing applet for drawing with processing commands
@@ -132,15 +138,13 @@ public class Node {
        * */
       void drawNode(float x, float y,int alpha){    	  
     	  
-    	  parent.fill(206,18,86,alpha);
-    	  parent.noStroke();
-    	  /**parent.stroke(206,18,86,alpha);
-    	  parent.strokeWeight(3);*/
+    	  parent.fill(nodeColour.getRed(),nodeColour.getGreen(),nodeColour.getBlue(),alpha);    	  
+    	  parent.noStroke();    	 
     	  parent.ellipse(x,y,RADIUS,RADIUS);  
     	  
     	  PFont font = parent.createFont("Droid Sans",12,true);
 	   	  parent.textFont(font);	   	  
-	   	  parent.fill(247,244,249,alpha);
+	   	  parent.fill(nodeLabelColour.getRed(),nodeLabelColour.getGreen(),nodeLabelColour.getBlue(),alpha);
 	   	  parent.textAlign(parent.CENTER);
 	   	  parent.text(this.label, x,y+4);  	   	  
 	   	 

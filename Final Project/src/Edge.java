@@ -21,6 +21,7 @@ public class Edge {
       static Color absentColour_darker = new Color(134, 134, 134,255);
       static Color yearMarkColour = new Color(50, 200, 150, 255);
       static Color anchorColour = new Color(43,172,130,255);
+      static Color edgeColour = new Color(25, 25, 25,255);
       
       Edge(PApplet p,String l, int n1, int n2, int numTimeSlices){
     	  this.parent = p;
@@ -251,8 +252,8 @@ public class Edge {
        * */
       void drawEdge(float x0, float y0, float x1, float y1,int interp,float weight){
     	  int alpha = (int)(interp*0.5); //Scale down the transparency    	  
-    	  parent.strokeWeight(weight);    	
-    	  parent.stroke(253, 224, 221,alpha); 
+    	  parent.strokeWeight(weight);     	 
+    	  parent.stroke(edgeColour.getRed(), edgeColour.getGreen(), edgeColour.getBlue(),alpha); 
 		  parent.line(x0, y0,x1,y1);		  
       }
       /** Function to compute the transparency of a node fading in
