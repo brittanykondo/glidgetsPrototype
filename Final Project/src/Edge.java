@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
@@ -14,6 +15,12 @@ public class Edge {
       int numTimeSlices;    
       ArrayList <Coordinate> hintCoords; //Stores the coordinates along the hint path
       
+      static Color presentColour = new Color(67,162,202,255);
+      static Color absentColour = new Color(189, 189, 189,255);
+      static Color presentColour_darker = new Color(0,128,183,255);
+      static Color absentColour_darker = new Color(134, 134, 134,255);
+      static Color yearMarkColour = new Color(50, 200, 150, 255);
+      static Color anchorColour = new Color(43,172,130,255);
       
       Edge(PApplet p,String l, int n1, int n2, int numTimeSlices){
     	  this.parent = p;
@@ -34,14 +41,21 @@ public class Edge {
        * @param view the current time slice to draw
        * @param showDisappeared true if edges not in the current view should be drawn
        * */
-      void display(ArrayList<Node> nodes, int view,boolean showDisappeared){   	     	 
+      void display(ArrayList<Node> nodes, int view,boolean showDisappeared,boolean highlight){   	     	 
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  if (showDisappeared){
     		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1.5f);
     	  }else{
     		  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){ //Safety Check
-        		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1.5f);
+    			  if (highlight){
+            		  parent.strokeWeight(2);    	
+                	  parent.stroke(67,162,202,255); 
+            		  parent.line(n1.x,n1.y,n2.x,n2.y);
+            	  }else{
+            		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1.5f);
+            	  }
+        		  
         	  }
     	  }    	  
       } 
@@ -50,7 +64,7 @@ public class Edge {
        *  @param view  the view to show the highlights for
        *  @param showAllHighlights true if all highlights for every edge should be drawn  
        *  */      
-      void drawGlobalPersistenceHighlights(ArrayList<Node>nodes,int view,boolean showAllHighlights){
+      void drawGlobalPersistenceHighlights(ArrayList<Node>nodes,int view,boolean showAllHighlights,float fade){
     	  if (showAllHighlights || this.persistence.get(view)!=0) {    	  
 	          this.hintCoords.clear();    	  
 	    	  Node n1 = nodes.get(this.node1);
@@ -84,17 +98,26 @@ public class Edge {
 	    	  }	    	 
 	    	  this.hintCoords.add(new Coordinate(end.x,end.y));   	
 	    	  parent.strokeWeight(5);
-	    	  parent.stroke(67,162,202,150);
-	    	        	 
+	    	 
+	    	  //Draw the hint path      	 
 	    	  for (int i=0;i<this.numTimeSlices;i++){     		         		  
 	    		  if (persistence.get(i)==1){
-	    			  parent.line(this.hintCoords.get(i).x,this.hintCoords.get(i).y,this.hintCoords.get(i+1).x,this.hintCoords.get(i+1).y);    			      			
+	    			  /**if (i==view){
+	    				  parent.stroke(presentColour.getRed(),presentColour.getBlue(),presentColour.getGreen(),presentColour.getAlpha()*fade);
+	    			  }else{
+	    				  parent.stroke(yearMarkColour.getRed(),yearMarkColour.getBlue(),yearMarkColour.getGreen(),yearMarkColour.getAlpha()*fade));
+	    			  }*/
+	    			  start = this.hintCoords.get(i);
+	    			  end = this.hintCoords.get(i+1);
+	    			  float offsetX = (end.x - start.x)*(0.01f)+ start.x;
+		    		  float offsetY = start.y +(end.y-start.y)*((offsetX-start.x)/(end.x-start.x));   
+	    			  parent.stroke(67,162,202,(255*fade));
+	    			  parent.line(offsetX,offsetY,this.hintCoords.get(i+1).x,this.hintCoords.get(i+1).y);    			      			
 	    		  }       		 
-	    	  }   
-    	  
-    	  }
-      }
-      
+	    	  } 
+	    	  drawEdge(n1.x,n1.y,n2.x,n2.y,(int)(255*fade),1.5f);
+    	  }    	  
+      }      
       /** Visualizes the overall edge persistence (how often is it displayed?) 
        *  at a certain time slice
        *  @param nodes all nodes in the graph
@@ -207,7 +230,7 @@ public class Edge {
             	  parent.stroke(67,162,202,interpolationAmt); 
         		  parent.line(n1.x,n1.y,n2.x,n2.y);
         	  }else{
-        		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1.5f);
+				drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1.5f);
         	  }
 
     	  } else if (startPersistence==1 && endPersistence==0) { //Fading out    		  
@@ -227,10 +250,9 @@ public class Edge {
        *  @param weight the thickness of the stroke
        * */
       void drawEdge(float x0, float y0, float x1, float y1,int interp,float weight){
-    	  //int alpha = (int)(interp*100); //Scale down the transparency    	  
+    	  int alpha = (int)(interp*0.5); //Scale down the transparency    	  
     	  parent.strokeWeight(weight);    	
-    	  //parent.stroke(253, 224, 221,interp); 
-    	  parent.stroke(200, 200, 200,interp); 
+    	  parent.stroke(253, 224, 221,alpha); 
 		  parent.line(x0, y0,x1,y1);		  
       }
       /** Function to compute the transparency of a node fading in
@@ -309,10 +331,10 @@ public class Edge {
     	  
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);   
-    	  float edgeLength = parent.dist(n1.x,n1.y,n2.x,n2.y);
-    	  float bufferSpace = -NODE_RADIUS/2-(0.03f*edgeLength);
-    	  Coordinate start = pointOnLine(n2.x,n2.y,n1.x,n1.y,bufferSpace);
-    	  Coordinate end = pointOnLine(n1.x,n1.y,n2.x,n2.y,bufferSpace);
+    	  //float edgeLength = parent.dist(n1.x,n1.y,n2.x,n2.y);
+    	  //float bufferSpace = -NODE_RADIUS/2-(0.03f*edgeLength);
+    	  Coordinate start = pointOnLine(n2.x,n2.y,n1.x,n1.y,-NODE_RADIUS/2);
+    	  Coordinate end = pointOnLine(n1.x,n1.y,n2.x,n2.y,-NODE_RADIUS/2);
     	  
     	  //Want the first time slice on the hint path to be the node thats closest to the left side of the screen
     	  //(this corresponds to the layout of the time slider)
@@ -365,10 +387,16 @@ public class Edge {
       	    endArrow = this.hintCoords.get(i+1);    	   		 		  		 
     		  
     		  if (persistence.get(i)==0){
-    			  parent.stroke(189, 189, 189,255);    			  
+    			  parent.stroke(absentColour.getRGB());    	
+    			  if (i==view){
+    				  parent.stroke(yearMarkColour.getRGB());
+    			  }
     			  drawDottedLine(startArrow.x,startArrow.y,endArrow.x,endArrow.y);     			
     		  }else{    			 
-    			  parent.stroke(67,162,202,255);     			 
+    			  parent.stroke(presentColour.getRGB());  
+    			  if (i==view){
+    				  parent.stroke(yearMarkColour.getRGB());
+    			  }
     			  parent.line(startArrow.x,startArrow.y,endArrow.x,endArrow.y);     			 
     		  }       		 
     	  }   
@@ -384,16 +412,16 @@ public class Edge {
     		  }     				  		 
     		  
     		  if (persistence.get(i)==0){
-    			  parent.stroke(189, 189, 189,255);    			     			  
-    			  if (view==(i)){
-    				  parent.stroke(206,18,86,255);
-    			  }
+    			  parent.stroke(absentColour.getRGB());    			     			  
+    			  /**if (view==i){
+    				  parent.stroke(120, 120, 120,255);
+    			  }*/
     			  this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
     		  }else{    			 
-    			  parent.stroke(67,162,202,255);     			  			 
-    			  if (view==(i)){
-    				  parent.stroke(206,18,86,255);
-    			  }
+    			  parent.stroke(presentColour.getRGB());     			  			 
+    			  /**if (view==i){
+    				 parent.stroke(0,118,168,255);				 
+    			  }*/
     			  this.drawArrow(startArrow.x,startArrow.y,endArrow.x,endArrow.y);
     		  }       		 
     	  }
@@ -420,22 +448,30 @@ public class Edge {
     	return new Coordinate(px,py);
     }
     /** Draws the hint path, then animates the indicator according to mouse dragging along the edge
-     *  @param newX,newY the position of the mouse projected onto the hint path (according to the min distance)     *  
+     *  @param newX,newY the position of the mouse projected onto the hint path (according to the min distance) 
+     *  @param view   to draw the time slice label 
      * */
-    void animateAnchor(float newX, float newY){  	   	
+    void animateAnchor(float newX, float newY,int view){  	   	
     	 parent.strokeCap(parent.ROUND);
-   	     parent.stroke(206,18,86,255);
-   	     parent.strokeWeight(7);
+   	     parent.stroke(anchorColour.getRGB());
+   	     parent.strokeWeight(10);
          Coordinate endC = this.hintCoords.get(this.numTimeSlices-1);        
-         ArrayList<Coordinate> coords = findPerpendicularLine(newX,newY,endC.x,endC.y,6.0f);
+         ArrayList<Coordinate> coords = findPerpendicularLine(newX,newY,endC.x,endC.y,7.0f);
          
          if (coords==null){ //At the last path segment
         	 endC = this.hintCoords.get(this.numTimeSlices);        
-        	 coords = findPerpendicularLine(newX,newY,endC.x,endC.y,6.0f);             	
+        	 coords = findPerpendicularLine(newX,newY,endC.x,endC.y,7.0f);             	
          }
          
-         parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);        
+         parent.line(coords.get(0).x, coords.get(0).y, coords.get(1).x, coords.get(1).y);  
+        
+         PFont font = parent.createFont("Droid Sans",20,true);
+	   	 parent.textFont(font);
+	   	 parent.fill(255,255,255,255);
+	   	 ArrayList<Coordinate> textCoords = findPerpendicularLine(newX,newY,endC.x,endC.y,20.0f);
+   	     parent.text(view, textCoords.get(0).x, textCoords.get(0).y);
     }
+  
     /**Draws an arrow at the end (x2,y2) of the line defined by the given points
      * @param x1,y1  Coordinates of the first point on the line
      * @param x1,y1  Coordinates of the second point on the line (where the arrow head goes)
@@ -444,7 +480,7 @@ public class Edge {
     void drawArrow(float x1,float y1, float x2, float y2) {   
     	  float lineLength = 6;
     	  parent.pushMatrix();
-    	  //parent.strokeWeight(2);
+    	  parent.strokeWeight(2);
     	  //parent.strokeJoin(parent.ROUND);
     	  parent.translate(x2, y2);
     	  float a = parent.atan2(x1-x2, y2-y1);

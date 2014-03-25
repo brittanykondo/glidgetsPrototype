@@ -108,42 +108,31 @@ public class GraphManager {
     	 //Hack here: node 17 does not have any edges (not stored in nodeswithedges array), add it at the very end
     	 this.layout = new FRLayout <Integer,Edge>(this.graph);         
 		 this.layout.setSize(new Dimension(1250,600));
-		 this.layout.setRepulsionMultiplier(0); //Default: 0.75
-		 this.layout.setAttractionMultiplier(1); //Default: 0.75
-		 this.layout.setMaxIterations(10000); //Default:700*/
-    	 /**this.layout = new SpringLayout <Integer,Edge>(this.graph);  
-    	 this.layout.setSize(new Dimension(1250,600));*/
+		 this.layout.setRepulsionMultiplier(0.4);
+		 this.layout.setMaxIterations(1000);
 		 allNodes.add(new Integer(17));
 		 Collections.sort(allNodes);
 		 
-		 PrintWriter output = parent.createWriter("savedGraphData9.txt");
 		 //Print out the average graph info (ideally, should save to a text file)
 		 //Print out the node, nodeId, position and persistence at each time slice
 		 for (int i=0;i<allNodes.size();i++){	
-			 System.out.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i));
-			 output.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i));
+			 System.out.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i));		
 			 for (int j=0;j<this.numTimeSlices;j++){
 				  if (this.nodesWithEdges.get(j).contains(i)){	   	   			
-			   	      System.out.println("1");	
-			   	      output.println("1");
+			   	      System.out.println("1");		       		  	
 		   		  }else{	   			
 		   			  System.out.println("0");
-		   			  output.println("0");
 		   		  }
 			 }
 		 }
 		//Print out the edge info
 			for (int i=0;i<this.numTimeSlices;i++){				
 				System.out.println("time "+i);
-				output.println("time "+i);
 				for (int j=0;j<this.edges.get(i).size();j++){
 					currentEdge = this.edges.get(i).get(j);					
 					System.out.println(currentEdge.node1+" "+currentEdge.node2);
-					output.println(currentEdge.node1+" "+currentEdge.node2);
 				}
 			}
-			output.flush();
-			output.close();
 		 
      }
      /**Finds an edge in an arraylist of edges
@@ -229,7 +218,7 @@ public class GraphManager {
       * Originally used in an experiment by Van De Bunt (1999)
       * */
      public void readVanDeBunt(){
-    	  String filename = "vanDeBunt_all_longer.txt";
+    	  String filename = "vanDeBunt_all.txt";
        	  Scanner scan;
        	  int time = 0;
        	  int nodeCounter = 0;      	  
@@ -286,11 +275,11 @@ public class GraphManager {
     	
     }
     
-    /************************************ Parser for heat map visualization ************************************************/
+    /************************************ Parser for heat map visualization *************************************************/
     
     /**Reads the text file containing time-varying data of undergraduate student's friendship
      * Originally used in an experiment by Van De Bunt (1999)
-     * 
+     * */
     public void readVanDeBunt2(){
    	  String filename = "vanDeBunt_all.txt";
       	  Scanner scan;
@@ -338,7 +327,7 @@ public class GraphManager {
       		  }
       		  System.out.println();
       	  }
-    }  */
+    }  
     /** Finds an edge in an ArrayList of edges
      *  @param Arraylist of edges to search within
      *  @param e the edge to search for

@@ -1,4 +1,6 @@
+import java.awt.Color;
 import java.util.ArrayList;
+
 import processing.core.*;
 /**A node on a graph, for displaying it and saving important properties
  * */
@@ -19,11 +21,25 @@ public class Node {
       int maxDegree; //For scaling visualizations of relative degree amount (only w.r.t to this node's degree changes)
       ArrayList <Coordinate> hintAngles; //View angles along the hint path
       ArrayList <Integer> incidentEdges; //Edges that the node forms with other nodes over time
-      
+            
       //Class Constants
-      static int MIN_WEIGHT = 5;
+      static int MIN_WEIGHT = 6;
       static int MAX_WEIGHT = 15;
       static final float RADIUS = 28;
+      
+      //Display colours
+      static Color presentColour = new Color(67,162,202,255);
+      static Color absentColour = new Color(189, 189, 189,255);
+      static Color presentColour_darker = new Color(0,128,183,255);
+     static Color absentColour_darker = new Color(134, 134, 134,255);
+     //static Color yearMarkColour = new Color(50, 200, 150, 255); Original
+     static Color yearMarkColour = new Color(66, 219, 128, 255); //ArcTressAlgaeGreen
+     //static Color yearMarkColour = new Color(51, 157, 70, 255); //Green1
+     //static Color yearMarkColour = new Color(102, 192, 108, 255); //Green2
+     //static Color yearMarkColour = new Color(75, 181, 57, 255); //Festival Green   		
+     
+     //static Color anchorColour = new Color(43,172,130,255);
+     static Color anchorColour = new Color(66, 219, 128, 255).darker();
       
       /** Constructor for creating a Node
        * @param p Reference to processing applet for drawing with processing commands
@@ -52,12 +68,12 @@ public class Node {
       
       /**Renders the node at its position at a certain moment in time
        * */
-      void display(int view,boolean showDisappeared){ 
+      void display(int view,boolean showDisappeared,float fade){ 
     	  if (showDisappeared){
-    		  drawNode(this.x, this.y,255);    	
+    		  drawNode(this.x, this.y,(int)(255*fade));    	
     	  }else{
     		  if (this.coords.get(view)!=null){
-        		  drawNode(this.x, this.y,255);    		  
+        		  drawNode(this.x, this.y,(int)(255*fade));    		  
         	  } 
     	  }    	    	  	  
       }
@@ -117,8 +133,9 @@ public class Node {
       void drawNode(float x, float y,int alpha){    	  
     	  
     	  parent.fill(206,18,86,alpha);
-    	  parent.stroke(206,18,86,alpha);
-    	  parent.strokeWeight(3);
+    	  parent.noStroke();
+    	  /**parent.stroke(206,18,86,alpha);
+    	  parent.strokeWeight(3);*/
     	  parent.ellipse(x,y,RADIUS,RADIUS);  
     	  
     	  PFont font = parent.createFont("Droid Sans",12,true);
@@ -160,19 +177,20 @@ public class Node {
        *  @param the current view to draw at
        *  @param showAllHighlights true, if all node persistence highlights should be drawn
        * */ 
-      void drawGlobalPersistenceHighlights(int view,boolean showAllHighlights){
+      void drawGlobalPersistenceHighlights(int view,boolean showAllHighlights,float fade){
     	  
     	  if (showAllHighlights || this.coords.get(view)!=null){
     		  parent.strokeCap(parent.SQUARE);        	 
         	  parent.noFill();
-        	  parent.stroke(67,162,202,255);
+        	  parent.stroke(67,162,202,(255*fade));
     		  parent.strokeWeight(MIN_WEIGHT);
         	  for (int i=0;i<this.numTimeSlices;i++){     		   		 
         		  if (this.coords.get(i)!=null){    			  
                 	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT,this.hintAngles.get(i).x-parent.HALF_PI, 
-                			  this.hintAngles.get(i).y-parent.HALF_PI);       			      			  
+                			  (this.hintAngles.get(i).y-parent.HALF_PI-0.06f));       			      			  
         		  }       	  	
         	  }
+        	  drawNode(this.x,this.y,(int)(255*fade));
     	  }
     	        	  
       }     
@@ -180,13 +198,18 @@ public class Node {
        * @param view  the current view       
        * @return [index of the selected, type of selection (2 is drawing around, 1 is clicking)], -1 otherwise
        * */
-      int [] selectNode(int view){
-    	  Coordinate coord = this.coords.get(view);    	 
+      int [] selectNode(int view,boolean selectedDisappeared){
+    	  Coordinate coord = this.coords.get(view);   
+    	  //TODO:Quick fix for allowing nodes that have disappeared but are part of a query can be selected, refactor this later
     	  if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)){  //Clicking directly on a node  			    		 
     		  return new int [] {this.id,1};
-    	  } else if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)+MAX_WEIGHT){  //Drawing around a node or clicking near it  			    		 
+    	  } else if (selectedDisappeared  && parent.mousePressed && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)){
+    		  return new int [] {this.id,1};
+    	  }
+    	  
+    	  /**else if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)+MAX_WEIGHT){  //Drawing around a node or clicking near it  			    		 
     		  return new int [] {this.id,2};
-    	  }   	 
+    	  } */  	 
     	  return new int [] {-1,-1};
       }
       
@@ -196,9 +219,9 @@ public class Node {
        * @return index of the released if it is a different node than what is selected
        *  -1 otherwise 
        * */
-      int releaseNode(int view, int selectedNode){
+      int releaseNode(int view, int selectedNode,boolean selectDisappeared){
     	  Coordinate coord = this.coords.get(view);    	  
-    	  if (coord != null && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=RADIUS && this.id!=selectedNode){    		 
+    	  if ((coord != null||selectDisappeared) && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=RADIUS && this.id!=selectedNode){    		 
     		  return this.id;   		  
     	  }    	 
     	  return -1;
@@ -207,86 +230,75 @@ public class Node {
        * @param mouseAngle the angle of the mouse w.r.t to the center of the node
        * @param fixAnchor, if 1, anchor should only extend vertically (staying at a fixed angle)
        *                   if 0, anchor should move with the mouse angle
+       * @param view      the time slice (to draw next to the anchor)
        **/
-      void animateAnchor(float mouseAngle, int fixAnchor){
-    	  //parent.stroke(67,162,202,255); 
+      void animateAnchor(float mouseAngle, int fixAnchor,int view){
+    	 
     	  parent.strokeCap(parent.ROUND);
-    	  parent.stroke(206,18,86,255);
+    	  parent.stroke(anchorColour.getRGB());
           parent.strokeWeight(4);          
           float x1 = (float) (this.x + RADIUS/2*Math.cos(mouseAngle));
           float y1 = (float) (this.y + RADIUS/2*Math.sin(mouseAngle));     
           
-          if (fixAnchor==1){
+          PFont font = parent.createFont("Droid Sans",20,true);
+	   	  parent.textFont(font);
+	   	  parent.fill(255,255,255,255);
+          
+	   	  if (fixAnchor==1){
         	  float dist = parent.dist(x1, y1, parent.mouseX, parent.mouseY);
         	  float x2 = (float) (this.x + dist*Math.cos(mouseAngle));
               float y2 = (float) (this.y + dist*Math.sin(mouseAngle));              
         	  parent.line(x1, y1, x2, y2);
+        	  parent.text(view, x2, y2);
           }else{
         	  parent.line(x1, y1, parent.mouseX, parent.mouseY);
-          }    	  
+        	  parent.text(view, parent.mouseX, parent.mouseY);
+          }   
+          
+      }
+      /**Animates the time slice indicator along the hint path when the time slider is dragged
+       * @param mouseAngle the angle of the mouse w.r.t to the center of the node
+       * @param fixAnchor, if 1, anchor should only extend vertically (staying at a fixed angle)
+       *                   if 0, anchor should move with the mouse angle
+       **/
+      void animateIndicator(float interpolation,int view){
+    	  //parent.stroke(67,162,202,255); 
+    	  parent.strokeCap(parent.ROUND);
+    	  parent.stroke(206,18,86,255);
+          parent.strokeWeight(4);            
+            					 
+		  int weight = MIN_WEIGHT+(int)(((float)this.degrees.get(view)/this.maxDegree)*MAX_WEIGHT);			  
+		  float mouseAngle =  ((parent.TWO_PI/this.numTimeSlices)*interpolation + this.hintAngles.get(view).x)-parent.HALF_PI;
+		  
+          float x1 = (float) (this.x + RADIUS/2*Math.cos(mouseAngle));
+          float y1 = (float) (this.y + RADIUS/2*Math.sin(mouseAngle));     
+          float x2 = (float) (this.x + (RADIUS/2+weight)*Math.cos(mouseAngle));
+          float y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(mouseAngle));
+          parent.line(x1, y1, x2, y2);              	  
       }
      
       /** Draws an aggregated hint path (following a persistence array)          
        *  @param persistence Array of persistence information for the aggregated nodes 
        *  @param view the current view of the visualization 
        * */      
-      void drawAggregatedHintPath(ArrayList<Integer> persistence,int view){    	  	 
-    	  // parent.strokeWeight(5);
-    	  float angleOffset = parent.HALF_PI + this.hintSegmentAngle/2;
+      void drawAggregatedHintPath(ArrayList<Integer> persistence,int view){      	
+    	  //float angleOffset = parent.HALF_PI + this.hintSegmentAngle/2;
     	  float x1,y1,x2,y2,weight; //For drawing the ticks in middle of segments    	 
-    	  float nodeStrokeWeight=0;
-    	  //Alternative Design: Split the node segments in half and make these the years
-    	  /**for (int i=0;i<this.numTimeSlices;i++){ 
-    		  //For now, just drawing the original degree amount when node is present, not aggregating it    		 
-    		  if (persistence.get(i)==0){
-    			  parent.stroke(189, 189, 189,255);
-    			  parent.strokeWeight(MIN_WEIGHT);
-    			  weight = MIN_WEIGHT;
-    		  }else{    			  
-    			  parent.stroke(67,162,202,255); 
-    			  weight = MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT);
-    			  parent.strokeWeight(weight);
-    		  }      		  
-        	  
-        	  parent.strokeCap(parent.SQUARE);        	 
-        	  parent.noFill();
-        	  //Offset by half pi so that beginning of time lies on top of the node (like a clock layout)
-        	  //parent.arc(this.x, this.y, RADIUS+weight, RADIUS+weight,this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI); 
-        	
-        	  //New hint path design: offset the segments by half a hint path segment angle
-        	  //TODO: 0.05 is just a value determined by eye-balling the glyph, it's added to remove the gaps between arc segments along the hint path        	
-        	  parent.arc(this.x, this.y, RADIUS+weight, RADIUS+weight,this.hintAngles.get(i).x-angleOffset, ((this.hintAngles.get(i).y+0.05f)-angleOffset));         	  
-        	  
-        	  //Draw the ticks along the segments
-        	  x1 = (float) (this.x + RADIUS/2*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
-              y1 = (float) (this.y + RADIUS/2*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
-              
-              x2 = (float) (this.x + (RADIUS/2+weight)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
-              y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI)); 
-              
-              if (i==view){
-            	  parent.stroke(206,18,86,255);
-            	  parent.strokeWeight(3);
-              }else{
-            	  parent.stroke(25,25,25,255); //background colour
-            	  parent.strokeWeight(1);
-              }        	  
-        	  parent.line(x1, y1, x2, y2);
-    	  } */ 
+    	  float nodeStrokeWeight=0;    	 
     	  
     	  for (int i=0;i<this.numTimeSlices;i++){ 
     		  //For now, just drawing the original degree amount when node is present, not aggregating it    		 
     		  if (persistence.get(i)==0){
-    			  parent.stroke(189, 189, 189,255); 
+    			  parent.stroke(absentColour.getRGB()); 
     			  if (i==view){
-    				  parent.stroke(134, 134, 134,255);
+    				  parent.stroke(yearMarkColour.getRGB());
     			  }
-    			  weight = MIN_WEIGHT;
+    			  weight = 3;
     			  parent.strokeWeight(weight);
     		  }else{    			  
-    			  parent.stroke(67,162,202,255); 
+    			  parent.stroke(presentColour.getRGB()); 
     			  if (i==view){
-    				  parent.stroke(0,128,183,255);
+    				  parent.stroke(yearMarkColour.getRGB());
     			  }
     			  weight = MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT);
     			  parent.strokeWeight(weight);
@@ -303,20 +315,16 @@ public class Node {
               y1 = (float) (this.y + (RADIUS/2)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
               
               x2 = (float) (this.x + (RADIUS/2+weight)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
-              y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));               
-     
-             /** if (i==view){ //Pink indicator showing current year
-            	  parent.stroke(206,18,86,255);
-            	  parent.strokeWeight(3);
-              }else if (persistence.get(i)==0){
-    			  parent.stroke(134, 134, 134,255);
+              y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));
+              
+              if (persistence.get(i)==0){
+    			  parent.stroke(absentColour_darker.getRGB());
     			  parent.strokeWeight(2.5f);
     		  }else{    			  
-    			  parent.stroke(0,128,183,255);
+    			  parent.stroke(presentColour_darker.getRGB());
     			  parent.strokeWeight(2.5f);
     		  }               
-        	  parent.line(x1, y1, x2, y2);*/      
-              
+        	  parent.line(x1, y1, x2, y2);
     	  }    	  
       }
       

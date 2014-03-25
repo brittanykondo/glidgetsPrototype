@@ -42,7 +42,7 @@ public class Slider {
 	   	  setTicks();
 	   	  
 	   	  //Set the initial position of the draggable tick
-	   	  this.dragTickX = this.tickPositions.get(0);
+	   	  this.dragTickX = this.tickPositions.get(0)-this.dragTickWidth/2;
 	   	  this.dragTickY = this.yPos-this.dragTickHeight/2;  
      }
      
@@ -95,23 +95,34 @@ public class Slider {
       * @param mx the x-coordinate of the mouse
       * */
      void drag(int mx){    
-    	 //Only update position if it's in bounds of the slider    	
+    	 //Only update position if it's in bounds of the slider 
+    	 int fixAnchor = 0;
     	 if (this.dragging == true && mx >= this.tickPositions.get(0) && mx < this.tickPositions.get(this.numLabels-1)){ 
     		 float next = this.tickPositions.get(this.nextView);
     		 float current = this.tickPositions.get(this.currentView);
     		 if (mx<=current && this.currentView >0){ //Passed current view, moving backward in time
     			 this.nextView = this.currentView;
-    			 this.currentView--;  
+    			 this.currentView--;      			 
     			 this.interpAmount = 1;
     		 }else if (mx>=next && this.nextView<(this.numLabels-1)){ //Passed next view, moving forward in time
     			 this.currentView = this.nextView;
-    			 this.nextView++;
+    			 this.nextView++;    			
     			 this.interpAmount = 0;
     		 }else{
     			 this.interpAmount = Math.abs(mx -current)/(next-current);
     		 }
     		 this.dragTickX = mx; 
-    	 }        
+    	 }else if (mx <= this.tickPositions.get(0)){
+    		 fixAnchor = 1;
+    	 }else if (mx > this.tickPositions.get(this.numLabels-1)){
+    		 fixAnchor = 1;
+    	 }
+    	 
+    	 if (fixAnchor==1){
+    		 this.drawingView = this.nextView;
+    	 }else{
+    		 this.drawingView = this.currentView;
+    	 }
      }
     
      /**Snaps the tick to the nearest tick on the slider
@@ -124,10 +135,10 @@ public class Slider {
 		 float currentDist = Math.abs(this.dragTickX - current);
 		 
 		 if (currentDist < nextDist){ //Snap to current view
-			 this.dragTickX = current; 
+			 this.dragTickX = current; //- this.dragTickWidth/2;
 			 this.drawingView = this.currentView;
 		 }else{ //Snap to next view
-			 this.dragTickX = next;
+			 this.dragTickX = next;// - this.dragTickWidth/2;
 			 if (this.nextView<(this.numLabels-1)){
 				 this.currentView = this.nextView;
 				 this.nextView++;

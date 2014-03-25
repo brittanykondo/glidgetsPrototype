@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,8 +21,9 @@ public class ForceDirectedGraph {
      public ArrayList<Edge> edges;  
      public ArrayList <Integer> aggregatedNodes; //Only stores the id's of the nodes
      public ArrayList <Edge> aggregatedEdges;
-     public ArrayList<Integer> aggregatedPersistence;
+     public ArrayList<Integer> aggregatedPersistence;    
      
+     public boolean inGlobalView;
      PApplet parent;
      public int numTimeSlices;
      public int currentView;
@@ -39,7 +41,7 @@ public class ForceDirectedGraph {
      public float mouseAngle;
      public Edge draggingEdge;
      public boolean onDraggingEdge;
-     public int pinnedView;
+     public int pinnedView; 
      
      /**Creates a new graph manager which generates or parses and saves the data
       * necessary for drawing the dynamic graph
@@ -70,6 +72,7 @@ public class ForceDirectedGraph {
     	 this.keyPressed = -1;
     	 this.draggingEdge = null;
     	 this.onDraggingEdge = false;
+    	 this.inGlobalView = false;
          readGraphDataFile(dataFile);            
      }   
      /**Handles mouse pressed event, to interact with the graph elements
@@ -94,15 +97,16 @@ public class ForceDirectedGraph {
       * */
      public void drawGraph(int view){      	
     	 
-	     if (selectedEdge !=-1){ //Case 1: Need to draw an edge hint path
-	    	 //this.drawEdgeHintPaths();	
+	     if (this.aggregatedEdges.size()>0){ //Case 1: Need to draw an edge hint path	    	 
 			 renderEdges(view);
 			 renderNodes(view);	
-			 this.drawEdgeHintPaths(this.drawingView);
-		 }else if (this.selectedNode != -1){ //Case 2: draw node hint paths			 
+			 keepDisappearingNodes(1);
+			 drawEdgeHintPaths(this.drawingView);
+		 }else if (this.aggregatedNodes.size()>0){ //Case 2: draw node hint paths			 
 			 renderEdges(view);				
-			 drawNodeHintPaths(view);
+			 drawNodeHintPaths(view);			 
 			 renderNodes(view);
+			 keepDisappearingNodes(0);
 		 }else{ //Case 3: Just render both edges and nodes without hint paths
 			 clearQueries();			 
 			 renderEdges(view);
@@ -119,10 +123,11 @@ public class ForceDirectedGraph {
     	 
     	 for (int i=0;i<this.aggregatedEdges.size();i++){
     		 Coordinate startPt = this.aggregatedEdges.get(i).hintCoords.get(0);
-        	 Coordinate endPt = this.aggregatedEdges.get(i).hintCoords.get(this.numTimeSlices-1);    	 
+        	 Coordinate endPt = this.aggregatedEdges.get(i).hintCoords.get(this.numTimeSlices);    	 
         	 float [] minPoint = minDistancePoint(parent.mouseX,parent.mouseY,startPt.x,startPt.y,endPt.x,endPt.y);
         	 if (parent.dist(minPoint[0],minPoint[1],parent.mouseX,parent.mouseY)<=10){ //Rough check to see if mouse was clicked on the anchor
         		 this.onDraggingEdge = true;
+        		 this.inGlobalView = false;
         		 this.draggingEdge = this.aggregatedEdges.get(i);
         		 this.pinnedView = this.drawingView;
         		 return;
@@ -147,7 +152,7 @@ public class ForceDirectedGraph {
      /**Releases an edge after the dragging has stopped, snaps to the nearest view
       * */
      public void releaseEdge(){    	
-    	 releaseEdgeAnchor();
+    	 //releaseEdgeAnchor();
     	 this.onDraggingEdge = false;
     	 this.dragging = false;
     	 this.draggingEdge = null;    	
@@ -155,14 +160,14 @@ public class ForceDirectedGraph {
      
      /**"Snaps" to a view when dragging along an edge is stopped
       * */
-     public void releaseEdgeAnchor(){    	 
+     /**public void releaseEdgeAnchor(){    	 
     	 Coordinate pt1 = this.draggingEdge.hintCoords.get(this.currentView);
     	 Coordinate pt2 = this.draggingEdge.hintCoords.get(this.nextView);        	 
          float currentDist = calculateDistance(pt1.x,pt1.y,parent.mouseX,parent.mouseY);
   		 float nextDist = calculateDistance(pt2.x,pt2.y,parent.mouseX,parent.mouseY);  		
   		 setDrawingView(currentDist,nextDist);
   		 this.removeDisappearedEdges();
-     }
+     }*/
      
      /** Checks where the mouse is w.r.t the edge
       * */
@@ -184,12 +189,25 @@ public class ForceDirectedGraph {
          }else{ //Some in between the views (pt1 and pt2)                         
              newPoint= new Coordinate (minDist[0],minDist[1]);             
              this.interpAmount = t;              
+         } 
+         
+         this.drawingView = this.currentView;
+         //Check if mouse is beyond the last view point
+         if (minDist[2]>1 && this.nextView==(this.numTimeSlices-1)){
+        	 Coordinate lastPoint = this.draggingEdge.hintCoords.get(this.numTimeSlices);
+        	 float [] minDist2 = minDistancePoint(parent.mouseX,parent.mouseY,pt2.x,pt2.y,lastPoint.x,lastPoint.y);
+        	 if (minDist2[2]<1){ //Beyond the second last point (pt2)
+        		 newPoint= new Coordinate (minDist2[0],minDist2[1]);
+        	 }else{
+        		 newPoint = new Coordinate(lastPoint.x,lastPoint.y);
+        	 }
+        	 this.drawingView = this.nextView;
          }
-         System.out.println(this.currentView+" "+this.nextView);
-         this.animateGraph(this.currentView, this.nextView, this.interpAmount, new int []{this.draggingEdge.node1,this.draggingEdge.node2}, this.pinnedView); 
-         this.drawEdgeHintPaths(-1);
-         this.draggingEdge.animateAnchor(newPoint.x,newPoint.y);        
-         this.keepDisappearingNodes(1);    	 
+         
+         
+         this.animateGraph(this.currentView, this.nextView, this.interpAmount,false);         
+	     this.drawEdgeHintPaths(this.drawingView);  	       
+         this.draggingEdge.animateAnchor(newPoint.x,newPoint.y,this.drawingView);        	 
      }
      /**Draws partial versions of nodes when dragging along a hint path
       * @param type:
@@ -283,7 +301,8 @@ public class ForceDirectedGraph {
 	    		this.currentView = nextView;
 		    	this.nextView++;
 		    	this.interpAmount = 0;
-	    	}    	 
+		    	this.drawingView = this.nextView;
+	    	} 
      }
      /**Moves the visualization back in time by one time step
       * Adjusts the view variables accordingly
@@ -293,12 +312,14 @@ public class ForceDirectedGraph {
     		 this.nextView = this.currentView;
 	    	 this.currentView--;
 	    	 this.interpAmount = 1;
+	    	 this.drawingView = this.currentView;
     	}    	 
      }
      /** Checks where the mouse is w.r.t the hint path
       * */
      public void dragAroundNode(){   	
-    	 
+    	 if (this.selectedNode==-1) return;
+    	
     	 Node n = this.nodes.get(this.selectedNode);	   	 
     	 //Find the angle of the mouse w.r.t the node's center point
 	   	 float adj = parent.mouseX - n.x;
@@ -311,15 +332,13 @@ public class ForceDirectedGraph {
 	   	float nextAngle = n.hintAngles.get(this.currentView).y;    	 
 	   	float bounds = checkBounds(mouseAngle,currentAngle,nextAngle);
 	   	
-	   	//Prevent wrapping around the node hint path
-	   	float lastAngle = n.hintAngles.get(this.numTimeSlices-1).x;
+	   	//Prevent wrapping around the node hint path	   
 	   	int fixAnchor = 0;
-	   	
-	   	if (this.nextView == (this.numTimeSlices-1) && 
-	   			(this.mouseAngle<=lastAngle && this.mouseAngle>Math.PI  && 
-	   			((mouseAngle >lastAngle && mouseAngle <= Math.PI*2)||(mouseAngle>=0 && mouseAngle < Math.PI)))){ //Prevent wrapping around from last view to first vie
+		   	
+	   	if (this.nextView == (this.numTimeSlices-1) && mouseAngle < Math.PI && mouseAngle >= 0 
+     			&& this.mouseAngle <= parent.TWO_PI && this.mouseAngle > Math.PI){ //Prevent wrapping around from last view to first vie
 	   		fixAnchor = 1;
-	   		mouseAngle = lastAngle;	   	   		
+	   		mouseAngle = (float) (Math.PI*2 - 0.02);	   	   		
 	   	}else if (this.currentView ==0 && mouseAngle > Math.PI && mouseAngle <= Math.PI*2 
      			&& this.mouseAngle >= 0 && this.mouseAngle < Math.PI){ //Prevent wrapping around from first to last view    		
     		 mouseAngle = (float) 0.02;
@@ -336,12 +355,20 @@ public class ForceDirectedGraph {
 		    	moveForward();		    	
 		   } 
 	    }
-		    //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView+" "+this.interpAmount);	       
-	        animateGraph(this.currentView, this.nextView, this.interpAmount,new int [] {n.id,-1},this.pinnedView);	    
-		    this.drawNodeHintPaths(this.drawingView);		   
-		    n.animateAnchor(mouseAngle-parent.HALF_PI,fixAnchor);		   
-		    this.keepDisappearingNodes(0);		    
-		    this.mouseAngle = mouseAngle;
+	   	
+	 	float lastAngle = n.hintAngles.get(this.numTimeSlices-1).x;	   	
+	    //System.out.println(this.currentView+" "+this.nextView+" "+this.drawingView+" "+this.interpAmount);	       
+        animateGraph(this.currentView, this.nextView, this.interpAmount,false);
+        if (this.nextView == (this.numTimeSlices-1) && 
+ 	   			(this.mouseAngle>=lastAngle && this.mouseAngle<=parent.TWO_PI)){ //Detect when last view is entered
+ 	   		this.drawingView = nextView;   		
+ 	   	}else{
+        	this.drawingView = this.currentView;
+        	
+        }    
+        this.drawNodeHintPaths(this.drawingView);
+        n.animateAnchor(mouseAngle-parent.HALF_PI,fixAnchor,this.drawingView);
+	    this.mouseAngle = mouseAngle;
      }     
      /** Checks if the mouse is in bounds defined by a and b, updates the interpolation amount
       *  @param mouse: the mouse position
@@ -383,15 +410,37 @@ public class ForceDirectedGraph {
       * */
      public void renderNodes(int view){    	
 		 for (int i = 0;i<this.nodes.size();i++)
-			 this.nodes.get(i).display(view,false); 
+			 this.nodes.get(i).display(view,false,1); 
      }
      
      /**Draws all the edges on the screen for the specified view
       * @param view  the current view of the visualization
       * */
      public void renderEdges(int view){
-    	 for (int row = 0;row<this.edges.size();row++)
-			 this.edges.get(row).display(this.nodes,view,false); 
+    	ArrayList<Integer> edgesToHighlight = findIncidentEdgesToHighlight();
+    	 	
+    	 for (int row = 0;row<this.edges.size();row++){
+    		 if (edgesToHighlight.contains(row) && this.selectedEdge==-1){    		    
+    		     this.edges.get(row).display(this.nodes, view, false,true);     		    
+    		 }else{
+    			 this.edges.get(row).display(this.nodes, view, false,false);    	 
+    		 } 
+    	 }
+			 
+     }
+     /**In the current aggregated node query, finds the incident edges that should be highlighted
+      * */
+     public ArrayList<Integer> findIncidentEdgesToHighlight(){
+    	 ArrayList<Integer>edges = new ArrayList<Integer>();
+    	 ArrayList<Integer>edgesToHighlight = new ArrayList<Integer>();
+    	 for (int i=0;i<this.aggregatedNodes.size();i++){
+    		 edges=this.nodes.get(this.aggregatedNodes.get(i)).incidentEdges;
+    		 for (int j=0;j<edges.size();j++){
+    			 if (!edgesToHighlight.contains(edges.get(j)))
+    			      edgesToHighlight.add(edges.get(j));
+    		 }
+    	 }
+    	 return edgesToHighlight;
      }
      /**Handles the mouse down listener for all nodes in the graph.
       * For now, only one node can be clicked at the same time
@@ -408,9 +457,18 @@ public class ForceDirectedGraph {
     	 int selected = -1;
     	 //int selectionType = -1;
     	 int [] savedSelections;
+    	 boolean selectedDisappeared = false;
     	 
     	 for (int i = 0;i<this.nodes.size();i++){
-    		savedSelections = this.nodes.get(i).selectNode(this.drawingView);  
+    		 if (aggregatedNodes.contains(new Integer(i))){
+    			 selectedDisappeared = true;
+    		 }else{
+    			 selectedDisappeared = false;
+    		 }
+    		 if (this.inGlobalView){
+    			 selectedDisappeared = true;
+    		 }
+    		savedSelections = this.nodes.get(i).selectNode(this.drawingView,selectedDisappeared);  
     		selected = savedSelections[0];
     		//selectionType = savedSelections[1];
     		
@@ -433,7 +491,8 @@ public class ForceDirectedGraph {
       * */
      public void isNodeDragged(){
     	 if (this.selectedSameNode){
-    		 this.draggingNode = true;    		
+    		 this.draggingNode = true; 
+    		 this.inGlobalView = false;
     		 this.selectedSameNode = false;
     	 }
      }
@@ -441,11 +500,8 @@ public class ForceDirectedGraph {
       * If the mouse up event is on a different node than what is
       * selected, want to draw the edge hint path in between nodes    
       * */
-     public void releaseNodes(){     	 
-    	 
-    	 if (this.draggingNode){ //Snap to view after dragging around the node
-    		 releaseNodeAnchor();    		
-    	 }else if (this.selectedSameNode){
+     public void releaseNodes(){    	      		
+    	 if (!this.draggingNode && this.selectedSameNode){
     		 if (this.aggregatedNodes.contains(new Integer(this.selectedNode))){ //Node has already been selected, de-select it
          		this.aggregatedNodes.remove(new Integer(this.selectedNode));
          	}
@@ -462,7 +518,7 @@ public class ForceDirectedGraph {
      public void findReleasedNode(){
     	 int released = -1;
 		 for (int i = 0;i<this.nodes.size();i++){
-	    		released = this.nodes.get(i).releaseNode(this.drawingView,this.selectedNode);
+	    		released = this.nodes.get(i).releaseNode(this.drawingView,this.selectedNode,this.inGlobalView);
 	    		if (released != -1) this.releasedNode = released;    		
 	      }
 		// System.out.println("finding released "+this.selectedNode+" "+this.releasedNode);
@@ -473,7 +529,7 @@ public class ForceDirectedGraph {
      }
      /**"Snaps" to a view when dragging around the node is stopped
       * */
-     public void releaseNodeAnchor(){     	 
+     /**public void releaseNodeAnchor(){     	 
     	 Node n = this.nodes.get(this.selectedNode);
     	 float current = n.hintAngles.get(this.currentView).x;
 	   	 float next = n.hintAngles.get(this.currentView).y;
@@ -481,14 +537,14 @@ public class ForceDirectedGraph {
          float nextDist = Math.abs(this.mouseAngle - next);
   		 float currentDist = Math.abs(this.mouseAngle - current);
   		 setDrawingView(currentDist,nextDist);  	
-  		 this.removeDisappearedNodes();
-     }
+  		 //this.removeDisappearedNodes();
+     }*/
      /**Updates the view variables and sets the drawing variables.  This is called when the visualization
       * should "snap" to a view 
       * @param currentDist, nextDist  the distance from the mouse to the current and next view markers on 
       *                               the hint path
       * */
-     public void setDrawingView(float currentDist,float nextDist){
+     /**public void setDrawingView(float currentDist,float nextDist){
     	 if (currentDist < nextDist){ //Snap to current view  			
   			 this.drawingView = this.currentView;
   		 }else{ //Snap to next view  			
@@ -500,7 +556,8 @@ public class ForceDirectedGraph {
   				 this.drawingView = this.nextView;
   			 }
   		 }      	 
-     }
+     }*/
+   
      /**When "snapping" to a view after dragging around a node, need to remove the node
       * hint paths where a node does not exist (which could cancel the entire query)
       * */
@@ -518,7 +575,7 @@ public class ForceDirectedGraph {
      /**When "snapping" to a view after dragging around a node, need to remove the node
       * hint paths where a node does not exist (which could cancel the entire query)
       * */
-     public void removeDisappearedEdges(){
+     /**public void removeDisappearedEdges(){
     	 ArrayList <Edge> newEdges = new ArrayList <Edge>();
     	 for (int i=0;i<this.aggregatedEdges.size();i++){
     		if (this.aggregatedEdges.get(i).persistence.get(this.drawingView)==1){
@@ -528,7 +585,7 @@ public class ForceDirectedGraph {
     	 this.aggregatedEdges.clear();
     	 this.aggregatedEdges = newEdges;
     	 this.aggregateEdgeHintPaths();
-     }
+     }*/
      /**Re-sets the selected and released node after the edge hint path is drawn.
       * Draws the hint path for the edge joined by selected and released node
       * */
@@ -548,7 +605,7 @@ public class ForceDirectedGraph {
          //Aggregate the edge hint paths if more than one edge is selected
          if (findEdge(this.aggregatedEdges,toAdd)!=-1){  //De-selecting an edge
     	     this.aggregatedEdges = removeEdge(this.aggregatedEdges,toAdd);    		        	 
-         }else{ //Adding an edge to the aggregation
+         }else if (!(this.inGlobalView && this.selectedEdge==-2)){
         	 this.aggregatedEdges.add(toAdd);
          }
          this.aggregateEdgeHintPaths();
@@ -655,97 +712,97 @@ public class ForceDirectedGraph {
       * dependent on dragging speed.
       * @param start the starting time slice
       * @param end the ending time slice
-      * @param interpolation the amount to interpolation the motion by
-      * @param pinned the object(s) (node, edge) that should be pinned during the animation (set to -1 if none)
-      * @param pinnedView the view to pin their position to (set to -1 if none)
+      * @param interpolation the amount to interpolation the motion by     
       * */
-     public void animateGraph(int start, int end, float interpolation,int [] pinned,int pinnedView){
-    	 Node n = null;
-    	 if (this.selectedNode !=-1)
-    		 n = this.nodes.get(this.selectedNode);
-    	 
-    	 
+     public void animateGraph(int start, int end, float interpolation,boolean animateIndicator){
+    	 ArrayList<Integer>edges = new ArrayList<Integer>();
+    	 ArrayList<Integer>edgesToHighlight = new ArrayList<Integer>();
+    	 for (int i=0;i<this.aggregatedNodes.size();i++){
+    		 edges=this.nodes.get(this.aggregatedNodes.get(i)).incidentEdges;
+    		 for (int j=0;j<edges.size();j++){
+    			 if (!edgesToHighlight.contains(edges.get(j)))
+    			      edgesToHighlight.add(edges.get(j));
+    		 }
+    	 }   	 
     	 for (int row = 0;row<this.edges.size();row++){     
-    		 if (this.selectedNode!=-1 && n.incidentEdges.contains(row) && this.selectedEdge==-1){    		    
+    		 if (edgesToHighlight.contains(row) && this.selectedEdge==-1){    		    
     		     this.edges.get(row).animate(this.nodes, start, end, interpolation,true);     		    
     		 }else{
     			 this.edges.get(row).animate(this.nodes, start, end, interpolation,false);    	 
     		 } 	                 	   	
  	     }    	 
-    	
+    	 drawEdgeHintPaths(this.drawingView);
     	 for (int i = 0;i<this.nodes.size();i++){
   		      this.nodes.get(i).animate(start, end, interpolation);	
-  	     }         	
-     }     
-     /**Updates the node's position when the user drags it to a new positon (in drag and
-      * drop mode)
-      * */
-     public void updateNodePosition(float x,float y){
-    
-    	 //First see which node is selected    	 
-    	 int nodeId = -1;
-    	 Node currentNode;
-    	 for (int i = 0;i<this.nodes.size();i++){
-     		currentNode = this.nodes.get(i);   
-     		if (parent.dist(x, y, currentNode.x, currentNode.y)<=(currentNode.RADIUS/2)){
-     			nodeId = currentNode.id;
-     			break;
-     		}            
-     	 }   
+  	     }  
+    	 drawNodeHintPaths(this.drawingView);    	     	 
     	 
-    	 if (nodeId==-1) return;
+         if (this.aggregatedNodes.size()>0){
+        		this.keepDisappearingNodes(0); 
+          }else if (this.aggregatedEdges.size()>0){
+        		this.keepDisappearingNodes(1);
+          } 
     	 
-    	 //Then, update the position in array of nodes
-    	 this.nodes.get(nodeId).x = x;
-    	 this.nodes.get(nodeId).y = y;
-    	 Coordinate newCoord = new Coordinate(x,y);
-    	 //TODO: remove the need for an array of all positions (since it is fixed)
-    	 ArrayList<Coordinate> coords = this.nodes.get(nodeId).coords;
-    	 ArrayList<Coordinate> newCoords = new ArrayList<Coordinate>();
-    	 for (int i=0;i<coords.size();i++){
-    		 if (coords.get(i)!=null){
-    			 newCoords.add(newCoord);
-    		 }else{
-    			 newCoords.add(null);
+    	 /**if (animateIndicator){
+    		 for (int i=0;i<this.aggregatedNodes.size();i++){
+    			 Node n = this.nodes.get(this.aggregatedNodes.get(i));
+    			 n.animateIndicator(interpolation, start);
     		 }
-    	 }
-    	 this.nodes.get(nodeId).coords = newCoords;
-     }
+    	 }*/
+     }     
      /** Calls functions for showing global persistence values for each node and edge
       * */
      public void showLocalPersistence(int view){
     	 for (int i = 0;i<this.edges.size();i++){
-    		  this.edges.get(i).display(this.nodes,view,false);
-		      this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,view,false);  	
+    		  this.edges.get(i).display(this.nodes,view,false,false);
+		      this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,view,false,1);  	
 	     }
     	 
     	 for (int i = 0;i<this.nodes.size();i++){
-    		   this.nodes.get(i).drawGlobalPersistenceHighlights(view,false);
-    		   this.nodes.get(i).display(view,false); 
+    		   this.nodes.get(i).drawGlobalPersistenceHighlights(view,false,1);
+    		   this.nodes.get(i).display(view,false,1); 
     	  }     	 
      }  
      /** Calls functions for showing global persistence values for EVERY node and edge (slider disabled)
       * */
+     //TODO: refactor this code, so many if statements!!
      public void showGlobalPersistence(){
-    	 for (int i = 0;i<this.edges.size();i++){
-   		      this.edges.get(i).display(this.nodes,-1,true);
-		      this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,-1,true);  	
+    	 ArrayList<Integer> edgesToHighlight = findIncidentEdgesToHighlight();
+    			 
+    	 for (int i = 0;i<this.edges.size();i++){   		      
+	   		   if (this.aggregatedNodes.size()>0){ //Highlight incident edges of selected nodes
+	   			   if (edgesToHighlight.contains(i)){	   				  
+	   				  this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,-1,true,1); 
+	   			   }else{
+	   				  this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,-1,true,0.2f);  
+	   			   }
+	   		   }else if (this.aggregatedEdges.size()>0){ //Highlight selected, aggregated edges
+	   			  int found = findEdge(this.aggregatedEdges,this.edges.get(i));
+	   			  if (found!=-1){
+	   				this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,-1,true,1); 
+	   			  }else{
+	   				this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,-1,true,0.2f);  
+	   			  }
+	   		   }else{ //Highlight all edges
+	   			  this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,-1,true,1); 
+	   		   }	       	
 	     }   	 
+    	 
 	   	 for (int i = 0;i<this.nodes.size();i++){
-	   		   this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true);
-	   		   this.nodes.get(i).display(-1,true); 
+	   		 if (this.aggregatedNodes.size()>0){ //Highlight selected, aggregated nodes
+	   			if (this.aggregatedNodes.contains(i)){
+	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,1);	   				 
+	   			}else{
+	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,0.2f);	   				
+	   			}	   			
+	   		 }/**else if (this.aggregatedEdges.size()>0){//Fade all highlights when edge is selected (?)
+	   			this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,0.2f);	   			 
+	   		 }*/else{ //Highlight all nodes
+	   			this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,1);	   			
+	   		 } 		   
+	   		 
 	   	  }     				 
-     } 
-     /**Draws all elements that ever existed in the network
-      * */
-     public void drawAllElements(){
-    	 for (int i = 0;i<this.edges.size();i++){
-  		      this.edges.get(i).display(this.nodes,-1,true);		       	
-	     }   	 
-	   	 for (int i = 0;i<this.nodes.size();i++){	   		   
-	   		   this.nodes.get(i).display(-1,true); 
-	   	  } 
-     }
+     }     
      /**Reads the text file containing the node positions and edges for each time slice
       * */
      public void readGraphDataFile(String filename){    	 
