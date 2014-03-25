@@ -113,7 +113,51 @@ public class ForceDirectedGraph {
 			 renderNodes(view);		 
 		 }		   	      
      } 
+     /**Draws all elements that ever existed in the network
+      * */
+     public void drawAllElements(){
+    	 for (int i = 0;i<this.edges.size();i++){
+  		      this.edges.get(i).display(this.nodes,-1,true,true);		       	
+	     }   	 
+	   	 for (int i = 0;i<this.nodes.size();i++){	   		   
+	   		   this.nodes.get(i).display(-1,true,1); 
+	   	  } 
+     }
+     /**Updates the node's position when the user drags it to a new positon (in drag and
+      * drop mode)
+      * */
+     public void updateNodePosition(float x,float y){
     
+    	 //First see which node is selected    	 
+    	 int nodeId = -1;
+    	 Node currentNode;
+    	 for (int i = 0;i<this.nodes.size();i++){
+     		currentNode = this.nodes.get(i);   
+     		if (parent.dist(x, y, currentNode.x, currentNode.y)<=(currentNode.RADIUS/2)){
+     			nodeId = currentNode.id;
+     			break;
+     		}            
+     	 }   
+    	 
+    	 if (nodeId==-1) return;
+    	 
+    	 //Then, update the position in array of nodes
+    	 this.nodes.get(nodeId).x = x;
+    	 this.nodes.get(nodeId).y = y;
+    	 Coordinate newCoord = new Coordinate(x,y);
+    	 //TODO: remove the need for an array of all positions (since it is fixed)
+    	 ArrayList<Coordinate> coords = this.nodes.get(nodeId).coords;
+    	 ArrayList<Coordinate> newCoords = new ArrayList<Coordinate>();
+    	 for (int i=0;i<coords.size();i++){
+    		 if (coords.get(i)!=null){
+    			 newCoords.add(newCoord);
+    		 }else{
+    			 newCoords.add(null);
+    		 }
+    	 }
+    	 this.nodes.get(nodeId).coords = newCoords;
+     }
+     
      /**Finds the min distance from the mouse point to a point on the line and decides if the edge
       * is selected and dragged along
       * */
