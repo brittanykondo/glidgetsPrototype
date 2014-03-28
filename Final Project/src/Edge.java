@@ -16,12 +16,20 @@ public class Edge {
       ArrayList <Coordinate> hintCoords; //Stores the coordinates along the hint path
       
      // static Color presentColour = new Color(67,162,202,255);
-      static Color presentColour = new Color(61,180,220,255); //Bluegreen      
+      static Color presentColour = new Color(61,180,220,255); //Bluegreen   
+      //static Color presentColour = new Color(61,130,247,255); //Royal blue
       static Color absentColour = new Color(189, 189, 189,255);
       
       //static Color yearMarkColour = new Color(50, 200, 150, 255);
-      static Color yearMarkColour = new Color(152, 255, 92, 255); //ArcTreesGreen3
-      static Color anchorColour = new Color(43,172,130,255);
+      //static Color yearMarkColour = new Color(152, 255, 92, 255); //ArcTreesGreen3
+     // static Color yearMarkColour = new Color(66, 219, 128, 255); //ArcTreesAlgaeGreen  
+      //static Color yearMarkColour = new Color(177,189,53,255); //Asparagus      
+      //static Color yearMarkColour = new Color(255,204,102,255);
+      //static Color yearMarkColour = new Color(255,196,79,255);
+      static Color yearMarkColour = new Color(255,171,2, 255);
+      
+      //static Color anchorColour = new Color(43,172,130,255);
+      static Color anchorColour = new Color(229,152,0, 255);
       
       // static Color edgeColour = new Color(25, 25, 25,255); //Grey
       // static Color edgeColour = new Color(206,18,86,255).darker();
@@ -48,7 +56,8 @@ public class Edge {
        * @param view the current time slice to draw
        * @param showDisappeared true if edges not in the current view should be drawn
        * */
-      void display(ArrayList<Node> nodes, int view,boolean showDisappeared,boolean highlight){   	     	 
+      void display(ArrayList<Node> nodes, int view,boolean showDisappeared,boolean highlight){  
+    	 
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  if (showDisappeared){
@@ -57,7 +66,7 @@ public class Edge {
     		  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){ //Safety Check
     			  if (highlight){
             		  parent.strokeWeight(2);    	
-                	  parent.stroke(67,162,202,255); 
+                	  parent.stroke(presentColour.getRGB()); 
             		  parent.line(n1.x,n1.y,n2.x,n2.y);
             	  }else{
             		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1.5f);
@@ -226,7 +235,7 @@ public class Edge {
     	  if (startPersistence!=0 && endPersistence!=0){      		  
     		  if (highlight){
         		  parent.strokeWeight(2);    	
-            	  parent.stroke(67,162,202,255); 
+            	  parent.stroke(presentColour.getRGB()); 
         		  parent.line(n1.x,n1.y,n2.x,n2.y);
         	  }else{
         		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1.5f);
@@ -235,7 +244,7 @@ public class Edge {
     		  interpolationAmt = easeInExpo(interpolation,0,255,1);
     		  if (highlight){
         		  parent.strokeWeight(2);    	
-            	  parent.stroke(67,162,202,interpolationAmt); 
+            	  parent.stroke(presentColour.getRed(),presentColour.getGreen(),presentColour.getBlue(),interpolationAmt); 
         		  parent.line(n1.x,n1.y,n2.x,n2.y);
         	  }else{
 				drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1.5f);
@@ -245,7 +254,7 @@ public class Edge {
     		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);
     		  if (highlight){
         		  parent.strokeWeight(2);    	
-            	  parent.stroke(67,162,202,interpolationAmt); 
+            	  parent.stroke(presentColour.getRed(),presentColour.getGreen(),presentColour.getBlue(),interpolationAmt); 
         		  parent.line(n1.x,n1.y,n2.x,n2.y);
         	  }else{
         		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1.5f);
@@ -411,14 +420,15 @@ public class Edge {
     	  
     	  //Draw arrows along the path     	 
     	  for (int i=0;i<this.numTimeSlices;i++){ 
-    		  if (i==0){
+    		  /**if (i==0){
     			  startArrow = new Coordinate(n1.x,n1.y); 
         		  endArrow = this.hintCoords.get(i); 
     		  }else{
     			  startArrow = this.hintCoords.get(i-1);
     	    	  endArrow = this.hintCoords.get(i);   
-    		  }     				  		 
-    		  
+    		  }  */   				  		 
+    		  startArrow = this.hintCoords.get(i);
+        	   endArrow = this.hintCoords.get(i+1);    
     		  if (persistence.get(i)==0){
     			  parent.stroke(absentColour.getRGB());    			     			  
     			  /**if (view==i){

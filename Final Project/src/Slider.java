@@ -60,7 +60,7 @@ public class Slider {
     	//Draw the main line
     	  parent.strokeWeight(2);
 	   	  parent.stroke(115,115,115);
-	   	  PFont font = parent.createFont("Arial",16,true);
+	   	  PFont font = parent.createFont("Droid Sans",16,true);
 	   	  parent.textFont(font);	   	  
 	   	  parent.fill(115,115,115);
 	   	  parent.textAlign(parent.CENTER);

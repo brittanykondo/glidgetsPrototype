@@ -72,7 +72,7 @@ public class ForceDirectedGraph {
     	 this.keyPressed = -1;
     	 this.draggingEdge = null;
     	 this.onDraggingEdge = false;
-    	 this.inGlobalView = false;
+    	 this.inGlobalView = false;    	
          readGraphDataFile(dataFile);            
      }   
      /**Handles mouse pressed event, to interact with the graph elements
@@ -884,8 +884,9 @@ public class ForceDirectedGraph {
 			String line;
 			line = scan.nextLine();
 			String[] items = line.split(" ");
+			//System.out.println(items[0]);
 			if (items[0].equals("node")){ //Save the node
-				nodeId = Integer.parseInt(items[1]);  
+				nodeId = Integer.parseInt(items[1]); 				
 				newNode = new Node(this.parent,nodeId,items[1],this.numTimeSlices);				
 				//When the node positions are fixed....
 				nodeX = Float.parseFloat(items[2]);
@@ -893,12 +894,13 @@ public class ForceDirectedGraph {
 				newNode.x = nodeX;
 				newNode.y = nodeY;
 				this.nodes.add(newNode);
-			}else if (items[0].equals("time")){ //Save the time slice
+			}else if (items[0].equals("time")){ //Save the time slice				
 				nodesDone = true;    
-				time = Integer.parseInt(items[1]);       				
+				time = Integer.parseInt(items[1]); 				
 			}else{
 				if (nodesDone){ //Save the edge information       						
 					newEdge = new Edge (this.parent,"",Integer.parseInt(items[0]),Integer.parseInt(items[1]),this.numTimeSlices);
+					//System.out.println(Integer.parseInt(items[0])+" "+Integer.parseInt(items[1]));
 					foundEdge = findEdge(this.edges,newEdge);
 					if (foundEdge==-1){ //If edge doesn't exist, create it       							
 						newEdge.persistence.set(time, 1);

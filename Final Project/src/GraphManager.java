@@ -21,6 +21,7 @@ public class GraphManager {
 	 public ArrayList<Node> nodes;
      public ArrayList<ArrayList<Edge>> edges;
      public ArrayList<ArrayList<Integer>> nodesWithEdges;
+     public PrintWriter output;
      
      PApplet parent;
      public int numTimeSlices;
@@ -35,7 +36,9 @@ public class GraphManager {
          //readVanDeBunt2();
     	 readVanDeBunt();
          //generateGraphs();
-         generateAverageGraph();
+         //generateAverageGraph();
+    	 //readReutersNetwork();
+    	 generateAverageGraph();
          if (saveData){
         	saveGraphData("savedData.txt"); //Doesn't work
          }    	  		   	 
@@ -115,27 +118,35 @@ public class GraphManager {
 		 allNodes.add(new Integer(17));
 		 Collections.sort(allNodes);
 		 
+		 this.output = parent.createWriter("reuters_saved.txt");
+		 
 		 //Print out the average graph info (ideally, should save to a text file)
 		 //Print out the node, nodeId, position and persistence at each time slice
 		 for (int i=0;i<allNodes.size();i++){	
-			 System.out.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i));		
+			 System.out.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i));
+			 this.output.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i));
 			 for (int j=0;j<this.numTimeSlices;j++){
 				  if (this.nodesWithEdges.get(j).contains(i)){	   	   			
-			   	      System.out.println("1");		       		  	
+			   	      System.out.println("1");	
+			   	     this.output.println("1");
 		   		  }else{	   			
 		   			  System.out.println("0");
+		   			this.output.println("0");
 		   		  }
 			 }
 		 }
 		//Print out the edge info
 			for (int i=0;i<this.numTimeSlices;i++){				
 				System.out.println("time "+i);
+				this.output.println("time "+i);
 				for (int j=0;j<this.edges.get(i).size();j++){
 					currentEdge = this.edges.get(i).get(j);					
 					System.out.println(currentEdge.node1+" "+currentEdge.node2);
+					this.output.println(currentEdge.node1+" "+currentEdge.node2);
 				}
 			}
-		 
+		 this.output.flush();
+		 this.output.close();
      }
      /**Finds an edge in an arraylist of edges
       * */
@@ -220,7 +231,7 @@ public class GraphManager {
       * Originally used in an experiment by Van De Bunt (1999)
       * */
      public void readVanDeBunt(){
-    	  String filename = "vanDeBunt_all.txt";
+    	  String filename = "vanDeBunt_all_time_30.txt";
        	  Scanner scan;
        	  int time = 0;
        	  int nodeCounter = 0;      	  
@@ -253,7 +264,7 @@ public class GraphManager {
        			e.printStackTrace();
        		}  
        	  this.numTimeSlices = time;     
-       	  System.out.println(this.numTimeSlices);
+       	  //System.out.println(this.numTimeSlices);
      }
      /**Parses one line of the van de bunt data set and sets the edges
       * */
@@ -277,59 +288,101 @@ public class GraphManager {
     	
     }
     
-    /************************************ Parser for heat map visualization *************************************************/
+    public void readReutersNetwork(){
+    	int timeSlices = 10;
+    	String filename = "Days.txt";
+     	  Scanner scan;
+     	  
+     	  int nodeCounter = 0;      	  
+     	  int type = 0;
+     	  this.nodes = new ArrayList<Node>();
+     	  this.edges = new ArrayList <ArrayList<Edge>>();
+     	  this.nodesWithEdges = new ArrayList <ArrayList<Integer>>();
+     	  String line;
+     	  String[] items;
+     	  int timeInterval = -1;
+     	  int edgeCounter = 0;
+     	  
+     	  try {
+     			scan = new Scanner(new File(filename));
+     			while(scan.hasNext())
+     			{   				
+     				
+     				line = scan.nextLine();
+     				items = line.replaceAll("(^\\s+|\\s+$)", "").split("\\s+");
+     				if (items[0].equals("Vertices")){ //Read in vertices      					
+     					type=1;
+     				}else if (items[0].equals("Edges")){//Read in edges
+     					type =2;
+     				}else{
+     					if (type==1){
+     						int [] persistence = stringToIntArray(items[2]);
+     						Node nodeToAdd = new Node(parent,Integer.parseInt(items[0]),items[1],timeSlices);
+     						boolean addIt = false;
+     						for (int i=0;i<persistence.length;i++){
+     							if(persistence[i]<=10){
+     								addIt = true;
+     							}
+     						}
+     						if (addIt){
+     							this.nodes.add(nodeToAdd);     							
+     						}     						
+     					}else if (type==2){
+     						int [] timeSliceNum = stringToIntArray(items[3]);     					    
+     						if (timeSliceNum[0]>timeSlices) break;
+     						
+     						if (timeSliceNum[0]!=timeInterval){
+     							this.nodesWithEdges.add(new ArrayList<Integer>());
+     							this.edges.add(new ArrayList<Edge>());
+     						}
+     						int nodeId1 = Integer.parseInt(items[0]);
+     						int nodeId2 = Integer.parseInt(items[1]);
+     						int adjustedNode1Id =getNodeId(nodeId1);
+     						int adjustedNode2Id =getNodeId(nodeId2);
+     						this.edges.get(timeSliceNum[0]-1).add(new Edge(parent,""+edgeCounter,adjustedNode1Id,adjustedNode2Id,timeSlices));
+     						
+     						ArrayList<Integer> temp = this.nodesWithEdges.get(timeSliceNum[0]-1);
+     						if (!temp.contains(adjustedNode1Id)){
+     							this.nodesWithEdges.get(timeSliceNum[0]-1).add(adjustedNode1Id);
+     						}
+     						
+     						if (!temp.contains(adjustedNode2Id)){
+     							this.nodesWithEdges.get(timeSliceNum[0]-1).add(adjustedNode2Id);
+     						}
+     						timeInterval = timeSliceNum[0]-1;
+     						edgeCounter++;
+     						
+     					}
+     				}
+     			}	       			
+     		} catch (FileNotFoundException e) {			
+     			e.printStackTrace();
+     		} 
+     	  for (int i=0;i<this.nodes.size();i++){
+     		  this.nodes.get(i).id = i;
+     	  }
+     	  this.numTimeSlices = timeSlices;          	  
+    }
+    public int getNodeId(int id){    	
+    	for (int i=0;i<this.nodes.size();i++){
+    		if (this.nodes.get(i).id==id) return i;
+    	}
+    	return -1;
+    }
+    //http://stackoverflow.com/questions/7646392/convert-string-to-int-array-in-java
+    public int [] stringToIntArray(String arr){
+    	String[] items = arr.replaceAll("\\[", "").replaceAll("\\]", "").split(",");
+
+    	int[] results = new int[items.length];
+
+    	for (int i = 0; i < items.length; i++) {
+    	    try {
+    	        results[i] = Integer.parseInt(items[i]);
+    	    } catch (NumberFormatException nfe) {};
+    	}
+    	return results;
+    }
     
-    /**Reads the text file containing time-varying data of undergraduate student's friendship
-     * Originally used in an experiment by Van De Bunt (1999)
-     * */
-    public void readVanDeBunt2(){
-   	  String filename = "vanDeBunt_all.txt";
-      	  Scanner scan;
-      	  int time = 0;
-      	  int nodeCounter = 0;       	 
-      	 
-      	  ArrayList<Edge> edges = new ArrayList <Edge>(); //All unique edges      	 
-      	  
-      	  try {
-      			scan = new Scanner(new File(filename));
-      			while(scan.hasNext())
-      			{   				
-      				String line;
-      				line = scan.nextLine();
-      				String[] items = line.split(" ");
-      				if (items[0].equals("time")){
-      					time = Integer.parseInt(items[1]);
-      					nodeCounter = 0;       					
-      				}else{      					
-      					//Find the edges for each time stamp	     					
-      				 	Edge newEdge;    
-      				 	//Parse a line of the file
-      				   	for (int i=0;i<items.length;i++){      				   		
-      				   		int relation = Integer.parseInt(items[i]);   					
-      						newEdge = new Edge (this.parent,"",i,nodeCounter,7);    			
-      						int foundEdge = find(edges,newEdge);
-       						if (foundEdge==-1){ //If edge doesn't exist, create it         							
-       							newEdge.persistence.set(time, relation);
-       							edges.add(newEdge);
-       						}else{//Otherwise just update the persistence info
-       							edges.get(foundEdge).persistence.set(time, relation);
-       						}       						    			
-      				   		
-      				   	} 
-      					nodeCounter++;       					
-      				}				
-      			}	       			
-      		} catch (FileNotFoundException e) {			
-      			e.printStackTrace();
-      		} 
-      	  for (int i=0;i<edges.size();i++){
-      		  System.out.print(edges.get(i).node1+"\t"+edges.get(i).node2+"\t");
-      		  for (int j=0;j<edges.get(i).persistence.size();j++){
-      			System.out.print(edges.get(i).persistence.get(j)+"\t");
-      		  }
-      		  System.out.println();
-      	  }
-    }  
     /** Finds an edge in an ArrayList of edges
      *  @param Arraylist of edges to search within
      *  @param e the edge to search for

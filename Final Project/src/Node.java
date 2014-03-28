@@ -30,15 +30,26 @@ public class Node {
       //Display colours
      // static Color presentColour = new Color(67,162,202,255);
       static Color presentColour = new Color(61,180,220,255); //Bluegreen
+      //static Color presentColour = new Color(61,130,247,255); //Royal blue
+      //static Color presentColour = new Color(69,121,205,255); //ArcTreesBlue
+      //static Color presentColour = new Color( 13,185,197,255); //Teal2
+     
       
       static Color absentColour = new Color(189, 189, 189,255);
       static Color presentColour_darker = new Color(0,128,183,255);
+      //static Color presentColour_darker = presentColour.darker();
      static Color absentColour_darker = new Color(134, 134, 134,255);
     
      //static Color yearMarkColour = new Color(66, 219, 128, 255); //ArcTreesAlgaeGreen  
-     static Color yearMarkColour = new Color(152, 255, 92, 255); //ArcTreesGreen3
+     //static Color yearMarkColour = new Color(152, 255, 92, 255); //ArcTreesGreen3
+     //static Color yearMarkColour = new Color(177,189,53,255); //Asparagus
+     //static Color yearMarkColour = new Color(255,204,102,255); //BlueSugarOrange
+     //static Color yearMarkColour = new Color(255,196,79,255);
+     static Color yearMarkColour = new Color(255,171,2, 255);
+          
+     //static Color anchorColour = new Color(66, 219, 128, 255).darker();
+     static Color anchorColour = new Color(229,152,0, 255);
      
-     static Color anchorColour = new Color(66, 219, 128, 255).darker();
      static Color yearLabel = new Color(67,78,98,255); //INK
      //static Color yearLabel = new Color(25,25,25,255);//Dark grey
      
@@ -56,9 +67,13 @@ public class Node {
      //static Color nodeColour = new Color(163,82,148,255);
      //SearchLightPink
      static Color nodeColour = new Color(254,141,185,255);
+     //Pink1
+     //static Color nodeColour = new Color(214,131,177,255);
+     //Purple1
+     //static Color nodeColour = new Color(141,108,161,255);
      
-     //static Color nodeLabelColour = new Color(25,25,25,255); //Dark grey
-     static Color nodeLabelColour = new Color(67,78,98,255); //INK
+     static Color nodeLabelColour = new Color(25,25,25,255); //Dark grey
+     //static Color nodeLabelColour = new Color(67,78,98,255); //INK
      
       /** Constructor for creating a Node
        * @param p Reference to processing applet for drawing with processing commands
