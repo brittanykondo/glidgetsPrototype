@@ -15,13 +15,19 @@ public class Edge {
       int numTimeSlices;    
       ArrayList <Coordinate> hintCoords; //Stores the coordinates along the hint path
       
-      static Color presentColour = new Color(67,162,202,255);
+     // static Color presentColour = new Color(67,162,202,255);
+      static Color presentColour = new Color(61,180,220,255); //Bluegreen      
       static Color absentColour = new Color(189, 189, 189,255);
-      static Color presentColour_darker = new Color(0,128,183,255);
-      static Color absentColour_darker = new Color(134, 134, 134,255);
-      static Color yearMarkColour = new Color(50, 200, 150, 255);
+      
+      //static Color yearMarkColour = new Color(50, 200, 150, 255);
+      static Color yearMarkColour = new Color(152, 255, 92, 255); //ArcTreesGreen3
       static Color anchorColour = new Color(43,172,130,255);
-      static Color edgeColour = new Color(25, 25, 25,255);
+      
+      // static Color edgeColour = new Color(25, 25, 25,255); //Grey
+      // static Color edgeColour = new Color(206,18,86,255).darker();
+      static Color edgeColour = new Color(67,78,98,255); //INK
+    
+      static Color yearLabel = new Color(0,0,0,255);
       
       Edge(PApplet p,String l, int n1, int n2, int numTimeSlices){
     	  this.parent = p;
@@ -97,7 +103,9 @@ public class Edge {
 	    		  prevX = interpX;
 	    		  prevY = interpY;    		 
 	    	  }	    	 
-	    	  this.hintCoords.add(new Coordinate(end.x,end.y));   	
+	    	  this.hintCoords.add(new Coordinate(end.x,end.y));
+	    	  drawEdge(n1.x,n1.y,n2.x,n2.y,(int)(255*fade),1.5f);
+	    	  
 	    	  parent.strokeWeight(5);
 	    	 
 	    	  //Draw the hint path      	 
@@ -112,11 +120,10 @@ public class Edge {
 	    			  end = this.hintCoords.get(i+1);
 	    			  float offsetX = (end.x - start.x)*(0.01f)+ start.x;
 		    		  float offsetY = start.y +(end.y-start.y)*((offsetX-start.x)/(end.x-start.x));   
-	    			  parent.stroke(67,162,202,(255*fade));
+	    			  parent.stroke(presentColour.getRed(),presentColour.getGreen(),presentColour.getBlue(),(255*fade));
 	    			  parent.line(offsetX,offsetY,this.hintCoords.get(i+1).x,this.hintCoords.get(i+1).y);    			      			
 	    		  }       		 
-	    	  } 
-	    	  drawEdge(n1.x,n1.y,n2.x,n2.y,(int)(255*fade),1.5f);
+	    	  } 	    	 
     	  }    	  
       }      
       /** Visualizes the overall edge persistence (how often is it displayed?) 
@@ -468,7 +475,7 @@ public class Edge {
         
          PFont font = parent.createFont("Droid Sans",20,true);
 	   	 parent.textFont(font);
-	   	 parent.fill(255,255,255,255);
+	   	 parent.fill(yearLabel.getRGB());
 	   	 ArrayList<Coordinate> textCoords = findPerpendicularLine(newX,newY,endC.x,endC.y,20.0f);
    	     parent.text(view, textCoords.get(0).x, textCoords.get(0).y);
     }

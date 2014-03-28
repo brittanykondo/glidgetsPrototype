@@ -28,25 +28,38 @@ public class Node {
       static final float RADIUS = 30;
       
       //Display colours
-      static Color presentColour = new Color(67,162,202,255);
+     // static Color presentColour = new Color(67,162,202,255);
+      static Color presentColour = new Color(61,180,220,255); //Bluegreen
+      
       static Color absentColour = new Color(189, 189, 189,255);
       static Color presentColour_darker = new Color(0,128,183,255);
      static Color absentColour_darker = new Color(134, 134, 134,255);
-     //static Color yearMarkColour = new Color(50, 200, 150, 255); Original
-     static Color yearMarkColour = new Color(66, 219, 128, 255); //ArcTressAlgaeGreen
-     //static Color yearMarkColour = new Color(51, 157, 70, 255); //Green1
-     //static Color yearMarkColour = new Color(102, 192, 108, 255); //Green2
-     //static Color yearMarkColour = new Color(75, 181, 57, 255); //Festival Green   		
+    
+     //static Color yearMarkColour = new Color(66, 219, 128, 255); //ArcTreesAlgaeGreen  
+     static Color yearMarkColour = new Color(152, 255, 92, 255); //ArcTreesGreen3
      
-     //static Color anchorColour = new Color(43,172,130,255);
      static Color anchorColour = new Color(66, 219, 128, 255).darker();
+     static Color yearLabel = new Color(67,78,98,255); //INK
+     //static Color yearLabel = new Color(25,25,25,255);//Dark grey
      
-    /** static Color nodeColour = new Color(206,18,86,255);
-     static Color nodeLabelColour = new Color(247,244,249,255);*/
-     static Color nodeColour = new Color(255,158,84,255);
-     static Color nodeLabelColour = new Color(0,0,0,255);    
-
-      
+     //Visgets Pink
+     //static Color nodeColour = new Color(206,18,86,255);
+     //static Color nodeLabelColour = new Color(247,244,249,255);
+     
+     //Orange2
+     //static Color nodeColour = new Color(255,158,84,255);
+     //static Color nodeLabelColour = new Color(25,25,25,255);   
+     
+     //MEPurple4
+     //static Color nodeColour = new Color(125,67,117,255);
+     //MEPurple3
+     //static Color nodeColour = new Color(163,82,148,255);
+     //SearchLightPink
+     static Color nodeColour = new Color(254,141,185,255);
+     
+     //static Color nodeLabelColour = new Color(25,25,25,255); //Dark grey
+     static Color nodeLabelColour = new Color(67,78,98,255); //INK
+     
       /** Constructor for creating a Node
        * @param p Reference to processing applet for drawing with processing commands
        * @param id unique id to discern nodes
@@ -186,7 +199,7 @@ public class Node {
     	  if (showAllHighlights || this.coords.get(view)!=null){
     		  parent.strokeCap(parent.SQUARE);        	 
         	  parent.noFill();
-        	  parent.stroke(67,162,202,(255*fade));
+        	  parent.stroke(presentColour.getRed(),presentColour.getGreen(),presentColour.getBlue(),(255*fade));
     		  parent.strokeWeight(MIN_WEIGHT);
         	  for (int i=0;i<this.numTimeSlices;i++){     		   		 
         		  if (this.coords.get(i)!=null){    			  
@@ -246,7 +259,7 @@ public class Node {
           
           PFont font = parent.createFont("Droid Sans",20,true);
 	   	  parent.textFont(font);
-	   	  parent.fill(255,255,255,255);
+	   	  parent.fill(yearLabel.getRGB());
           
 	   	  if (fixAnchor==1){
         	  float dist = parent.dist(x1, y1, parent.mouseX, parent.mouseY);

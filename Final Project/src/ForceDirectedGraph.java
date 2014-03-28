@@ -812,7 +812,7 @@ public class ForceDirectedGraph {
      //TODO: refactor this code, so many if statements!!
      public void showGlobalPersistence(){
     	 ArrayList<Integer> edgesToHighlight = findIncidentEdgesToHighlight();
-    			 
+    	     			 
     	 for (int i = 0;i<this.edges.size();i++){   		      
 	   		   if (this.aggregatedNodes.size()>0){ //Highlight incident edges of selected nodes
 	   			   if (edgesToHighlight.contains(i)){	   				  
@@ -839,14 +839,29 @@ public class ForceDirectedGraph {
 	   			}else{
 	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,0.2f);	   				
 	   			}	   			
-	   		 }/**else if (this.aggregatedEdges.size()>0){//Fade all highlights when edge is selected (?)
-	   			this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,0.2f);	   			 
-	   		 }*/else{ //Highlight all nodes
+	   		 }else if (this.aggregatedEdges.size()>0){//Fade all but the nodes connected to selected edges
+	   			boolean found = findNodeInEdges(this.aggregatedEdges,i);
+	   			if (found){
+	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,1);	   
+	   			}else{
+	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,0.2f);	   
+	   			}	   						 
+	   		 }else{ //Highlight all nodes
 	   			this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,1);	   			
 	   		 } 		   
 	   		 
 	   	  }     				 
      }     
+     /**Searches for a node ID in an array of edges
+      * */
+     public boolean findNodeInEdges(ArrayList<Edge> e, int nodeId){
+    	 for (int i=0;i<e.size();i++){
+    		 if (e.get(i).node1==nodeId || e.get(i).node2==nodeId){
+    			 return true;
+    		 }
+    	 }
+    	 return false;
+     }
      /**Reads the text file containing the node positions and edges for each time slice
       * */
      public void readGraphDataFile(String filename){    	 
