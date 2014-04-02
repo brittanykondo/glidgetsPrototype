@@ -27,53 +27,17 @@ public class Node {
       static int MAX_WEIGHT = 15;
       static final float RADIUS = 30;
       
-      //Display colours
-     // static Color presentColour = new Color(67,162,202,255);
-      static Color presentColour = new Color(61,180,220,255); //Bluegreen
-      //static Color presentColour = new Color(61,130,247,255); //Royal blue
-      //static Color presentColour = new Color(69,121,205,255); //ArcTreesBlue
-      //static Color presentColour = new Color( 13,185,197,255); //Teal2
-     
-      
-      static Color absentColour = new Color(189, 189, 189,255);
-      static Color presentColour_darker = new Color(0,128,183,255);
-      //static Color presentColour_darker = presentColour.darker();
-     static Color absentColour_darker = new Color(134, 134, 134,255);
-    
-     //static Color yearMarkColour = new Color(66, 219, 128, 255); //ArcTreesAlgaeGreen  
-     //static Color yearMarkColour = new Color(152, 255, 92, 255); //ArcTreesGreen3
-     //static Color yearMarkColour = new Color(177,189,53,255); //Asparagus
-     //static Color yearMarkColour = new Color(255,204,102,255); //BlueSugarOrange
-     //static Color yearMarkColour = new Color(255,196,79,255);
-     static Color yearMarkColour = new Color(255,171,2, 255);
-          
-     //static Color anchorColour = new Color(66, 219, 128, 255).darker();
-     static Color anchorColour = new Color(229,152,0, 255);
-     
-     static Color yearLabel = new Color(67,78,98,255); //INK
-     //static Color yearLabel = new Color(25,25,25,255);//Dark grey
-     
-     //Visgets Pink
-     //static Color nodeColour = new Color(206,18,86,255);
-     //static Color nodeLabelColour = new Color(247,244,249,255);
-     
-     //Orange2
-     //static Color nodeColour = new Color(255,158,84,255);
-     //static Color nodeLabelColour = new Color(25,25,25,255);   
-     
-     //MEPurple4
-     //static Color nodeColour = new Color(125,67,117,255);
-     //MEPurple3
-     //static Color nodeColour = new Color(163,82,148,255);
-     //SearchLightPink
-     static Color nodeColour = new Color(254,141,185,255);
-     //Pink1
-     //static Color nodeColour = new Color(214,131,177,255);
-     //Purple1
-     //static Color nodeColour = new Color(141,108,161,255);
-     
-     static Color nodeLabelColour = new Color(25,25,25,255); //Dark grey
-     //static Color nodeLabelColour = new Color(67,78,98,255); //INK
+      //Display colours     
+      static Colours getColours = new Colours();
+      static Color presentColour = getColours.BlueGreen;         
+      static Color absentColour = getColours.LightGrey;
+      static Color presentColour_darker = getColours.DarkBlue;
+      static Color absentColour_darker = getColours.DarkGrey;
+      static Color yearMarkColour = getColours.BlueSugarOrangeDarker; 
+      static Color anchorColour = getColours.DarkOrange;  
+      static Color yearLabel = getColours.Ink;    
+      static Color nodeColour = getColours.SearchLightPink;
+      static Color nodeLabelColour = getColours.Ink;
      
       /** Constructor for creating a Node
        * @param p Reference to processing applet for drawing with processing commands
@@ -97,7 +61,7 @@ public class Node {
     	  this.coords = new ArrayList<Coordinate>();
     	  this.degrees = new ArrayList<Integer>();
     	  this.maxDegree = -1;
-    	  setHintAngles();
+    	  setHintAngles();   	  
       }        
       
       /**Renders the node at its position at a certain moment in time
@@ -237,8 +201,7 @@ public class Node {
     		  return new int [] {this.id,1};
     	  } else if (selectedDisappeared  && parent.mousePressed && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)){
     		  return new int [] {this.id,1};
-    	  }
-    	  
+    	  }    	  
     	  /**else if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)+MAX_WEIGHT){  //Drawing around a node or clicking near it  			    		 
     		  return new int [] {this.id,2};
     	  } */  	 
@@ -367,33 +330,18 @@ public class Node {
        * */
       void animate(int start,int end, float interpolation){
     	  Coordinate startPosition = this.coords.get(start);
-    	  Coordinate endPosition = this.coords.get(end);    	 
+    	  Coordinate endPosition = this.coords.get(end);     	 
     	 
-    	  /**if (startPosition != null && endPosition !=null){    		
-    		  if (pinned[0] == this.id || pinned[1]==this.id){    			  
-    			  drawNode(this.coords.get(pinnedView).x,this.coords.get(pinnedView).y,255); 
-    		  }else{
-    			  interpPosition = interpolatePosition(startPosition,endPosition,interpolation);
-        		  drawNode(interpPosition.x,interpPosition.y,255); 
-    		  }
-    	  }*/
-    	  int interpolationAmt;
-    	 /** if (this.id==11){
-    		  System.out.println(startPosition+" "+start+" "+endPosition+" "+end);
-    	  }*/
-    	 
+    	  int interpolationAmt;  	
     	  
     	  if (startPosition != null && endPosition !=null){   
-    		  drawNode(endPosition.x,endPosition.y,255);
+    		  drawNode(this.x,this.y,255);
     	  }else if (startPosition==null && endPosition!=null){ //Node is fading in 
     		  interpolationAmt = easeInExpo(interpolation,0,255,1);
-    		  drawNode(endPosition.x,endPosition.y,interpolationAmt);    		  
+    		  drawNode(this.x,this.y,interpolationAmt);    		  
     	  }else if (startPosition!=null && endPosition==null){ //Node is fading out    		  
-    		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);    		 
-    		  /**if (this.id==11){
-        		  System.out.println("fade out"+interpolationAmt);
-        		  }*/
-    		  drawNode(startPosition.x,startPosition.y,interpolationAmt);    		
+    		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);     		  
+    		  drawNode(this.x,this.y,interpolationAmt);    		
     	  }     
       }  
       /** Function to compute the transparency of a node fading in

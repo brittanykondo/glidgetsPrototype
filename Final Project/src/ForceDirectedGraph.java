@@ -143,19 +143,7 @@ public class ForceDirectedGraph {
     	 
     	 //Then, update the position in array of nodes
     	 this.nodes.get(nodeId).x = x;
-    	 this.nodes.get(nodeId).y = y;
-    	 Coordinate newCoord = new Coordinate(x,y);
-    	 //TODO: remove the need for an array of all positions (since it is fixed)
-    	 ArrayList<Coordinate> coords = this.nodes.get(nodeId).coords;
-    	 ArrayList<Coordinate> newCoords = new ArrayList<Coordinate>();
-    	 for (int i=0;i<coords.size();i++){
-    		 if (coords.get(i)!=null){
-    			 newCoords.add(newCoord);
-    		 }else{
-    			 newCoords.add(null);
-    		 }
-    	 }
-    	 this.nodes.get(nodeId).coords = newCoords;
+    	 this.nodes.get(nodeId).y = y;    	 
      }
      
      /**Finds the min distance from the mouse point to a point on the line and decides if the edge
@@ -266,7 +254,7 @@ public class ForceDirectedGraph {
     			 parent.textFont(font);	   	  
     			 parent.fill(n.nodeLabelColour.getRGB());
     			 parent.textAlign(parent.CENTER);    			 
-       	   	  	 parent.text(n.id, n.x, n.y +4); 
+       	   	  	 parent.text(n.label, n.x, n.y +4); 
     		 }        	  
     	 }else if (type==1){
     		 ArrayList<Integer> nodes = new ArrayList<Integer>();
@@ -887,10 +875,10 @@ public class ForceDirectedGraph {
 			//System.out.println(items[0]);
 			if (items[0].equals("node")){ //Save the node
 				nodeId = Integer.parseInt(items[1]); 				
-				newNode = new Node(this.parent,nodeId,items[1],this.numTimeSlices);				
+				newNode = new Node(this.parent,nodeId,items[4],this.numTimeSlices);				
 				//When the node positions are fixed....
 				nodeX = Float.parseFloat(items[2]);
-				nodeY = Float.parseFloat(items[3]);
+				nodeY = Float.parseFloat(items[3]);				
 				newNode.x = nodeX;
 				newNode.y = nodeY;
 				this.nodes.add(newNode);

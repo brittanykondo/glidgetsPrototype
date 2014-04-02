@@ -231,7 +231,7 @@ public class GraphManager {
       * Originally used in an experiment by Van De Bunt (1999)
       * */
      public void readVanDeBunt(){
-    	  String filename = "vanDeBunt_all_time_30.txt";
+    	  String filename = "vanDeBunt_all.txt";
        	  Scanner scan;
        	  int time = 0;
        	  int nodeCounter = 0;      	  

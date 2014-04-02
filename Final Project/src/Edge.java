@@ -15,27 +15,15 @@ public class Edge {
       int numTimeSlices;    
       ArrayList <Coordinate> hintCoords; //Stores the coordinates along the hint path
       
-     // static Color presentColour = new Color(67,162,202,255);
-      static Color presentColour = new Color(61,180,220,255); //Bluegreen   
-      //static Color presentColour = new Color(61,130,247,255); //Royal blue
-      static Color absentColour = new Color(189, 189, 189,255);
-      
-      //static Color yearMarkColour = new Color(50, 200, 150, 255);
-      //static Color yearMarkColour = new Color(152, 255, 92, 255); //ArcTreesGreen3
-     // static Color yearMarkColour = new Color(66, 219, 128, 255); //ArcTreesAlgaeGreen  
-      //static Color yearMarkColour = new Color(177,189,53,255); //Asparagus      
-      //static Color yearMarkColour = new Color(255,204,102,255);
-      //static Color yearMarkColour = new Color(255,196,79,255);
-      static Color yearMarkColour = new Color(255,171,2, 255);
-      
-      //static Color anchorColour = new Color(43,172,130,255);
-      static Color anchorColour = new Color(229,152,0, 255);
-      
-      // static Color edgeColour = new Color(25, 25, 25,255); //Grey
-      // static Color edgeColour = new Color(206,18,86,255).darker();
-      static Color edgeColour = new Color(67,78,98,255); //INK
+      //Display colours     
+      static Colours getColours = new Colours();
+      static Color presentColour = getColours.BlueGreen;         
+      static Color absentColour = getColours.LightGrey;      
+      static Color yearMarkColour = getColours.BlueSugarOrangeDarker; 
+      static Color anchorColour = getColours.DarkOrange;  
+      static Color yearLabel = getColours.Ink;    
+      static Color edgeColour = getColours.Ink; 
     
-      static Color yearLabel = new Color(0,0,0,255);
       
       Edge(PApplet p,String l, int n1, int n2, int numTimeSlices){
     	  this.parent = p;
@@ -69,9 +57,8 @@ public class Edge {
                 	  parent.stroke(presentColour.getRGB()); 
             		  parent.line(n1.x,n1.y,n2.x,n2.y);
             	  }else{
-            		  drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,255,1.5f);
-            	  }
-        		  
+            		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1.5f);
+            	  }        		  
         	  }
     	  }    	  
       } 
@@ -135,50 +122,7 @@ public class Edge {
 	    	  } 	    	 
     	  }    	  
       }      
-      /** Visualizes the overall edge persistence (how often is it displayed?) 
-       *  at a certain time slice
-       *  @param nodes all nodes in the graph
-       *  @param view  the view to draw the edges at
-       *      
-      void displayGlobalPersistence(ArrayList<Node> nodes,int view){   
-    	  Node n1 = nodes.get(this.node1);
-    	  Node n2 = nodes.get(this.node2);
-    	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){
-    		  this.globalPersistence = calculateGlobalPersistence(); 
-    		  drawGlobalPersistenceHighlights(n1.coords.get(view),n2.coords.get(view));
-    		  //Stroke thickness: 
-    		  //drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,1,(float)(this.globalPersistence*10));      		
-    	  }     	  
-      }
-      /** Adds highlights to the edges to show global persistence
-       *        
-      void drawGlobalPersistenceHighlights(Coordinate c1, Coordinate c2){
-    	 
-    	  //Barchart gylphs along edges:
-    	  Coordinate start = pointOnLine(c2.x,c2.y,c1.x,c1.y,-NODE_RADIUS/2);
-    	  Coordinate end = pointOnLine(c1.x,c1.y,c2.x,c2.y,-NODE_RADIUS/2);    	  
-    	  
-    	  float lineHalfDist = euclideanDistance(start.x,start.y,end.x,end.y)/8;    	  
-    	  Coordinate endPoint1 = pointOnLine(start.x,start.y,end.x,end.y,-lineHalfDist*this.globalPersistence);    	  
-    	  Coordinate endPoint2 = pointOnLine(end.x,end.y,start.x,start.y,-lineHalfDist*this.globalPersistence);
-    	
-    	  parent.stroke(67,162,202,255);  
-    	  parent.line(end.x, end.y, endPoint1.x, endPoint1.y);
-    	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);   	  
-    	  
-    	  //Short gylphs along edges with thickness encoding persistence
-    	  /**Coordinate start = pointOnLine(c2.x,c2.y,c1.x,c1.y,-NODE_RADIUS/2);
-    	  Coordinate end = pointOnLine(c1.x,c1.y,c2.x,c2.y,-NODE_RADIUS/2);    	  
-    	  
-    	  float lineHalfDist = euclideanDistance(start.x,start.y,end.x,end.y)/8;    	  
-    	  Coordinate endPoint1 = pointOnLine(start.x,start.y,end.x,end.y,-lineHalfDist*0.3f);    	  
-    	  Coordinate endPoint2 = pointOnLine(end.x,end.y,start.x,start.y,-lineHalfDist*0.3f);
-    	
-    	  parent.stroke(67,162,202,150);  
-    	  parent.strokeWeight(7*this.globalPersistence); 
-    	  parent.line(end.x, end.y, endPoint1.x, endPoint1.y);
-    	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);      	  
-      }*/
+      
       
       /** Calculates the distance between two points
        * (x1,y1) is the first point
@@ -229,37 +173,22 @@ public class Edge {
     	  int startPersistence = this.persistence.get(start);
     	  int endPersistence = this.persistence.get(end);
     	  
-    	  int interpolationAmt;      
+    	  int interpolationAmt = 255;      
     	  
-    	  //TODO: not very elegant way of drawing the edge (check highlight each time), refactor this later
-    	  if (startPersistence!=0 && endPersistence!=0){      		  
-    		  if (highlight){
-        		  parent.strokeWeight(2);    	
-            	  parent.stroke(presentColour.getRGB()); 
-        		  parent.line(n1.x,n1.y,n2.x,n2.y);
-        	  }else{
-        		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1.5f);
-        	  }
-    	  }else if (startPersistence==0 && endPersistence==1){ //Fading in
-    		  interpolationAmt = easeInExpo(interpolation,0,255,1);
-    		  if (highlight){
-        		  parent.strokeWeight(2);    	
-            	  parent.stroke(presentColour.getRed(),presentColour.getGreen(),presentColour.getBlue(),interpolationAmt); 
-        		  parent.line(n1.x,n1.y,n2.x,n2.y);
-        	  }else{
-				drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1.5f);
-        	  }
-
+    	  if (startPersistence==0 && endPersistence==1){ //Fading in
+    		  interpolationAmt = easeInExpo(interpolation,0,255,1);    		
     	  } else if (startPersistence==1 && endPersistence==0) { //Fading out    		  
-    		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);
-    		  if (highlight){
-        		  parent.strokeWeight(2);    	
-            	  parent.stroke(presentColour.getRed(),presentColour.getGreen(),presentColour.getBlue(),interpolationAmt); 
-        		  parent.line(n1.x,n1.y,n2.x,n2.y);
-        	  }else{
-        		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1.5f);
-        	  }
-    	  }     	 
+    		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);    		  
+    	  }
+    	  
+    	  //If highlight is set to true, colour the edge as blue
+    	  if (highlight){
+    		  parent.strokeWeight(2);    	
+        	  parent.stroke(presentColour.getRed(),presentColour.getGreen(),presentColour.getBlue(),interpolationAmt); 
+    		  parent.line(n1.x,n1.y,n2.x,n2.y);
+    	  }else{
+    		  drawEdge(n1.x,n1.y,n2.x,n2.y,interpolationAmt,1.5f);
+    	  }
       }
       /** Renders the edge between the specified coordinates
        *  @param x0,y0,x1,y1 the coordinates
@@ -380,7 +309,7 @@ public class Edge {
     		  prevY = interpY;    		 
     	  }	    	 
     	  this.hintCoords.add(new Coordinate(end.x,end.y));
-    	  //Draw hint path: Highlight surrounding the edge    	  
+    	  //Old Design: Hint path as a highlight surrounding the edge    	  
     	 /** for (int i=1;i<this.hintCoords.size();i++){     		  
     		  if (persistence.get(i-1)==0){
     			  parent.stroke(189, 189, 189,255);
@@ -394,7 +323,8 @@ public class Edge {
     	  
     	  parent.strokeWeight(5);
     	  parent.stroke(25,25,25,255);
-    	  parent.line(start.x, start.y, end.x, end.y);*/   
+    	  parent.line(start.x, start.y, end.x, end.y);*/  
+    	  
     	  Coordinate startArrow,endArrow;
     	  parent.strokeWeight(3);
 		  
@@ -420,15 +350,14 @@ public class Edge {
     	  
     	  //Draw arrows along the path     	 
     	  for (int i=0;i<this.numTimeSlices;i++){ 
-    		  /**if (i==0){
+    		  if (i==0){
     			  startArrow = new Coordinate(n1.x,n1.y); 
         		  endArrow = this.hintCoords.get(i); 
     		  }else{
     			  startArrow = this.hintCoords.get(i-1);
     	    	  endArrow = this.hintCoords.get(i);   
-    		  }  */   				  		 
-    		  startArrow = this.hintCoords.get(i);
-        	   endArrow = this.hintCoords.get(i+1);    
+    		  }     				  		 
+    		  
     		  if (persistence.get(i)==0){
     			  parent.stroke(absentColour.getRGB());    			     			  
     			  /**if (view==i){
@@ -498,8 +427,7 @@ public class Edge {
     void drawArrow(float x1,float y1, float x2, float y2) {   
     	  float lineLength = 6;
     	  parent.pushMatrix();
-    	  parent.strokeWeight(2);
-    	  //parent.strokeJoin(parent.ROUND);
+    	  parent.strokeWeight(2);    	
     	  parent.translate(x2, y2);
     	  float a = parent.atan2(x1-x2, y2-y1);
     	  parent.rotate(a);
@@ -531,3 +459,50 @@ public class Edge {
         return lineCoords;
    }
 }
+
+
+///////////////////////////////Old designs for global highlights/////////////////////////////////////////////////
+/** Visualizes the overall edge persistence (how often is it displayed?) 
+ *  at a certain time slice
+ *  @param nodes all nodes in the graph
+ *  @param view  the view to draw the edges at
+ *      
+void displayGlobalPersistence(ArrayList<Node> nodes,int view){   
+	  Node n1 = nodes.get(this.node1);
+	  Node n2 = nodes.get(this.node2);
+	  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){
+		  this.globalPersistence = calculateGlobalPersistence(); 
+		  drawGlobalPersistenceHighlights(n1.coords.get(view),n2.coords.get(view));
+		  //Stroke thickness: 
+		  //drawEdge(n1.coords.get(view).x,n1.coords.get(view).y,n2.coords.get(view).x,n2.coords.get(view).y,1,(float)(this.globalPersistence*10));      		
+	  }     	  
+}
+/** Adds highlights to the edges to show global persistence
+ *        
+void drawGlobalPersistenceHighlights(Coordinate c1, Coordinate c2){
+	 
+	  //Barchart gylphs along edges:
+	  Coordinate start = pointOnLine(c2.x,c2.y,c1.x,c1.y,-NODE_RADIUS/2);
+	  Coordinate end = pointOnLine(c1.x,c1.y,c2.x,c2.y,-NODE_RADIUS/2);    	  
+	  
+	  float lineHalfDist = euclideanDistance(start.x,start.y,end.x,end.y)/8;    	  
+	  Coordinate endPoint1 = pointOnLine(start.x,start.y,end.x,end.y,-lineHalfDist*this.globalPersistence);    	  
+	  Coordinate endPoint2 = pointOnLine(end.x,end.y,start.x,start.y,-lineHalfDist*this.globalPersistence);
+	
+	  parent.stroke(67,162,202,255);  
+	  parent.line(end.x, end.y, endPoint1.x, endPoint1.y);
+	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);   	  
+	  
+	  //Short gylphs along edges with thickness encoding persistence
+	  /**Coordinate start = pointOnLine(c2.x,c2.y,c1.x,c1.y,-NODE_RADIUS/2);
+	  Coordinate end = pointOnLine(c1.x,c1.y,c2.x,c2.y,-NODE_RADIUS/2);    	  
+	  
+	  float lineHalfDist = euclideanDistance(start.x,start.y,end.x,end.y)/8;    	  
+	  Coordinate endPoint1 = pointOnLine(start.x,start.y,end.x,end.y,-lineHalfDist*0.3f);    	  
+	  Coordinate endPoint2 = pointOnLine(end.x,end.y,start.x,start.y,-lineHalfDist*0.3f);
+	
+	  parent.stroke(67,162,202,150);  
+	  parent.strokeWeight(7*this.globalPersistence); 
+	  parent.line(end.x, end.y, endPoint1.x, endPoint1.y);
+	  parent.line(start.x, start.y, endPoint2.x, endPoint2.y);      	  
+}*/
