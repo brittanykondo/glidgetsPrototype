@@ -173,9 +173,10 @@ public class Edge {
     	  int startPersistence = this.persistence.get(start);
     	  int endPersistence = this.persistence.get(end);
     	  
-    	  int interpolationAmt = 255;      
-    	  
-    	  if (startPersistence==0 && endPersistence==1){ //Fading in
+    	  int interpolationAmt = 0;      
+    	  if (startPersistence==1 && endPersistence==1){
+    		  interpolationAmt = 255;
+    	  }else if (startPersistence==0 && endPersistence==1){ //Fading in
     		  interpolationAmt = easeInExpo(interpolation,0,255,1);    		
     	  } else if (startPersistence==1 && endPersistence==0) { //Fading out    		  
     		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);    		  

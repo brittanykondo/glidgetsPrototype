@@ -25,7 +25,7 @@ public class Node {
       //Class Constants
       static int MIN_WEIGHT = 6;
       static int MAX_WEIGHT = 15;
-      static final float RADIUS = 30;
+      static final float RADIUS = 32;
       
       //Display colours     
       static Colours getColours = new Colours();
@@ -65,15 +65,23 @@ public class Node {
       }        
       
       /**Renders the node at its position at a certain moment in time
+       * @param view  the current time point
+       * @param aggNodes  a list of selected nodes or nodes attached to selected edges
+       * @param fade    the amount of transparency
+       * @param  outlineOnly  true if only the outline of the node should be displayed (when attached to an edge)
        * */
-      void display(int view,boolean showDisappeared,float fade){ 
-    	  if (showDisappeared){
-    		  drawNode(this.x, this.y,(int)(255*fade));    	
-    	  }else{
-    		  if (this.coords.get(view)!=null){
-        		  drawNode(this.x, this.y,(int)(255*fade));    		  
-        	  } 
-    	  }    	    	  	  
+      void display(int view,ArrayList<Integer> aggNodes,float fade, boolean outlineOnly){    
+    	  if (view==-1){ //In global view
+    		  drawNode((int)(255*fade),false);
+    	  }else if (aggNodes.contains(this.id) && this.coords.get(view)==null){ //Disappearing node case
+    		  if (outlineOnly){ //Node attached to an edge
+    			  drawNode((int)(255*fade),outlineOnly);
+    		  }else{
+    			  drawNodeLabel((int)(255*fade));
+    		  }    		     	
+    	  }else if (this.coords.get(view)!=null){
+    		  drawNode((int)(255*fade),false);
+    	  }
       }
       /**Finds and saved the degree (number of edges incident on the node) of the node
        * for each time slice
@@ -128,21 +136,28 @@ public class Node {
        *  @param x,y the position coordinates
        *  @param alpha the amount of transparency (0 to 255)
        * */
-      void drawNode(float x, float y,int alpha){    	  
-    	  
-    	  parent.fill(nodeColour.getRed(),nodeColour.getGreen(),nodeColour.getBlue(),alpha);    	  
-    	  parent.noStroke();    	 
-    	  parent.ellipse(x,y,RADIUS,RADIUS);  
-    	  
-    	  PFont font = parent.createFont("Droid Sans",12,true);
+      void drawNode(int alpha,boolean outlineOnly){ 
+    	  if (outlineOnly){
+    		  parent.stroke(nodeColour.getRed(),nodeColour.getGreen(),nodeColour.getBlue(),alpha);    	  
+        	  parent.strokeWeight(2) ;
+        	  parent.noFill();
+        	  parent.ellipse(this.x,this.y,RADIUS,RADIUS); 
+    	  }else{
+    		  parent.fill(nodeColour.getRed(),nodeColour.getGreen(),nodeColour.getBlue(),alpha);    	  
+        	  parent.noStroke();    	 
+        	  parent.ellipse(this.x,this.y,RADIUS,RADIUS);         	  	   
+    	  }
+    	  drawNodeLabel(alpha); 
+      }    
+      /**Draws only the label, centered on top of the node
+       * */
+      void drawNodeLabel(int alpha){    	  
+    	  PFont font = parent.createFont("Century Gothic",12,true);
 	   	  parent.textFont(font);	   	  
 	   	  parent.fill(nodeLabelColour.getRed(),nodeLabelColour.getGreen(),nodeLabelColour.getBlue(),alpha);
 	   	  parent.textAlign(parent.CENTER);
-	   	  parent.text(this.label, x,y+4);  	   	  
-	   	 
-    	  this.x = x;
-	   	  this.y = y;
-      }    
+	   	  parent.text(this.label, this.x,this.y+4); 
+      }
       /** Adds highlights to the nodes to show global persistence
        *     
       void drawGlobalPersistenceHighlights(){
@@ -186,7 +201,7 @@ public class Node {
                 			  (this.hintAngles.get(i).y-parent.HALF_PI-0.06f));       			      			  
         		  }       	  	
         	  }
-        	  drawNode(this.x,this.y,(int)(255*fade));
+        	  drawNode((int)(255*fade),false);
     	  }
     	        	  
       }     
@@ -327,22 +342,33 @@ public class Node {
        * @param start the starting time slice
        * @param end the ending time slice
        * @param interpolation the amount to interpolate by
+       * @param aggNodes  list of selected nodes or nodes attached to selected edges
+       * @param outlineOnly  show only the outline of a disappearing node (when attached to an edge)
        * */
-      void animate(int start,int end, float interpolation){
+      void animate(int start,int end, float interpolation,ArrayList<Integer> aggNodes,boolean outlineOnly){
     	  Coordinate startPosition = this.coords.get(start);
     	  Coordinate endPosition = this.coords.get(end);     	 
     	 
-    	  int interpolationAmt;  	
+    	  int interpolationAmt=0;  	
     	  
     	  if (startPosition != null && endPosition !=null){   
-    		  drawNode(this.x,this.y,255);
+    		  interpolationAmt = 255;
     	  }else if (startPosition==null && endPosition!=null){ //Node is fading in 
-    		  interpolationAmt = easeInExpo(interpolation,0,255,1);
-    		  drawNode(this.x,this.y,interpolationAmt);    		  
+    		  interpolationAmt = easeInExpo(interpolation,0,255,1);    		    		  
     	  }else if (startPosition!=null && endPosition==null){ //Node is fading out    		  
-    		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);     		  
-    		  drawNode(this.x,this.y,interpolationAmt);    		
-    	  }     
+    		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);   		  		
+    	  }    
+    	  
+    	  if (aggNodes.contains(this.id) && interpolationAmt!=255){
+    		  if (outlineOnly){
+    			  drawNode(255,outlineOnly); //Kind of redundant...    			  
+    		  }else{
+    			  drawNode(interpolationAmt,false);
+    			  drawNodeLabel(255);
+    		  }   	    		 
+    	  }else{
+    		  drawNode(interpolationAmt,false);
+    	  }    	 
       }  
       /** Function to compute the transparency of a node fading in
        *  From: http://www.gizma.com/easing/#cub1

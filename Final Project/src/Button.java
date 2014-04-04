@@ -13,30 +13,35 @@ public class Button {
     public int height;
     public int x;
     public int y;
-    public Color background;
-    public Color textColour;
-    public String label;
-    public Color toggleColour;
+    public int hover;   
+    public String label;    
     public PApplet parent;
     public int textX;
     public int textY;
     public int fontSize;
+    
+    //Colours    
+    public Colours getColours = new Colours();
+    public Color background = getColours.MedGrey;
+    //public Color background = getColours.InkBrighter;
+    public Color textColour = getColours.Ink;
+    public Color toggleColour = new Color(220,220,220,255);
+    public Color borderColour = getColours.charcolGrey;
+    
     /**Creates a new rectangle button
      * */
-    public Button(PApplet p,int w,int h, int x, int y, Color off, Color on, Color t, String l,int tx, int ty, int fs){
+    public Button(PApplet p,int w,int h, int x, int y, String l,int tx, int ty, int fs){
     	this.parent = p;
     	this.width = w;
     	this.height = h;
     	this.x = x;
-    	this.y = y;
-    	this.background = off;
-    	this.toggleColour = on;
-    	this.textColour = t;
+    	this.y = y;   
     	this.label = l;
     	this.type = 0;
     	this.textX = tx;
     	this.textY = ty;
     	this.fontSize = fs;
+    	this.hover = 0;
     }
     /**Creates a new circle button (radio button style)
      * */
@@ -55,23 +60,23 @@ public class Button {
      * */
     public void draw(){
     	if (this.type==0){ //Rectangle button
-    		if (this.toggle==1){
-    			  parent.fill(this.background.getRGB()); 
-    			  parent.stroke(this.toggleColour.getRGB());
+    		if (this.toggle==1 || this.hover==1){
+    			  parent.fill(this.toggleColour.getRGB());     			  
     		  }else{
-    			  parent.fill(this.background.getRGB()); 
-    			  parent.stroke(this.background.getRGB()); 
+    			  parent.fill(this.background.getRGB());    			 
     		  }
-    		  
-    		parent.strokeWeight(2);
+    		 parent.stroke(borderColour.getRGB());
+    		 parent.strokeWeight(1);
     		 parent.rect(this.x,this.y,this.width,this.height,6);
-    		 PFont font = parent.createFont("Droid Serif",this.fontSize,true);
+    		 PFont font = parent.createFont("Century Gothic",this.fontSize,true);
     	   	 parent.textFont(font);  	  	  
     	   	 parent.fill(this.textColour.getRGB());
     	   	 parent.text(this.label,this.textX,this.textY);  
     	}
     	//TODO: circle radio button (if needed)
     }
+    /**Checks if a mouse clicked within the area of the button 
+     * */
     public void toggle(){
     	if (this.type==0){
     		if (parent.mouseX >= this.x && parent.mouseX <= (this.x+this.width) && parent.mouseY >= this.y && parent.mouseY <= 
@@ -84,9 +89,25 @@ public class Button {
       		  }	 
       		  return;
       	  }
+    	  this.toggle=0;
+    	  this.hover = 0;
       	  this.clicked = false;
     	}
     	  
+    }
+    /**Checks if a mouse has entered the area of the button (mouse over)
+     * */
+    public void hover(){
+    	if (this.type==0){
+    		if (parent.mouseX >= this.x && parent.mouseX <= (this.x+this.width) && parent.mouseY >= this.y && parent.mouseY <= 
+    				(this.y+this.height)){
+    		  this.hover = 1;
+    			
+    		}else{
+    			this.hover = 0;
+    		}
+    	}    	
+    	
     }
     
 }

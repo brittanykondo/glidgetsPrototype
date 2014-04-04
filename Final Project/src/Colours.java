@@ -16,9 +16,12 @@ public class Colours {
        
        //Greys
 	   public Color Ink = new Color(67,78,98,255); 
+	   public Color LightInk = new Color(99,112,135);
+	   public Color InkBrighter = Ink.brighter();
 	   public Color charcolGrey = new Color(25,25,25,255);
 	   public Color DarkGrey = new Color(134, 134, 134,255); 
 	   public Color LightGrey = new Color(189, 189, 189,255);
+	   public Color MedGrey = new Color(200,200,200,255);
        
        //Purples      
 	   public Color Purple1 = new Color(141,108,161,255);   
