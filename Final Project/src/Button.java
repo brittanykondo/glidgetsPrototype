@@ -80,20 +80,18 @@ public class Button {
     public void toggle(){
     	if (this.type==0){
     		if (parent.mouseX >= this.x && parent.mouseX <= (this.x+this.width) && parent.mouseY >= this.y && parent.mouseY <= 
-    				(this.y+this.height)){
-      		  this.clicked = true;
+    				(this.y+this.height)){   
+    		 this.clicked = true;
       		  if (this.toggle==0){
-      			  this.toggle = 1;        			  
+      			  this.toggle = 1;       			
       		  }else{
-      			  this.toggle = 0;      			  
+      			  this.toggle = 0;         			 
       		  }	 
       		  return;
       	  }
-    	  this.toggle=0;
-    	  this.hover = 0;
-      	  this.clicked = false;
-    	}
-    	  
+      	  this.hover = 0;
+      	 this.clicked = false;          
+    	}    	  
     }
     /**Checks if a mouse has entered the area of the button (mouse over)
      * */

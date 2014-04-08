@@ -79,7 +79,7 @@ public class Slider {
      * */
     void drawSlider(){
     	drawSliderBackground();    	  
-    	parent.rect(this.dragTickX - this.dragTickWidth/2,this.dragTickY,this.dragTickWidth,this.dragTickHeight,4);  
+    	parent.rect(this.dragTickX,this.dragTickY,this.dragTickWidth,this.dragTickHeight,4);  
      } 
      
      /**Checks if a mouse down event is occurring on the draggable tick
@@ -135,10 +135,10 @@ public class Slider {
 		 float currentDist = Math.abs(this.dragTickX - current);
 		 
 		 if (currentDist < nextDist){ //Snap to current view
-			 this.dragTickX = current; //- this.dragTickWidth/2;
+			 this.dragTickX = current- this.dragTickWidth/2; 
 			 this.drawingView = this.currentView;
 		 }else{ //Snap to next view
-			 this.dragTickX = next;// - this.dragTickWidth/2;
+			 this.dragTickX = next- this.dragTickWidth/2;
 			 if (this.nextView<(this.numLabels-1)){
 				 this.currentView = this.nextView;
 				 this.nextView++;
@@ -166,7 +166,7 @@ public class Slider {
     	this.currentView = current;
     	this.nextView = next;
     	this.drawingView = drawing;
-    	this.dragTickX = this.tickPositions.get(drawing);
+    	this.dragTickX = this.tickPositions.get(drawing) - this.dragTickWidth/2;
     }
      
 }

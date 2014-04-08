@@ -34,14 +34,14 @@ public class GraphManager {
      public GraphManager(PApplet p,boolean saveData){
     	 this.parent = p;      	
          //readVanDeBunt2();
-    	 readVanDeBunt();
+    	 //readVanDeBunt();
          //generateGraphs();
          //generateAverageGraph();
-    	 //readReutersNetwork();
+    	 readReutersNetwork();
     	 generateAverageGraph();
-         if (saveData){
+         /**if (saveData){
         	saveGraphData("savedData.txt"); //Doesn't work
-         }    	  		   	 
+         }  */  	  		   	 
      }
      
      /**Uses the JUNG to generate a set of layouts for the graph at each time slice      
@@ -115,7 +115,7 @@ public class GraphManager {
 		 this.layout.setMaxIterations(1000000000);
 		 this.layout.setSize(new Dimension(1250,600));
 		
-		 allNodes.add(new Integer(17));
+		// allNodes.add(new Integer(17));
 		 Collections.sort(allNodes);
 		 
 		 this.output = parent.createWriter("reuters_saved.txt");
@@ -124,7 +124,7 @@ public class GraphManager {
 		 //Print out the node, nodeId, position and persistence at each time slice
 		 for (int i=0;i<allNodes.size();i++){	
 			 System.out.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i));
-			 this.output.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i));
+			 this.output.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i)+" "+this.nodes.get(i).label);
 			 for (int j=0;j<this.numTimeSlices;j++){
 				  if (this.nodesWithEdges.get(j).contains(i)){	   	   			
 			   	      System.out.println("1");	
@@ -319,12 +319,15 @@ public class GraphManager {
      						int [] persistence = stringToIntArray(items[2]);
      						Node nodeToAdd = new Node(parent,Integer.parseInt(items[0]),items[1],timeSlices);
      						boolean addIt = false;
+     						int persistenceTotal = 0;
      						for (int i=0;i<persistence.length;i++){
      							if(persistence[i]<=10){
      								addIt = true;
+     								persistenceTotal++;
      							}
      						}
-     						if (addIt){
+     						
+     						if (addIt && persistenceTotal==10){     							
      							this.nodes.add(nodeToAdd);     							
      						}     						
      					}else if (type==2){
@@ -338,17 +341,19 @@ public class GraphManager {
      						int nodeId1 = Integer.parseInt(items[0]);
      						int nodeId2 = Integer.parseInt(items[1]);
      						int adjustedNode1Id =getNodeId(nodeId1);
-     						int adjustedNode2Id =getNodeId(nodeId2);
-     						this.edges.get(timeSliceNum[0]-1).add(new Edge(parent,""+edgeCounter,adjustedNode1Id,adjustedNode2Id,timeSlices));
-     						
-     						ArrayList<Integer> temp = this.nodesWithEdges.get(timeSliceNum[0]-1);
-     						if (!temp.contains(adjustedNode1Id)){
-     							this.nodesWithEdges.get(timeSliceNum[0]-1).add(adjustedNode1Id);
-     						}
-     						
-     						if (!temp.contains(adjustedNode2Id)){
-     							this.nodesWithEdges.get(timeSliceNum[0]-1).add(adjustedNode2Id);
-     						}
+     						int adjustedNode2Id =getNodeId(nodeId2);  
+     						if (adjustedNode1Id>=0 && adjustedNode2Id >=0){
+     							this.edges.get(timeSliceNum[0]-1).add(new Edge(parent,""+edgeCounter,adjustedNode1Id,adjustedNode2Id,timeSlices));
+     							ArrayList<Integer> temp = this.nodesWithEdges.get(timeSliceNum[0]-1);
+         						if (!temp.contains(adjustedNode1Id)){
+         							this.nodesWithEdges.get(timeSliceNum[0]-1).add(adjustedNode1Id);
+         						}
+         						
+         						if (!temp.contains(adjustedNode2Id)){
+         							this.nodesWithEdges.get(timeSliceNum[0]-1).add(adjustedNode2Id);
+         						}
+     						}     						
+     					
      						timeInterval = timeSliceNum[0]-1;
      						edgeCounter++;
      						

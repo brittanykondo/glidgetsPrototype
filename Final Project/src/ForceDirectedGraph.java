@@ -98,7 +98,7 @@ public class ForceDirectedGraph {
       * render them onto the screen for a certain view
       * */
      public void drawGraph(int view){      	
-    	 
+    	
 	     if (this.aggregatedEdges.size()>0){ //Case 1: Need to draw an edge hint path	    	 
 			 renderEdges(view);
 			 renderNodes(view);				
@@ -453,8 +453,9 @@ public class ForceDirectedGraph {
             	
             	this.aggregateNodeHintPaths();
             	this.selectedNode = selected; 
-            	this.aggregatedEdges.clear();
-            	this.aggregatedEdges_Nodes.clear();
+            	//this.aggregatedEdges.clear();
+            	System.out.println("clearing edges");
+            	//this.aggregatedEdges_Nodes.clear();
             }
     	 }    
     	this.dragging = true;
@@ -498,21 +499,7 @@ public class ForceDirectedGraph {
 	     if (this.selectedNode != -1 && this.releasedNode !=-1){    		 
 	    	connectNodes();
 	    }
-     }  
-     /**When "snapping" to a view after dragging around a node, need to remove the node
-      * hint paths where a node does not exist (which could cancel the entire query)
-      * */
-     public void removeDisappearedNodes(){
-    	 ArrayList <Integer> removedNodes = new ArrayList <Integer>();
-    	 for (int i=0;i<this.aggregatedNodes.size();i++){
-    		 Node currentNode = this.nodes.get(this.aggregatedNodes.get(i));    		 
-    		 if (currentNode.coords.get(this.drawingView)==null){    			
-    			 removedNodes.add(currentNode.id);    			 
-    		 }
-    	 }
-    	 this.aggregatedNodes.removeAll(removedNodes);
-    	 this.aggregateNodeHintPaths();
-     }    
+     }        
      /**Re-sets the selected and released node after the edge hint path is drawn.
       * Draws the hint path for the edge joined by selected and released node
       * */
@@ -531,19 +518,18 @@ public class ForceDirectedGraph {
          //Aggregate the edge hint paths if more than one edge is selected
          if (findEdge(this.aggregatedEdges,toAdd)!=-1){  //De-selecting an edge
     	     this.aggregatedEdges = removeEdge(this.aggregatedEdges,toAdd); 
-    	     this.aggregatedEdges_Nodes.remove(toAdd.node1);
-    	     this.aggregatedEdges_Nodes.remove(toAdd.node2);
+    	     this.aggregatedEdges_Nodes.remove(new Integer(toAdd.node1));
+    	     this.aggregatedEdges_Nodes.remove(new Integer(toAdd.node2));
          }else if (!(this.inGlobalView && this.selectedEdge==-2)){
-        	 this.aggregatedEdges.add(toAdd);
+        	 this.aggregatedEdges.add(toAdd);        	 
         	 this.aggregatedEdges_Nodes.add(toAdd.node1);
         	 this.aggregatedEdges_Nodes.add(toAdd.node2);
          }
-         this.aggregateEdgeHintPaths();
-         this.aggregatedNodes.clear();
+         this.aggregateEdgeHintPaths();         
      }
      /**Clears all queries on the screen (this is triggered when the background is clicked)
       * */
-     public void clearQueries(){    	
+     public void clearQueries(){     	
     	this.aggregatedNodes.clear();
     	this.aggregatedPersistence.clear();
     	this.aggregatedEdges.clear();  
@@ -577,7 +563,7 @@ public class ForceDirectedGraph {
      /** Draws the hint path of node(s) selected
       * @view the current view of the visualization
       * */
-     public void drawNodeHintPaths(int view){
+     public void drawNodeHintPaths(int view){    	
     	 for (int i=0;i<this.aggregatedNodes.size();i++){    		 
     		 this.nodes.get(this.aggregatedNodes.get(i)).drawAggregatedHintPath(this.aggregatedPersistence,view);
     	 }
@@ -604,7 +590,7 @@ public class ForceDirectedGraph {
     	 }   	  	
      }
      /**Draws hint paths for all selected edge(s) */
-     public void drawEdgeHintPaths(int view){    	 
+     public void drawEdgeHintPaths(int view){       	 
     	 for (int i=0;i<this.aggregatedEdges.size();i++){
     		 this.aggregatedEdges.get(i).drawHintPath(this.nodes, this.aggregatedPersistence,view);
     	 }
@@ -658,9 +644,14 @@ public class ForceDirectedGraph {
     		 }else{
     			 this.edges.get(row).animate(this.nodes, start, end, interpolation,false);    	 
     		 } 	                 	   	
- 	     }    	 
-    	 drawEdgeHintPaths(this.drawingView);
-    	 drawNodeHintPaths(this.drawingView); 
+ 	     } 
+    	
+    	 //Only draw one type of hint path at a time
+    	 if (this.aggregatedEdges.size() >0){    		
+    		 drawEdgeHintPaths(this.drawingView);
+    	 }else{
+    		 drawNodeHintPaths(this.drawingView);
+    	 }  	   	 
     	 
     	 for (int i = 0;i<this.nodes.size();i++){
     		  if (this.aggregatedEdges_Nodes.size()>0){

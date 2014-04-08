@@ -45,7 +45,9 @@ public class Edge {
        * @param showDisappeared true if edges not in the current view should be drawn
        * */
       void display(ArrayList<Node> nodes, int view,boolean showDisappeared,boolean highlight){  
-    	 
+    	  //Safety check
+    	  if (this.node1>=nodes.size() || this.node2>=nodes.size()) return;
+    	  
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  if (showDisappeared){
