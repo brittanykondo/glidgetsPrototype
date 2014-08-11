@@ -110,7 +110,7 @@ public class ForceDirectedGraph {
 			 drawNodeHintPaths(view);			 
 			 renderNodes(view);			 
 		 }else{ //Case 3: Just render both edges and nodes without hint paths
-			 clearQueries();			 
+			 //clearQueries();			 
 			 renderEdges(view);
 			 renderNodes(view);		 
 		 }		   	      
