@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.util.ArrayList;
 import processing.core.PApplet;
 import processing.core.PFont;
@@ -17,7 +18,12 @@ public class Slider {
      boolean dragging;
      float dragTickX, dragTickY;
      float interpAmount;
-    
+     
+    //Colours    
+     //public Colours getColours = new Colours();
+     public Color sliderColour = new Color(115,115,115,255);    
+     public Color slidingTickBorder = new Color(255,255,255,255);     
+     
      /**Creates a new interactive slider widget
       * @param p reference to the processing applet (for drawing)
       * @param l an array of labels to appear along the slider
@@ -59,10 +65,9 @@ public class Slider {
      void drawSliderBackground(){
     	//Draw the main line
     	  parent.strokeWeight(2);
-	   	  parent.stroke(115,115,115);
+	   	  parent.stroke(sliderColour.getRGB());
 	   	  PFont font = parent.createFont("Century Gothic",16,true);
-	   	  parent.textFont(font);	   	  
-	   	  parent.fill(115,115,115);
+	   	  parent.textFont(font);		   	 
 	   	  parent.textAlign(parent.CENTER);
 	   	  
 	   	  parent.line(this.tickPositions.get(0), this.yPos, this.tickPositions.get(this.numLabels-1), this.yPos);
@@ -78,7 +83,13 @@ public class Slider {
      * Also re-draws the slider bar
      * */
     void drawSlider(){
-    	drawSliderBackground();    	  
+    	drawSliderBackground();
+    	 parent.fill(sliderColour.getRGB());
+    	if (this.dragging){
+    		parent.stroke(slidingTickBorder.getRGB());
+    	}else{
+    		parent.noStroke();
+    	}    	
     	parent.rect(this.dragTickX,this.dragTickY,this.dragTickWidth,this.dragTickHeight,4);  
      } 
      

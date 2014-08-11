@@ -12,7 +12,7 @@ public class Node {
       double value;     
     
       PApplet parent;
-      ArrayList<Coordinate> coords; //Ordered by time
+      ArrayList<Integer> persistence; //Ordered by time
       ArrayList<Integer> degrees; //Ordered by time, degree of the node
       float globalPersistence; //Percentage of time the node does not disappear
       int numTimeSlices; 
@@ -58,7 +58,7 @@ public class Node {
     	  this.x = 0;
     	  this.y = 0;  
     	  this.dragging = false;    	  
-    	  this.coords = new ArrayList<Coordinate>();
+    	  this.persistence = new ArrayList<Integer>();
     	  this.degrees = new ArrayList<Integer>();
     	  this.maxDegree = -1;
     	  setHintAngles();   	  
@@ -73,13 +73,13 @@ public class Node {
       void display(int view,ArrayList<Integer> aggNodes,float fade, boolean outlineOnly){    
     	  if (view==-1){ //In global view
     		  drawNode((int)(255*fade),false);
-    	  }else if (aggNodes.contains(this.id) && this.coords.get(view)==null){ //Disappearing node case
+    	  }else if (aggNodes.contains(this.id) && this.persistence.get(view)==0){ //Disappearing node case
     		  if (outlineOnly){ //Node attached to an edge
     			  drawNode((int)(255*fade),outlineOnly);
     		  }else{
     			  drawNodeLabel((int)(255*fade));
     		  }    		     	
-    	  }else if (this.coords.get(view)!=null){
+    	  }else if (this.persistence.get(view)==1){
     		  drawNode((int)(255*fade),false);
     	  }
       }
@@ -190,13 +190,13 @@ public class Node {
        * */ 
       void drawGlobalPersistenceHighlights(int view,boolean showAllHighlights,float fade){
     	  
-    	  if (showAllHighlights || this.coords.get(view)!=null){
+    	  if (showAllHighlights || this.persistence.get(view)==1){
     		  parent.strokeCap(parent.SQUARE);        	 
         	  parent.noFill();
         	  parent.stroke(presentColour.getRed(),presentColour.getGreen(),presentColour.getBlue(),(255*fade));
     		  parent.strokeWeight(MIN_WEIGHT);
         	  for (int i=0;i<this.numTimeSlices;i++){     		   		 
-        		  if (this.coords.get(i)!=null){    			  
+        		  if (this.persistence.get(i)==1){    			  
                 	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT,this.hintAngles.get(i).x-parent.HALF_PI, 
                 			  (this.hintAngles.get(i).y-parent.HALF_PI-0.06f));       			      			  
         		  }       	  	
@@ -210,9 +210,9 @@ public class Node {
        * @return [index of the selected, type of selection (2 is drawing around, 1 is clicking)], -1 otherwise
        * */
       int [] selectNode(int view,boolean selectedDisappeared){
-    	  Coordinate coord = this.coords.get(view);   
+    	  Integer p = this.persistence.get(view);
     	  //TODO:Quick fix for allowing nodes that have disappeared but are part of a query can be selected, refactor this later
-    	  if (coord !=null && parent.mousePressed && parent.dist(coord.x,coord.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)){  //Clicking directly on a node  			    		 
+    	  if (p==1 && parent.mousePressed && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)){  //Clicking directly on a node  			    		 
     		  return new int [] {this.id,1};
     	  } else if (selectedDisappeared  && parent.mousePressed && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=(RADIUS/2)){
     		  return new int [] {this.id,1};
@@ -229,9 +229,9 @@ public class Node {
        * @return index of the released if it is a different node than what is selected
        *  -1 otherwise 
        * */
-      int releaseNode(int view, int selectedNode,boolean selectDisappeared){
-    	  Coordinate coord = this.coords.get(view);    	  
-    	  if ((coord != null||selectDisappeared) && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=RADIUS && this.id!=selectedNode){    		 
+      int releaseNode(int view, int selectedNode,boolean selectDisappeared){    	
+    	  Integer p = this.persistence.get(view);
+    	  if ((p ==1||selectDisappeared) && parent.dist(this.x,this.y,parent.mouseX,parent.mouseY)<=RADIUS && this.id!=selectedNode){    		 
     		  return this.id;   		  
     	  }    	 
     	  return -1;
@@ -291,7 +291,7 @@ public class Node {
        *  @param persistence Array of persistence information for the aggregated nodes 
        *  @param view the current view of the visualization 
        * */      
-      void drawAggregatedHintPath(ArrayList<Integer> persistence,int view){      	
+      void drawHintPath(ArrayList<Integer> persistence,int view){      	
     	  //float angleOffset = parent.HALF_PI + this.hintSegmentAngle/2;
     	  float x1,y1,x2,y2,weight; //For drawing the ticks in middle of segments    	 
     	  float nodeStrokeWeight=0;    	 
@@ -330,9 +330,11 @@ public class Node {
               if (persistence.get(i)==0){
     			  parent.stroke(absentColour_darker.getRGB());
     			  parent.strokeWeight(2.5f);
+    			  //parent.strokeWeight(1.0f);
     		  }else{    			  
     			  parent.stroke(presentColour_darker.getRGB());
     			  parent.strokeWeight(2.5f);
+    			  //parent.strokeWeight(1.0f);
     		  }               
         	  parent.line(x1, y1, x2, y2);
     	  }    	  
@@ -346,16 +348,16 @@ public class Node {
        * @param outlineOnly  show only the outline of a disappearing node (when attached to an edge)
        * */
       void animate(int start,int end, float interpolation,ArrayList<Integer> aggNodes,boolean outlineOnly){
-    	  Coordinate startPosition = this.coords.get(start);
-    	  Coordinate endPosition = this.coords.get(end);     	 
+    	  Integer startPosition = this.persistence.get(start);
+    	  Integer endPosition = this.persistence.get(end);     	 
     	 
     	  int interpolationAmt=0;  	
     	  
-    	  if (startPosition != null && endPosition !=null){   
+    	  if (startPosition ==1 && endPosition ==1){   
     		  interpolationAmt = 255;
-    	  }else if (startPosition==null && endPosition!=null){ //Node is fading in 
+    	  }else if (startPosition==0 && endPosition==1){ //Node is fading in 
     		  interpolationAmt = easeInExpo(interpolation,0,255,1);    		    		  
-    	  }else if (startPosition!=null && endPosition==null){ //Node is fading out    		  
+    	  }else if (startPosition==1 && endPosition==0){ //Node is fading out    		  
     		  interpolationAmt = easeOutExpo((1-interpolation),0,255,1);   		  		
     	  }    
     	  

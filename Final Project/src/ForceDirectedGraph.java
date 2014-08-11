@@ -43,6 +43,7 @@ public class ForceDirectedGraph {
      public Edge draggingEdge;
      public boolean onDraggingEdge;
      public int pinnedView; 
+     public int aggregate;
      
      /**Creates a new graph manager which generates or parses and saves the data
       * necessary for drawing the dynamic graph
@@ -65,6 +66,7 @@ public class ForceDirectedGraph {
     	 this.selectedSameNode = false;    	 
     	 this.mouseAngle = 0;
     	 this.pinnedView = -1;
+    	 this.aggregate = 0;
     	
     	 this.aggregatedNodes = new ArrayList<Integer>();
     	 this.aggregatedEdges = new ArrayList<Edge>();
@@ -443,19 +445,20 @@ public class ForceDirectedGraph {
     		selected = savedSelections[0];
     		//selectionType = savedSelections[1];
     		
-            if (selected !=-1)	{         
+            if (selected !=-1)	{             	
             	
-            	if (!this.aggregatedNodes.contains(new Integer(selected))){
-            		this.aggregatedNodes.add(selected);
-            	}else{
-            		this.selectedSameNode = true;
-            	}
+            		if (!this.aggregatedNodes.contains(new Integer(selected))){
+                		this.aggregatedNodes.add(selected);
+                	}else{
+                		this.selectedSameNode = true;
+                	}
+                	
+                	this.aggregateNodeHintPaths();
+                	this.selectedNode = selected; 
+                	//this.aggregatedEdges.clear();
+                	//System.out.println("clearing edges");
+                	//this.aggregatedEdges_Nodes.clear();       		
             	
-            	this.aggregateNodeHintPaths();
-            	this.selectedNode = selected; 
-            	//this.aggregatedEdges.clear();
-            	System.out.println("clearing edges");
-            	//this.aggregatedEdges_Nodes.clear();
             }
     	 }    
     	this.dragging = true;
@@ -539,22 +542,21 @@ public class ForceDirectedGraph {
     	this.releasedNode = -1;
      }
  
-     /**When multiple nodes have been selected and the key is released,
-      * an aggregated hint path is drawn on all of them to show 
-      * when they disappear/reappear at the same time slices
+     /**When multiple nodes have been selected, and the user has specified aggregation, an aggregated hint path is drawn on all of them to show 
+      * when they disappear/reappear at the same time slices. Otherwise, glyphs are revealed independently
       * */
      public void aggregateNodeHintPaths(){
     	 
-    	 if (this.aggregatedNodes.size()==0) return;
-    	 
+    	 if (this.aggregatedNodes.size()==0 || this.aggregate == 0) return; //No hints to show or aggregate
+
     	 this.aggregatedPersistence.clear();    	 
     	 Node currentNode;
     	 for (int i=0;i<this.aggregatedNodes.size();i++){    		 
     		 currentNode = this.nodes.get(this.aggregatedNodes.get(i));
     		 for (int t=0;t<this.numTimeSlices;t++){
     			 if (i==0) {
-    				 this.aggregatedPersistence.add((currentNode.coords.get(t)!=null)?1:0);
-    			 }else if (this.aggregatedPersistence.get(t)==1 && currentNode.coords.get(t)==null){
+    				 this.aggregatedPersistence.add(currentNode.persistence.get(t));
+    			 }else if (this.aggregatedPersistence.get(t)==1 && currentNode.persistence.get(t)==0){
     				this.aggregatedPersistence.set(t, 0);    				 				 
     			 }    			
     		 }    		
@@ -563,9 +565,15 @@ public class ForceDirectedGraph {
      /** Draws the hint path of node(s) selected
       * @view the current view of the visualization
       * */
-     public void drawNodeHintPaths(int view){    	
-    	 for (int i=0;i<this.aggregatedNodes.size();i++){    		 
-    		 this.nodes.get(this.aggregatedNodes.get(i)).drawAggregatedHintPath(this.aggregatedPersistence,view);
+     public void drawNodeHintPaths(int view){   
+    	 for (int i=0;i<this.aggregatedNodes.size();i++){ 
+    		 Node n;
+    		 if (this.aggregate ==0){
+    			 n = this.nodes.get(this.aggregatedNodes.get(i));
+    			 this.nodes.get(this.aggregatedNodes.get(i)).drawHintPath(n.persistence,view);
+    		 }else{
+    			 this.nodes.get(this.aggregatedNodes.get(i)).drawHintPath(this.aggregatedPersistence,view);
+    		 }    		
     	 }
      }
      /**When multiple edges are selected and the key is released,
@@ -590,9 +598,15 @@ public class ForceDirectedGraph {
     	 }   	  	
      }
      /**Draws hint paths for all selected edge(s) */
-     public void drawEdgeHintPaths(int view){       	 
+     public void drawEdgeHintPaths(int view){ 
+    	 Edge e;
     	 for (int i=0;i<this.aggregatedEdges.size();i++){
-    		 this.aggregatedEdges.get(i).drawHintPath(this.nodes, this.aggregatedPersistence,view);
+    		 if (this.aggregate ==0){ //Reveal glyphs independently
+    			 e = this.aggregatedEdges.get(i);
+    			 this.aggregatedEdges.get(i).drawHintPath(this.nodes, e.persistence,view);
+    		 }else{ //Aggregate glyphs
+    			 this.aggregatedEdges.get(i).drawHintPath(this.nodes, this.aggregatedPersistence,view);
+    		 }   		 
     	 }
      }
      /** Finds an edge in an ArrayList of edges
@@ -784,9 +798,9 @@ public class ForceDirectedGraph {
 					} */        
 					//When the node positions are fixed
 					if (items[0].equals("0")){ //Node does not appear for this time slice
-						this.nodes.get(nodeId).coords.add(null);
+						this.nodes.get(nodeId).persistence.add(0);
 					}else{           						
-						this.nodes.get(nodeId).coords.add(new Coordinate(nodeX,nodeY));
+						this.nodes.get(nodeId).persistence.add(1);
 					}
 				}
 			}       				

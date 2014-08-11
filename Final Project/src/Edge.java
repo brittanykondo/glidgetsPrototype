@@ -53,7 +53,7 @@ public class Edge {
     	  if (showDisappeared){
     		  drawEdge(n1.x,n1.y,n2.x,n2.y,255,1.5f);
     	  }else{
-    		  if (n1.coords.get(view)!=null && n2.coords.get(view)!=null && this.persistence.get(view)!=0){ //Safety Check
+    		  if (n1.persistence.get(view)==1 && n2.persistence.get(view)==1 && this.persistence.get(view)!=0){ //Safety Check
     			  if (highlight){
             		  parent.strokeWeight(2);    	
                 	  parent.stroke(presentColour.getRGB()); 
@@ -169,7 +169,7 @@ public class Edge {
        * @param interpolation the amount to interpolate by
        * @param highlight  whether or not to highlight the edge (if incident on a dragged node)
        * */
-      void animate(ArrayList<Node> nodes,int start,int end, float interpolation,boolean highlight){
+      void animate(ArrayList<Node> nodes,int start,int end, float interpolation,boolean highlight){    	  
     	  Node n1 = nodes.get(this.node1);
     	  Node n2 = nodes.get(this.node2);
     	  int startPersistence = this.persistence.get(start);
