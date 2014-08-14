@@ -14,6 +14,7 @@ public class RunApp extends PApplet {
     //public int toggleLocalPersistence; 
     public Button globalViewButton;
     public Button editModeButton;   
+    public Button aggregateButton;
     public PGraphicsPDF pdf;
     public boolean recording;
     public Colours getColours = new Colours();
@@ -32,8 +33,8 @@ public void setup() {
 	
 	size(this.screenWidth,this.screenHeight); 	
 	
-    //GraphManager g = new GraphManager(this,false);  //Creates the graph layout using JUNG library
-    this.graph = new ForceDirectedGraph(this,"graphData_names.txt",6);    
+    GraphManager g = new GraphManager(this,false);  //Creates the graph layout using JUNG library
+    this.graph = new ForceDirectedGraph(this,"graphData.txt",6);    
     this.recording = false;
 	
 	ArrayList <String> testLabels = new ArrayList <String>();
@@ -46,6 +47,7 @@ public void setup() {
     //this.toggleLocalPersistence = 0;
     this.globalViewButton = new Button(this,130,40,495,625,"Global View",560,650,18);
     this.editModeButton = new Button(this,130,40,650,625,"Edit Mode",715,650,18);   
+    this.aggregateButton = new Button(this,130,40,805,625,"Aggregate",870,650,18);   
   }
 
   /**Re-draw the view */
@@ -54,9 +56,8 @@ public void setup() {
 	 if (recording){
 		  beginRecord(PDF,"frame-####.pdf");
 	  }
-	 // scale(scaleFactor);
-	
-	  if (this.editModeButton.toggle==1){ //Reposition nodes by dragging
+	 // scale(scaleFactor);	 
+	 if (this.editModeButton.toggle==1){ //Reposition nodes by dragging
 		  drawBackground();    	    
 		  this.graph.clearQueries();
 		  this.graph.drawAllElements();
@@ -97,28 +98,29 @@ public void setup() {
   public void mouseOver(){
 	  this.globalViewButton.hover();
 	  this.editModeButton.hover();
+	  this.aggregateButton.hover();
   }
   /**Draws the background and other interface components
    * */
   public void drawBackground(){	  
-	  background(255);	   
-	  
+	  background(255);	   	  
 	  fill(getColours.LightGrey.getRGB()); //Panel surrounding the slider and toggle options
 	  noStroke();
-	  rect(60,600,750,100,10); 
+	  rect(60,600,890,100,10); 
 	  mouseOver();
 	  this.globalViewButton.draw();	
 	  this.editModeButton.draw();
+	  this.aggregateButton.draw();
 	  this.drawBorder();	  
   }
-  /**Draws the de-selection border and toggles it's colour on mouse over
+  /**Draws the de-selection border and toggles its colour on mouse over
    * */
   public void drawBorder(){
 	  if (mouseX >= this.borderSize && mouseX <= (this.screenWidth-this.borderSize) && mouseY >= this.borderSize && mouseY <= 
 				(this.screenHeight-this.borderSize)){
-		  stroke(getColours.LightGrey.getRGB());		  
+		  stroke(255);		  
 	  }else{
-		  stroke(220,220,220,255);
+		  stroke(220,220,220,200);
 	  }
 	  
 	  strokeWeight(this.borderSize);
@@ -157,6 +159,13 @@ public void setup() {
 	  if (this.clickedBorder()){
 		  graph.clearQueries();
 	  }
+	  
+	  //Check if glyphs should be aggregated
+	  if (this.aggregateButton.toggle ==1){
+		 graph.aggregate = 1;
+       }else{
+		 graph.aggregate = 0;
+	   }
   }
   /**Checks if the mouse clicked the border (designated de-selection area for canceling all queries)*/
   public boolean clickedBorder(){
@@ -202,12 +211,18 @@ public void setup() {
 	  }	 
 	  
 	  this.editModeButton.toggle();
+	  this.aggregateButton.toggle();
 	  
 	  //Both global view and edit mode can't be selected at the same time
 	  if (this.globalViewButton.clicked){
 		  this.editModeButton.toggle = 0;
+		  this.aggregateButton.toggle = 0;
 	  }else if (this.editModeButton.clicked){
 		  this.globalViewButton.toggle= 0;
+		  this.aggregateButton.toggle = 0;
+	  }else if (this.aggregateButton.clicked){
+		  this.globalViewButton.toggle= 0;
+		  this.editModeButton.toggle = 0;
 	  }
 	  
   }

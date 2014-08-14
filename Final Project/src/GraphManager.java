@@ -35,8 +35,7 @@ public class GraphManager {
     	 this.parent = p;      	
          //readVanDeBunt2();
     	 readVanDeBunt();
-         //generateGraphs();
-         //generateAverageGraph();
+         //generateGraphs();         
     	 //readReutersNetwork();
     	 generateAverageGraph();
          /**if (saveData){
@@ -107,14 +106,18 @@ public class GraphManager {
     				 }
     			 }
     		 }
-    	 }     	
+    	 }    
+    	 System.out.println(this.graph.toString());
     	 //Hack here: node 17 does not have any edges (not stored in nodeswithedges array), add it at the very end
     	 this.layout = new FRLayout <Integer,Edge>(this.graph); 
     	 this.layout.setRepulsionMultiplier(0.5);
     	 this.layout.setAttractionMultiplier(0.8);
-		 this.layout.setMaxIterations(1000000000);
-		// this.layout.setSize(new Dimension(1250,600));
-		 this.layout.setSize(new Dimension(1880,900));
+		 this.layout.setMaxIterations(1000000);
+		 //this.layout.setSize(new Dimension(1880,900));
+		 this.layout.setSize(new Dimension(1250,600));
+		 while (!this.layout.done()){
+			 this.layout.step();
+		 }		
 		
 		 allNodes.add(new Integer(17));
 		 Collections.sort(allNodes);
@@ -232,7 +235,7 @@ public class GraphManager {
       * Originally used in an experiment by Van De Bunt (1999)
       * */
      public void readVanDeBunt(){
-    	  String filename = "vanDeBunt_all_time_60.txt";
+    	  String filename = "vanDeBunt_all.txt";
        	  Scanner scan;
        	  int time = 0;
        	  int nodeCounter = 0;      	  
