@@ -25,16 +25,18 @@ public class RunApp extends PApplet {
     
 /**Initialize the view, draw the visualization */
 public void setup() {    
-	//this.screenHeight = displayHeight;
-	//this.screenWidth = displayWidth;
-	this.screenHeight = 700;
-	this.screenWidth = 1250;	
+	this.screenHeight = displayHeight;
+	this.screenWidth = displayWidth;
+	//this.screenHeight = 700;
+	//this.screenWidth = 1250;	
 	this.borderSize = 30; //Width of the query de-selection area
 	
-	size(this.screenWidth,this.screenHeight); 	
+	size(this.screenWidth,this.screenHeight); 
+   
+	GraphGenerator g = new GraphGenerator(this,4);
+    //g.process("infectious_saved",this.screenWidth,this.screenHeight);
 	
-    //GraphManager g = new GraphManager(this,false);  //Creates the graph layout using JUNG library
-    this.graph = new ForceDirectedGraph(this,"graphData.txt",6);    
+    this.graph = new ForceDirectedGraph(this,"infectious_saved.txt",4);    
     this.recording = false;
 	
 	ArrayList <String> testLabels = new ArrayList <String>();
@@ -48,7 +50,7 @@ public void setup() {
     this.globalViewButton = new Button(this,130,40,495,625,"Global View",560,650,18);
     this.editModeButton = new Button(this,130,40,650,625,"Edit Mode",715,650,18);   
     this.aggregateButton = new Button(this,130,40,805,625,"Aggregate",870,650,18);   
-    this.aggregateButton.toggleColour = getColours.ArcTreesAlgaeGreen;
+    this.aggregateButton.toggleColour = getColours.ArcTreesGreen3;
   }
 
   /**Re-draw the view */

@@ -38,7 +38,7 @@ public class Node {
       static Color yearLabel = getColours.Ink;    
       static Color nodeColour = getColours.SearchLightPink;
       static Color nodeLabelColour = getColours.Ink;
-      static Color aggregationColour = getColours.ArcTreesAlgaeGreen;
+      static Color aggregationColour = getColours.ArcTreesGreen3;
      
       /** Constructor for creating a Node
        * @param p Reference to processing applet for drawing with processing commands
@@ -470,5 +470,12 @@ public class Node {
     	  float x = (x1 - x0)*interpAmount + x0;
 		  float y = y0 +(y1-y0)*((x-x0)/(x1-x0)); 
 		  return new Coordinate(x,y);
+      }
+      /** Sets all persistence values in the node's array to 0.
+       * */
+      void initPersistence(){
+    	  for (int i=0;i<this.numTimeSlices;i++){
+    		  this.persistence.add(0);
+    	  }
       }
 }
