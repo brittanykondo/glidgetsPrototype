@@ -532,7 +532,7 @@ public class ForceDirectedGraph {
      }
      /**Clears all queries on the screen (this is triggered when the background is clicked)
       * */
-     public void clearQueries(){     	
+     public void clearQueries(){      	
     	this.aggregatedNodes.clear();
     	this.aggregatedPersistence.clear();
     	this.aggregatedEdges.clear();  
@@ -547,7 +547,7 @@ public class ForceDirectedGraph {
       * */
      public void aggregateNodeHintPaths(){
     	 
-    	 if (this.aggregatedNodes.size()==0 || this.aggregate == 0) return; //No hints to show or aggregate
+    	 if (this.aggregatedNodes.size()==0) return; //No hints to show or aggregate
 
     	 this.aggregatedPersistence.clear();    	 
     	 Node currentNode;
@@ -565,14 +565,12 @@ public class ForceDirectedGraph {
      /** Draws the hint path of node(s) selected
       * @view the current view of the visualization
       * */
-     public void drawNodeHintPaths(int view){   
-    	 for (int i=0;i<this.aggregatedNodes.size();i++){ 
-    		 Node n;
-    		 if (this.aggregate ==0){
-    			 n = this.nodes.get(this.aggregatedNodes.get(i));
-    			 this.nodes.get(this.aggregatedNodes.get(i)).drawHintPath(n.persistence,view);
-    		 }else{
-    			 this.nodes.get(this.aggregatedNodes.get(i)).drawHintPath(this.aggregatedPersistence,view);
+     public void drawNodeHintPaths(int view){      	
+    	 for (int i=0;i<this.aggregatedNodes.size();i++){     		 
+    		 if (this.aggregate ==0){    			
+    			 this.nodes.get(this.aggregatedNodes.get(i)).drawHintPath(view);
+    		 }else{    			
+    			 this.nodes.get(this.aggregatedNodes.get(i)).drawAggregatedHintPath(this.aggregatedPersistence,view);
     		 }    		
     	 }
      }

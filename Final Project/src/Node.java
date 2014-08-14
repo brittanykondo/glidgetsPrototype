@@ -13,7 +13,7 @@ public class Node {
     
       PApplet parent;
       ArrayList<Integer> persistence; //Ordered by time
-      ArrayList<Integer> degrees; //Ordered by time, degree of the node
+      ArrayList<Integer> degrees; //Ordered by time, degree of the node     
       float globalPersistence; //Percentage of time the node does not disappear
       int numTimeSlices; 
       float hintSegmentAngle; //The angle of each segment along the hint path
@@ -38,6 +38,7 @@ public class Node {
       static Color yearLabel = getColours.Ink;    
       static Color nodeColour = getColours.SearchLightPink;
       static Color nodeLabelColour = getColours.Ink;
+      static Color aggregationColour = getColours.ArcTreesAlgaeGreen;
      
       /** Constructor for creating a Node
        * @param p Reference to processing applet for drawing with processing commands
@@ -287,12 +288,11 @@ public class Node {
           parent.line(x1, y1, x2, y2);              	  
       }
      
-      /** Draws an aggregated hint path (following a persistence array)          
-       *  @param persistence Array of persistence information for the aggregated nodes 
+      /** Draws a hint path (following a persistence array)          
+       *  @param persistence Array of persistence information of the node
        *  @param view the current view of the visualization 
        * */      
-      void drawHintPath(ArrayList<Integer> persistence,int view){      	
-    	  //float angleOffset = parent.HALF_PI + this.hintSegmentAngle/2;
+      void drawHintPath(int view){      	
     	  float x1,y1,x2,y2,weight; //For drawing the ticks in middle of segments    	 
     	  float nodeStrokeWeight=0;    	 
     	  
@@ -318,8 +318,8 @@ public class Node {
         	  parent.noFill();
         	  //Offset by half pi so that beginning of time lies on top of the node (like a clock layout)
         	  parent.arc(this.x, this.y, RADIUS+weight+nodeStrokeWeight, RADIUS+weight+nodeStrokeWeight,
-        			  this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI);         	
-        	
+        			  this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI);  
+        	  
         	  //Draw the ticks along the segments
         	  x1 = (float) (this.x + (RADIUS/2)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
               y1 = (float) (this.y + (RADIUS/2)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
@@ -337,9 +337,74 @@ public class Node {
     			  //parent.strokeWeight(1.0f);
     		  }               
         	  parent.line(x1, y1, x2, y2);
-    	  }    	  
+    	  }  
       }
-      
+      /** Draws an aggregated hint path          
+       *  @param persistence Array of persistence information for the aggregated nodes 
+       *  @param view the current view of the visualization 
+       * */ 
+      //TODO: copied code for drawhintPath() function, refactor this
+      void drawAggregatedHintPath(ArrayList<Integer> persistence,int view){ 
+    	//float angleOffset = parent.HALF_PI + this.hintSegmentAngle/2;
+    	  float x1,y1,x2,y2,weight; //For drawing the ticks in middle of segments    	 
+    	  float nodeStrokeWeight=0; 
+    	  float borderWeight = 3;    	
+    	  
+    	  for (int i=0;i<this.numTimeSlices;i++){     		  
+    		  parent.strokeCap(parent.SQUARE);        	 
+        	  parent.noFill();
+        	  
+    		  //For now, just drawing the original degree amount when node is present, not aggregating it    		 
+    		  if (persistence.get(i)==0){
+    			  weight = 3;
+    			  parent.stroke(aggregationColour.getRGB(), 255);
+    			  parent.strokeWeight(weight+borderWeight);
+    			  parent.arc(this.x, this.y, RADIUS+weight+nodeStrokeWeight+borderWeight, RADIUS+weight+nodeStrokeWeight+borderWeight,
+            			  this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI); 
+    			  
+    			  parent.stroke(absentColour.getRGB()); 
+    			  if (i==view){
+    				  parent.stroke(yearMarkColour.getRGB());
+    			  }    			  
+    			  parent.strokeWeight(weight);
+    			  parent.arc(this.x, this.y, RADIUS+weight+nodeStrokeWeight, RADIUS+weight+nodeStrokeWeight,
+            			  this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI); 
+    		  }else{   
+    			  weight = MIN_WEIGHT+(int)(((float)this.degrees.get(i)/this.maxDegree)*MAX_WEIGHT);
+    			  parent.stroke(aggregationColour.getRGB(),255);
+    			  parent.strokeWeight(weight+borderWeight);
+    			  parent.arc(this.x, this.y, RADIUS+weight+nodeStrokeWeight+borderWeight, RADIUS+weight+nodeStrokeWeight+borderWeight,
+            			  this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI); 
+    			 
+    			  parent.stroke(presentColour.getRGB()); 
+    			  if (i==view){
+    				  parent.stroke(yearMarkColour.getRGB());
+    			  }    			 
+    			  parent.strokeWeight(weight);
+    			  parent.arc(this.x, this.y, RADIUS+weight+nodeStrokeWeight, RADIUS+weight+nodeStrokeWeight,
+            			  this.hintAngles.get(i).x-parent.HALF_PI, this.hintAngles.get(i).y-parent.HALF_PI); 
+    		  }      		  
+        	  
+        	 //Draw the ticks along the segments
+        	  x1 = (float) (this.x + (RADIUS/2)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
+              y1 = (float) (this.y + (RADIUS/2)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));    
+              
+              x2 = (float) (this.x + (RADIUS/2+weight)*Math.cos(this.hintAngles.get(i).x-parent.HALF_PI));
+              y2 = (float) (this.y + (RADIUS/2+weight)*Math.sin(this.hintAngles.get(i).x-parent.HALF_PI));
+              
+              if (persistence.get(i)==0){
+    			  parent.stroke(absentColour_darker.getRGB());
+    			  parent.strokeWeight(2.5f);
+    			  //parent.strokeWeight(1.0f);
+    		  }else{    			  
+    			  parent.stroke(presentColour_darker.getRGB());
+    			  parent.strokeWeight(2.5f);
+    			  //parent.strokeWeight(1.0f);
+    		  }               
+        	  parent.line(x1, y1, x2, y2);
+    	  }    	  
+    	  
+      }
       /**Animates a node by interpolating its position between two time slices
        * @param start the starting time slice
        * @param end the ending time slice

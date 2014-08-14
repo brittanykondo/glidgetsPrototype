@@ -33,7 +33,7 @@ public void setup() {
 	
 	size(this.screenWidth,this.screenHeight); 	
 	
-    GraphManager g = new GraphManager(this,false);  //Creates the graph layout using JUNG library
+    //GraphManager g = new GraphManager(this,false);  //Creates the graph layout using JUNG library
     this.graph = new ForceDirectedGraph(this,"graphData.txt",6);    
     this.recording = false;
 	
@@ -48,6 +48,7 @@ public void setup() {
     this.globalViewButton = new Button(this,130,40,495,625,"Global View",560,650,18);
     this.editModeButton = new Button(this,130,40,650,625,"Edit Mode",715,650,18);   
     this.aggregateButton = new Button(this,130,40,805,625,"Aggregate",870,650,18);   
+    this.aggregateButton.toggleColour = getColours.ArcTreesAlgaeGreen;
   }
 
   /**Re-draw the view */
