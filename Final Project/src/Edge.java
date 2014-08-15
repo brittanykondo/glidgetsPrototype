@@ -23,6 +23,7 @@ public class Edge {
       static Color anchorColour = getColours.DarkOrange;  
       static Color yearLabel = getColours.Ink;    
       static Color edgeColour = getColours.Ink; 
+      static Color aggregationColour = getColours.MintGreen; 
     
       
       Edge(PApplet p,String l, int n1, int n2, int numTimeSlices){
@@ -66,7 +67,6 @@ public class Edge {
       } 
       /** Adds highlights to the edges to show global persistence
        *  @param nodes all nodes in the network
-       *  @param view  the view to show the highlights for
        *  @param showAllHighlights true if all highlights for every edge should be drawn  
        *  */      
       void drawGlobalPersistenceHighlights(ArrayList<Node>nodes,int view,boolean showAllHighlights,float fade){
@@ -271,8 +271,9 @@ public class Edge {
        *  @param nodes an array of all nodes in the graph    
        *  @param persistence an array of persistence values (if null, then set it to this object's persistence)
        *  @param view the current (drawing) view
+       *  @param aggregate   Set to 1, if the hint path is aggregated, 0 otherwise
        * */
-      void drawHintPath(ArrayList <Node> nodes,ArrayList<Integer>persistence,int view){
+      void drawHintPath(ArrayList <Node> nodes,ArrayList<Integer>persistence,int view,int aggregate){
     	  this.hintCoords.clear();
     	  
     	  if (persistence == null)
@@ -327,6 +328,13 @@ public class Edge {
     	  parent.strokeWeight(5);
     	  parent.stroke(25,25,25,255);
     	  parent.line(start.x, start.y, end.x, end.y);*/  
+    	  
+    	  if (aggregate ==1){ //Draw a coloured border around the path (in aggregate mode)
+    		  parent.strokeWeight(6);
+    		  parent.stroke(aggregationColour.getRGB());
+    		  int last = hintCoords.size()-1;
+    		  parent.line(hintCoords.get(0).x,hintCoords.get(0).y,hintCoords.get(last).x,hintCoords.get(last).y);     		 
+    	  }
     	  
     	  Coordinate startArrow,endArrow;
     	  parent.strokeWeight(3);

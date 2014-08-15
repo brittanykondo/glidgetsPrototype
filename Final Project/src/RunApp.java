@@ -29,7 +29,7 @@ public void setup() {
 	this.screenWidth = displayWidth;
 	//this.screenHeight = 700;
 	//this.screenWidth = 1250;	
-	this.borderSize = 30; //Width of the query de-selection area
+	this.borderSize = 40; //Width of the query de-selection area
 	
 	size(this.screenWidth,this.screenHeight); 
    

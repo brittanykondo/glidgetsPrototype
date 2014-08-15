@@ -601,9 +601,9 @@ public class ForceDirectedGraph {
     	 for (int i=0;i<this.aggregatedEdges.size();i++){
     		 if (this.aggregate ==0){ //Reveal glyphs independently
     			 e = this.aggregatedEdges.get(i);
-    			 this.aggregatedEdges.get(i).drawHintPath(this.nodes, e.persistence,view);
+    			 this.aggregatedEdges.get(i).drawHintPath(this.nodes, e.persistence,view,this.aggregate);
     		 }else{ //Aggregate glyphs
-    			 this.aggregatedEdges.get(i).drawHintPath(this.nodes, this.aggregatedPersistence,view);
+    			 this.aggregatedEdges.get(i).drawHintPath(this.nodes, this.aggregatedPersistence,view,this.aggregate);
     		 }   		 
     	 }
      }
