@@ -38,7 +38,7 @@ public class Node {
       static Color yearLabel = getColours.Ink;    
       static Color nodeColour = getColours.SearchLightPink;
       static Color nodeLabelColour = getColours.Ink;
-      static Color aggregationColour = getColours.ArcTreesGreen3;
+      static Color aggregationColour = getColours.MintGreen;
      
       /** Constructor for creating a Node
        * @param p Reference to processing applet for drawing with processing commands

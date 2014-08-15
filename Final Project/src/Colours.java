@@ -6,7 +6,10 @@ public class Colours {
 	   //Greens
 	   public Color ArcTreesGreen3 = new Color(152, 255, 92, 255); 
 	   public Color ArcTreesAlgaeGreen = new Color(66, 219, 128, 255);  
-	   public Color Asparagus = new Color(177,189,53,255);    
+	   public Color Asparagus = new Color(177,189,53,255);  
+	   public Color DarkSeaGreen = new Color(121,195,106,255);
+	   public Color YellowGreen = new Color(105,225,85,255);
+	   public Color MintGreen = new Color(153,255,153,255);
        
        //Oranges       
 	   public Color Orange1 = new Color(255,158,84,255);
@@ -18,6 +21,9 @@ public class Colours {
 	   public Color Ink = new Color(67,78,98,255); 
 	   public Color LightInk = new Color(99,112,135);
 	   public Color InkBrighter = Ink.brighter();
+	   public Color LightSlate = new Color(158,169,189,200);
+	   public Color LightSlate2 = new Color(158,169,189,255);
+	   public Color LightSlate3 = new Color(212,216,223,255);
 	   public Color charcolGrey = new Color(25,25,25,255);
 	   public Color DarkGrey = new Color(134, 134, 134,255); 
 	   public Color LightGrey = new Color(189, 189, 189,255);

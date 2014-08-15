@@ -22,11 +22,17 @@ public class Button {
     
     //Colours    
     public Colours getColours = new Colours();
-    public Color background = getColours.MedGrey;
+    //public Color background = getColours.MedGrey;
+    public Color background = getColours.LightSlate2;
     //public Color background = getColours.InkBrighter;
     public Color textColour = getColours.Ink;
-    public Color toggleColour = new Color(220,220,220,255);
-    public Color borderColour = getColours.charcolGrey;
+    //public Color toggleColour = new Color(220,220,220,255);
+    public Color toggleColour = getColours.LightSlate3;
+    public Color toggleBorderColour = getColours.LightSlate2;
+    //public Color borderColour = getColours.charcolGrey;
+    public Color borderColour =  getColours.LightSlate2;
+    public Color clickedColour = toggleColour;
+    public Color clickedBorderColour = toggleBorderColour;
     
     /**Creates a new rectangle button
      * */
@@ -60,15 +66,21 @@ public class Button {
      * */
     public void draw(){
     	if (this.type==0){ //Rectangle button
-    		if (this.toggle==1 || this.hover==1){
-    			  parent.fill(this.toggleColour.getRGB());     			  
-    		  }else{
-    			  parent.fill(this.background.getRGB());    			 
-    		  }
-    		 parent.stroke(borderColour.getRGB());
-    		 parent.strokeWeight(1);
+    	      if (this.hover==1 || this.toggle==1){
+    			  if (this.toggle ==1){
+    				     parent.fill(this.clickedColour.getRGB());   
+    	   			     parent.stroke(this.clickedBorderColour.getRGB());
+    			  }else{
+    				  parent.fill(this.toggleColour.getRGB());   
+        			  parent.stroke(toggleBorderColour.getRGB());
+    			  }    			 
+    		 }else{
+    			  parent.fill(this.background.getRGB()); 
+    			  parent.stroke(borderColour.getRGB());
+    		  }    		
+    		 parent.strokeWeight(1.5f);
     		 parent.rect(this.x,this.y,this.width,this.height,6);
-    		 PFont font = parent.createFont("Century Gothic",this.fontSize,true);
+    		 PFont font = parent.createFont("Sans-Serif",this.fontSize);     	
     	   	 parent.textFont(font);  	  	  
     	   	 parent.fill(this.textColour.getRGB());
     	   	 parent.text(this.label,this.textX,this.textY);  
@@ -90,7 +102,7 @@ public class Button {
       		  return;
       	  }
       	  this.hover = 0;
-      	 this.clicked = false;          
+      	  this.clicked = false;          
     	}    	  
     }
     /**Checks if a mouse has entered the area of the button (mouse over)

@@ -20,9 +20,8 @@ public class Slider {
      float interpAmount;
      
     //Colours    
-     //public Colours getColours = new Colours();
-     public Color sliderColour = new Color(115,115,115,255);    
-     public Color slidingTickBorder = new Color(255,255,255,255);     
+     public Colours getColours = new Colours();     
+     public Color sliderColour,slidingTickBorder;
      
      /**Creates a new interactive slider widget
       * @param p reference to the processing applet (for drawing)
@@ -49,7 +48,10 @@ public class Slider {
 	   	  
 	   	  //Set the initial position of the draggable tick
 	   	  this.dragTickX = this.tickPositions.get(0)-this.dragTickWidth/2;
-	   	  this.dragTickY = this.yPos-this.dragTickHeight/2;  
+	   	  this.dragTickY = this.yPos-this.dragTickHeight/2; 
+	   	  
+	   	  this.sliderColour = getColours.Ink;
+	   	  this.slidingTickBorder = getColours.Ink;
      }
      
      /**Sets the tick x-positions to appear on the slider

@@ -33,10 +33,10 @@ public void setup() {
 	
 	size(this.screenWidth,this.screenHeight); 
    
-	GraphGenerator g = new GraphGenerator(this,4);
+	//GraphGenerator g = new GraphGenerator(this,4);
     //g.process("infectious_saved",this.screenWidth,this.screenHeight);
 	
-    this.graph = new ForceDirectedGraph(this,"infectious_saved.txt",4);    
+    this.graph = new ForceDirectedGraph(this,"vanDeBunt_saved.txt",6);    
     this.recording = false;
 	
 	ArrayList <String> testLabels = new ArrayList <String>();
@@ -49,8 +49,9 @@ public void setup() {
     //this.toggleLocalPersistence = 0;
     this.globalViewButton = new Button(this,130,40,495,625,"Global View",560,650,18);
     this.editModeButton = new Button(this,130,40,650,625,"Edit Mode",715,650,18);   
-    this.aggregateButton = new Button(this,130,40,805,625,"Aggregate",870,650,18);   
-    this.aggregateButton.toggleColour = getColours.ArcTreesGreen3;
+    this.aggregateButton = new Button(this,130,40,805,625,"Aggregate",870,650,18);      
+    this.aggregateButton.clickedBorderColour = getColours.MintGreen;
+    this.aggregateButton.clickedColour = getColours.MintGreen;
   }
 
   /**Re-draw the view */
@@ -107,7 +108,8 @@ public void setup() {
    * */
   public void drawBackground(){	  
 	  background(255);	   	  
-	  fill(getColours.LightGrey.getRGB()); //Panel surrounding the slider and toggle options
+	 // fill(getColours.LightGrey.getRGB()); //Panel surrounding the slider and toggle options
+	  fill(getColours.LightSlate.getRGB());
 	  noStroke();
 	  rect(60,600,890,100,10); 
 	  mouseOver();
