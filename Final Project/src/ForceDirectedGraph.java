@@ -764,9 +764,12 @@ public class ForceDirectedGraph {
 			String[] items = line.split(" ");
 			//System.out.println(items[0]);
 			if (items[0].equals("node")){ //Save the node
-				nodeId = Integer.parseInt(items[1]); 				
-				//newNode = new Node(this.parent,nodeId,items[4],this.numTimeSlices);
-				newNode = new Node(this.parent,nodeId,""+nodeId,this.numTimeSlices);
+				nodeId = Integer.parseInt(items[1]); 
+				if (items[4] != null){
+					newNode = new Node(this.parent,nodeId,items[4],this.numTimeSlices);
+				}else{
+					newNode = new Node(this.parent,nodeId,""+nodeId,this.numTimeSlices);
+				}				
 				//When the node positions are fixed....
 				nodeX = Float.parseFloat(items[2]);
 				nodeY = Float.parseFloat(items[3]);				

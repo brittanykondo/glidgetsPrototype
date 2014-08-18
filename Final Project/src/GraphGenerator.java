@@ -52,8 +52,9 @@ public class GraphGenerator {
     	 this.graph = new UndirectedSparseGraph<Integer,Edge>(); 
     	 this.width = graphWidth;
     	 this.height = graphHeight;
-      	 //readVanDeBunt();        	
-      	 readInfectious();
+      	// readVanDeBunt();        	
+      	 //readInfectious();
+    	 readWC();
       	 generateGraph();       
     }
     /** Creates a JUNG graph to store all nodes and edges that ever existed in the network dataset.  Then, generates an FR Layout
@@ -72,7 +73,7 @@ public class GraphGenerator {
     public void generateGraph (){   	   	 
    	 addElements(); //Add all elements
    	 //Just a test to see if it worked..
-   	 System.out.println(this.graph.toString());
+   	 //System.out.println(this.graph.toString());
    	 
    	 //Create the JUNG layout and set some parameters
    	 this.layout = new FRLayout <Integer,Edge>(this.graph); 
@@ -149,7 +150,7 @@ public class GraphGenerator {
      * Originally used in an experiment by Van De Bunt (1999)
      * */
     public void readVanDeBunt(){
-   	       String filename = "vanDeBunt_all.txt";
+   	       String filename = "vanDeBunt_all_time_60.txt";
       	  Scanner scan;
       	  int time = 0;
       	  int nodeCounter = 0;      	
@@ -262,6 +263,67 @@ public class GraphGenerator {
      		} catch (FileNotFoundException e) {			
      			e.printStackTrace();
      		}         	  
+   }
+   /** Reads the dataset representing history of FIFA World Cup matches
+    * */
+   public void readWC (){
+	   String filename = "HistoryWC.txt";
+  	  Scanner scan;
+  	  int time = -1;     	
+  	  int nodeId;
+  	  ArrayList<Integer> allNodes = new ArrayList<Integer>();
+  	  boolean readNode = true;
+  	  
+  	  try {
+  			scan = new Scanner(new File(filename));
+  			while(scan.hasNext())
+  			{   				
+  				String line;
+  				line = scan.nextLine();
+  				String[] items = line.trim().split(" ");
+  				if (items[0].equals("edges")){ //Reading edge info
+  					readNode = false;
+  				}
+  				
+  				if (readNode && !(items[0].equals("nodes"))){
+  					nodeId = Integer.parseInt(items[0])-1;  					
+  					if (!allNodes.contains(nodeId)){
+  						 this.nodes.add(new Node(this.parent,nodeId,items[1].substring(1,items[1].length()-1),this.numTimeSlices)); 
+       				     this.nodes.get(nodeId).initPersistence();
+       				     allNodes.add(nodeId);
+       				 } 
+  				}else if (!readNode && !(items[0].equals("edges"))){
+  							
+  					int endIndex = items[3].length()-2;
+  					int currentTime;
+  					System.out.println(endIndex);
+  					if (endIndex ==1){
+  						Character t = items[3].charAt(1);
+  						currentTime = Character.getNumericValue(t)-1;  
+  					}else{
+  					    currentTime = Integer.parseInt(items[3].substring(1,endIndex+1))-1;
+  					}
+  								
+  	  				if (time != currentTime){ //Switching time points
+  	  					time = currentTime;
+  	  				    this.edges.add(new ArrayList<Edge>());  
+  	  				}  
+  	  			   
+  	  			    
+  	  			    int n1 = Integer.parseInt(items[0])-1;					
+					int n2 = Integer.parseInt(items[1])-1;
+					if (allNodes.contains(n1) && allNodes.contains(n2)){ //Safety check
+						this.edges.get(time).add(new Edge(this.parent,"",n1,n2,this.numTimeSlices));     					
+						this.nodes.get(n1).persistence.set(time,1);
+						this.nodes.get(n2).persistence.set(time,1); 
+					}  
+  	  				
+  				} 			
+  									
+  			}	       			
+  		} catch (FileNotFoundException e) {			
+  			e.printStackTrace();
+  		}  
    }
    
    /** Converts a String to an integer array

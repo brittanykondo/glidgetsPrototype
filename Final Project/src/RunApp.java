@@ -25,18 +25,18 @@ public class RunApp extends PApplet {
     
 /**Initialize the view, draw the visualization */
 public void setup() {    
-	this.screenHeight = displayHeight;
-	this.screenWidth = displayWidth;
-	//this.screenHeight = 700;
-	//this.screenWidth = 1250;	
+	//this.screenHeight = displayHeight;
+	//this.screenWidth = displayWidth;
+	this.screenHeight = 700;
+	this.screenWidth = 1250;	
 	this.borderSize = 40; //Width of the query de-selection area
 	
 	size(this.screenWidth,this.screenHeight); 
    
-	//GraphGenerator g = new GraphGenerator(this,4);
-    //g.process("infectious_saved",this.screenWidth,this.screenHeight);
+	GraphGenerator g = new GraphGenerator(this,18);
+    g.process("WC_saved",this.screenWidth,this.screenHeight);
 	
-    this.graph = new ForceDirectedGraph(this,"vanDeBunt_saved.txt",6);    
+    this.graph = new ForceDirectedGraph(this,"WC_saved.txt",18);    
     this.recording = false;
 	
 	ArrayList <String> testLabels = new ArrayList <String>();
