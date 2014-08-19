@@ -33,17 +33,13 @@ public void setup() {
 	
 	size(this.screenWidth,this.screenHeight); 
    
-	GraphGenerator g = new GraphGenerator(this,18);
-    g.process("WC_saved",this.screenWidth,this.screenHeight);
+	//GraphGenerator g = new GraphGenerator(this,18);
+    //g.process("WC_saved",this.screenWidth,this.screenHeight);
 	
     this.graph = new ForceDirectedGraph(this,"WC_saved.txt",18);    
-    this.recording = false;
-	
-	ArrayList <String> testLabels = new ArrayList <String>();
-	for (int i=0;i<this.graph.numTimeSlices;i++){
-		testLabels.add(""+i);
-	}    
-    this.timeSlider = new Slider(this,testLabels,70,10,650);  
+    this.recording = false;	
+	    
+    this.timeSlider = new Slider(this,graph.timelineLabels,70,10,650);  
     this.selectedNode = -1;
     this.selectedEdge = -1;   
     //this.toggleLocalPersistence = 0;

@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import java.util.Arrays;
 import processing.core.PApplet;
 import processing.core.PFont;
 
@@ -23,6 +24,7 @@ public class ForceDirectedGraph {
      public ArrayList <Edge> aggregatedEdges;
      public ArrayList <Integer> aggregatedEdges_Nodes; //All nodes attached to selected edges
      public ArrayList<Integer> aggregatedPersistence;    
+     public ArrayList <String> timelineLabels; //Labels to appear along the time slider + embedded slider
      
      public boolean inGlobalView;
      PApplet parent;
@@ -227,7 +229,7 @@ public class ForceDirectedGraph {
          }      
          
          this.animateGraph(this.currentView, this.nextView, this.interpAmount);	            
-         this.draggingEdge.animateAnchor(newPoint.x,newPoint.y,this.drawingView);        	 
+         this.draggingEdge.animateAnchor(newPoint.x,newPoint.y,this.timelineLabels.get(this.drawingView));        	 
      }     
      /** Finds the minimum distance between a point at (x,y), with respect
       * to a line segment defined by points (pt1_x,pt1_y) and (pt2_x,pt2_y)
@@ -334,7 +336,7 @@ public class ForceDirectedGraph {
         	this.drawingView = this.currentView;
         	
         }       
-        n.animateAnchor(mouseAngle-parent.HALF_PI,fixAnchor,this.drawingView);
+        n.animateAnchor(mouseAngle-parent.HALF_PI,fixAnchor,this.timelineLabels.get(this.drawingView));
 	    this.mouseAngle = mouseAngle;
      }     
      /** Checks if the mouse is in bounds defined by a and b, updates the interpolation amount
@@ -779,6 +781,9 @@ public class ForceDirectedGraph {
 			}else if (items[0].equals("time")){ //Save the time slice				
 				nodesDone = true;    
 				time = Integer.parseInt(items[1]); 				
+			}else if (items[0].equals("timeline")){
+				String [] labels = scan.nextLine().split(" ");			
+				this.timelineLabels = new ArrayList<String>(Arrays.asList(labels));
 			}else{
 				if (nodesDone){ //Save the edge information       						
 					newEdge = new Edge (this.parent,"",Integer.parseInt(items[0]),Integer.parseInt(items[1]),this.numTimeSlices);

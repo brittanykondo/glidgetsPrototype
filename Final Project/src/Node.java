@@ -240,10 +240,10 @@ public class Node {
       /**Draws the anchor as an elastic attached to the mouse when it is dragging around a node
        * @param mouseAngle the angle of the mouse w.r.t to the center of the node
        * @param fixAnchor, if 1, anchor should only extend vertically (staying at a fixed angle)
-       *                   if 0, anchor should move with the mouse angle
-       * @param view      the time slice (to draw next to the anchor)
+       *                   if 0, anchor should move with the mouse angle       
+       * @param timeLabel  the label to display on the node's time slider
        **/
-      void animateAnchor(float mouseAngle, int fixAnchor,int view){
+      void animateAnchor(float mouseAngle, int fixAnchor,String timeLabel){
     	 
     	  parent.strokeCap(parent.ROUND);
     	  parent.stroke(anchorColour.getRGB());
@@ -260,10 +260,10 @@ public class Node {
         	  float x2 = (float) (this.x + dist*Math.cos(mouseAngle));
               float y2 = (float) (this.y + dist*Math.sin(mouseAngle));              
         	  parent.line(x1, y1, x2, y2);
-        	  parent.text(view, x2, y2);
+        	  parent.text(timeLabel, x2, y2);
           }else{
         	  parent.line(x1, y1, parent.mouseX, parent.mouseY);
-        	  parent.text(view, parent.mouseX, parent.mouseY);
+        	  parent.text(timeLabel, parent.mouseX, parent.mouseY);
           }   
           
       }

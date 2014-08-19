@@ -406,10 +406,10 @@ public class Edge {
     	return new Coordinate(px,py);
     }
     /** Draws the hint path, then animates the indicator according to mouse dragging along the edge
-     *  @param newX,newY the position of the mouse projected onto the hint path (according to the min distance) 
-     *  @param view   to draw the time slice label 
+     *  @param newX,newY the position of the mouse projected onto the hint path (according to the min distance)     
+     *  @param timeLabel  The time label to be drawn on the slider (current view)
      * */
-    void animateAnchor(float newX, float newY,int view){  	   	
+    void animateAnchor(float newX, float newY,String timeLabel){  	   	
     	 parent.strokeCap(parent.ROUND);
    	     parent.stroke(anchorColour.getRGB());
    	     parent.strokeWeight(10);
@@ -427,7 +427,7 @@ public class Edge {
 	   	 parent.textFont(font);
 	   	 parent.fill(yearLabel.getRGB());
 	   	 ArrayList<Coordinate> textCoords = findPerpendicularLine(newX,newY,endC.x,endC.y,20.0f);
-   	     parent.text(view, textCoords.get(0).x, textCoords.get(0).y);
+   	     parent.text(timeLabel, textCoords.get(0).x, textCoords.get(0).y);
     }
   
     /**Draws an arrow at the end (x2,y2) of the line defined by the given points

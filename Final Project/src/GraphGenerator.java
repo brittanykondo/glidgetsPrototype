@@ -22,10 +22,11 @@ public class GraphGenerator {
 	public FRLayout<Integer,Edge> layout;
 	public ArrayList<Node> nodes;
     public ArrayList<ArrayList<Edge>> edges;    
+    public ArrayList<String> timeLabels;
     public PrintWriter output;
     public int width;
     public int height;
-    
+      
     PApplet parent;
     public int numTimeSlices;
     String outfile;
@@ -40,6 +41,7 @@ public class GraphGenerator {
    	      this.numTimeSlices = t;
    	      this.nodes = new ArrayList<Node>();
    	      this.edges = new ArrayList<ArrayList<Edge>>(); //All edges that exist at each time point
+   	      this.timeLabels = new ArrayList<String>();
     }
     
     /**Reads the data file and generates a graph layout which is written to a data file, 
@@ -68,6 +70,8 @@ public class GraphGenerator {
      *  time timeSliceNumber
      *  node1 node2 (edges)
      *  ...for all time slices
+     *  
+     *  timeline time1Label time2Label etc... (to appear on the time slider)
      * 
      * */
     public void generateGraph (){   	   	 
@@ -107,6 +111,13 @@ public class GraphGenerator {
 			}
     }
     
+    //Save the time line labels
+    System.out.println("timeline");
+    this.output.println("timeline");
+    for (int i=0;i<this.numTimeSlices;i++){
+    	System.out.print(this.timeLabels.get(i)+" ");
+    	this.output.print(this.timeLabels.get(i)+" ");
+    }
 	 this.output.flush();
 	 this.output.close();
 }
@@ -155,7 +166,7 @@ public class GraphGenerator {
       	  int time = 0;
       	  int nodeCounter = 0;      	
       	  ArrayList <ArrayList<Integer>> nodesWithEdges = new ArrayList <ArrayList<Integer>>();
-      	  
+      	 
       	  try {
       			scan = new Scanner(new File(filename));
       			while(scan.hasNext())
@@ -165,6 +176,7 @@ public class GraphGenerator {
       				String[] items = line.split(" ");
       				if (items[0].equals("time")){       					
       					time = Integer.parseInt(items[1]);
+      					this.timeLabels.add(""+time);
       					nodeCounter = 0;  
       					this.edges.add(new ArrayList <Edge>());
       				}else{
