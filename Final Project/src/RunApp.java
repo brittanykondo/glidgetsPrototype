@@ -21,6 +21,9 @@ public class RunApp extends PApplet {
     public int screenWidth;
     public int screenHeight;
     public int borderSize;
+    public boolean clickedBorder;
+    public double t; //Track animations
+    
    // public float scaleFactor = 1;
     
 /**Initialize the view, draw the visualization */
@@ -36,9 +39,12 @@ public void setup() {
 	//GraphGenerator g = new GraphGenerator(this,18);
     //g.process("WC_saved",this.screenWidth,this.screenHeight);
 	
-    this.graph = new ForceDirectedGraph(this,"WC_saved.txt",18);    
+    //this.graph = new ForceDirectedGraph(this,"WC_saved.txt",18);   
+	this.graph = new ForceDirectedGraph(this,"vanDeBunt_saved.txt",6);
     this.recording = false;	
-	    
+	this.clickedBorder = false;
+	this.t = 0;
+	
     this.timeSlider = new Slider(this,graph.timelineLabels,70,10,650);  
     this.selectedNode = -1;
     this.selectedEdge = -1;   
@@ -114,16 +120,57 @@ public void setup() {
 	  this.aggregateButton.draw();
 	  this.drawBorder();	  
   }
-  /**Draws the de-selection border and toggles its colour on mouse over
+  /**Draws the de-selection border and toggles its colour when it is clicked, using animated transitions
+   * (cubic ease in and out functions)
    * */
-  public void drawBorder(){
-	  if (mouseX >= this.borderSize && mouseX <= (this.screenWidth-this.borderSize) && mouseY >= this.borderSize && mouseY <= 
-				(this.screenHeight-this.borderSize)){
-		  stroke(255);		  
-	  }else{
-		  stroke(220,220,220,200);
+  public void animateBorder(){
+	  if (!this.onBorder()){	
+		  this.clickedBorder = false;		 
+		  if (this.t>0){  //Fade out border colour			 
+			  this.t -=0.1;
+			  stroke(220,220,220,this.easeOutExpo((float)this.t,0,200,1));			  
+		  }else{ //Already faded out, do nothing
+			  this.t = 0;			  
+			  noStroke();
+		  }		  	  
+	  }else if (this.clickedBorder){		  
+		  if (this.t >=1){
+			  this.clickedBorder = false;
+			  this.t = 0;
+		  }else { //Fade in/out
+			  this.t +=0.1;		
+			  //stroke(214,39,40,this.easeInOutCubic((float)this.t, 0, 255, 1)); //RED	
+			  stroke(100,100,100,this.easeInOutCubic((float)this.t, 0, 255, 1));				 		  
+		  }		
+	  }else{			  
+		  if (this.t<1){ //Fade in border colour			
+			  this.t +=0.1;
+			  stroke(220,220,220,this.easeInExpo((float)this.t,0,200,1));		
+		  }else{ //Already faded in, do nothing
+			  this.t = 1;
+			  stroke(220,220,220,200);
+		  }
 	  }
 	  
+	  strokeWeight(this.borderSize);
+	  noFill();
+	  rect(0,0,this.screenWidth,this.screenHeight);
+  }
+  /**Draws the de-selection border and toggles its colour when it is clicked, without animated transitions
+   * */
+  public void drawBorder(){
+	  if (!this.onBorder()){
+		  noStroke();
+	  }else if (this.clickedBorder){	//Make the border change colour for longer than one frame
+		  if (this.t >= 1){
+			  this.clickedBorder = false;
+		  }
+		  stroke(100,100,100,255);
+		  this.t +=0.1;		  		 
+	  }else{		 
+		 stroke(220,220,220,200);
+		 this.t = 0;
+	  }
 	  strokeWeight(this.borderSize);
 	  noFill();
 	  rect(0,0,this.screenWidth,this.screenHeight);
@@ -157,8 +204,10 @@ public void setup() {
 		  }			 	 
 	  }  */
 	 //Check if queries should be cleared
-	  if (this.clickedBorder()){
+	  if (this.onBorder()){		  
 		  graph.clearQueries();
+		  this.clickedBorder = true;
+		  this.t = 0;
 	  }
 	  
 	  //Check if glyphs should be aggregated
@@ -168,10 +217,12 @@ public void setup() {
 		 graph.aggregate = 0;
 	   }
   }
-  /**Checks if the mouse clicked the border (designated de-selection area for canceling all queries)*/
-  public boolean clickedBorder(){
+  /**Checks if the mouse is on the border (designated de-selection area for canceling all queries)
+   * */
+  public boolean onBorder(){
+	  
 	  if (mouseX >= this.borderSize && mouseX <= (this.screenWidth-this.borderSize) && mouseY >= this.borderSize && mouseY <= 
-				(this.screenHeight-this.borderSize)){
+				(this.screenHeight-this.borderSize)){		  
 		  return false;
 	  }
 		  
@@ -191,7 +242,7 @@ public void setup() {
   }
   
   /**Responds to a mouse up event on the canvas */
-  public void mouseReleased(){
+  public void mouseReleased(){	  
 	  if (timeSlider.dragging){ //Snap to view based on the slider		 
 		  timeSlider.releaseTick();		  
 		  this.graph.updateView(timeSlider.currentView, timeSlider.nextView, timeSlider.drawingView);		  
@@ -239,6 +290,34 @@ public void setup() {
 		  if (scaleFactor <=1) scaleFactor = 1;
 	  }*/
   }
+  /** Cubic ease in animation function
+   *  From: http://www.gizma.com/easing/#cub1
+   *  @param t current time
+   *  @param b start value
+   *  @param c change in value
+   *  @param d duration
+   * */
+  public int easeInExpo(float t, float b, float c, float d) {
+	  return (int)(c * Math.pow( 2, 10 * (t/d - 1) ) + b);    	   
+  }
+  /** Cubic ease out animation function
+   *  From: http://www.gizma.com/easing/#cub1
+   *  @param see easeInExpo() above
+   * */
+  public int easeOutExpo(float t, float b, float c, float d) {	
+	  return (int) (c * ( -Math.pow( 2, -10 * t/d ) + 1 ) + b);
+	}
+  /**
+   * */
+  public float easeInOutCubic (float t, float b,float c, float d) {
+		t /= d/2;
+		if (t < 1) return c/2*t*t*t + b;
+		t -= 2;
+		return c/2*(t*t*t + 2) + b;
+	}
+  
+  /* The main executable class, will run full screen
+   * */
   static public void main(String args[]) {
 	   PApplet.main(new String[] { "--present", "RunApp" });	  
 	}

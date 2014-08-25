@@ -449,7 +449,7 @@ public class Node {
       }
       /** Function to compute the transparency of a node fading out
        *  From: http://www.gizma.com/easing/#cub1
-       *  @param see easeInExpo();
+       *  @param see easeInExpo() above
        * */
       int easeOutExpo(float t, float b, float c, float d) {
     	 // t /= d;
