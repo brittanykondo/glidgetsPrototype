@@ -24,7 +24,7 @@ public class RunApp extends PApplet {
     public boolean clickedBorder;
     public double t; //Track animations
     
-   // public float scaleFactor = 1;
+    public float scaleFactor = 1;
     
 /**Initialize the view, draw the visualization */
 public void setup() {    
@@ -35,8 +35,8 @@ public void setup() {
 	this.borderSize = 40; //Width of the query de-selection area
 	
 	size(this.screenWidth,this.screenHeight); 
-   
-	//GraphGenerator g = new GraphGenerator(this,18);
+		
+	GraphGenerator g = new GraphGenerator(this,18);
     //g.process("WC_saved",this.screenWidth,this.screenHeight);
 	
     //this.graph = new ForceDirectedGraph(this,"WC_saved.txt",18);   
@@ -62,7 +62,13 @@ public void setup() {
 	 if (recording){
 		  beginRecord(PDF,"frame-####.pdf");
 	  }
-	 // scale(scaleFactor);	 
+	  
+	 scale(scaleFactor); //Zooming in and out, re-scale the mouse coordinates 
+	 if (mouseX !=pmouseX && mouseY!=pmouseY){
+		 mouseX = (int)(mouseX/scaleFactor);
+		 mouseY = (int)(mouseY/scaleFactor);
+	 }
+	 
 	 if (this.editModeButton.toggle==1){ //Reposition nodes by dragging
 		  drawBackground();    	    
 		  this.graph.clearQueries();
@@ -109,16 +115,21 @@ public void setup() {
   /**Draws the background and other interface components
    * */
   public void drawBackground(){	  
-	  background(255);	   	  
-	 // fill(getColours.LightGrey.getRGB()); //Panel surrounding the slider and toggle options
-	  fill(getColours.LightSlate.getRGB());
+	  background(255);	   	
+	  fill(getColours.LightSlate.getRGB());	  
 	  noStroke();
 	  rect(60,600,890,100,10); 
+	  fill(getColours.Ink.getRGB());
+	  PFont font = createFont("Droid Sans",12,true);
+   	  textFont(font);
+	  text("Press 'r' to take a screen shot",850,690);
 	  mouseOver();
 	  this.globalViewButton.draw();	
 	  this.editModeButton.draw();
 	  this.aggregateButton.draw();
-	  this.drawBorder();	  
+	  if (this.editModeButton.toggle !=1){ //Can't de-select elements in edit mode..
+		  this.drawBorder();	 
+	  }	   
   }
   /**Draws the de-selection border and toggles its colour when it is clicked, using animated transitions
    * (cubic ease in and out functions)
@@ -161,6 +172,7 @@ public void setup() {
   public void drawBorder(){
 	  if (!this.onBorder()){
 		  noStroke();
+		  this.clickedBorder = false;
 	  }else if (this.clickedBorder){	//Make the border change colour for longer than one frame
 		  if (this.t >= 1){
 			  this.clickedBorder = false;
@@ -228,11 +240,12 @@ public void setup() {
 		  
 	  return true;
   }
-  /**Responds to a mouse dragging event (mouse pressed + mouse move ) on the canvas */
+  /**Responds to a mouse dragging event (mouse pressed + mouse move ) on the canvas 
+   * */
   public void mouseDragged(){	
 	  
 	  if (this.editModeButton.toggle==1){
-		  graph.updateNodePosition(mouseX, mouseY);
+		  graph.updateNodePosition(mouseX/scaleFactor, mouseY/scaleFactor);
 		  return;
 	  }	  
 	  graph.isNodeDragged();//Just check if the node should be dragged around or de-selected
@@ -283,12 +296,14 @@ public void setup() {
   public void keyPressed(){
 	  if (key=='r'){
 		  recording = true;
-	  }/**else if (key=='i'){
-		  scaleFactor +=0.01;
-	  }else if (key=='o'){		  
+	  }else if (key=='='){
+		  scaleFactor +=0.01;		  
+	  }else if (key=='-'){		  
 		  scaleFactor -=0.01;
-		  if (scaleFactor <=1) scaleFactor = 1;
-	  }*/
+		  if (scaleFactor <=0) scaleFactor = 0.01f; //Minimum zoom out level
+	  }else if (key =='0'){
+		  scaleFactor = 1;
+	  }
   }
   /** Cubic ease in animation function
    *  From: http://www.gizma.com/easing/#cub1

@@ -54,8 +54,7 @@ public class GraphGenerator {
     	 this.graph = new UndirectedSparseGraph<Integer,Edge>(); 
     	 this.width = graphWidth;
     	 this.height = graphHeight;
-      	// readVanDeBunt();        	
-      	 //readInfectious();
+      	// readVanDeBunt();         
     	 readWC();
       	 generateGraph();       
     }
@@ -231,51 +230,7 @@ public class GraphGenerator {
    	}     	
    	
    }  
-
-   /**Reads the text file containing time-varying data of infectious SocioPatterns
-    * Dataset can be found here: http://www.sociopatterns.org/datasets/infectious-sociopatterns/
-    * */
-   public void readInfectious(){
-  	      String filename = "infectious_small.txt";
-     	  Scanner scan;
-     	  int time = -1;     	
-     	  int nodeId;
-     	  ArrayList<Integer> allNodes = new ArrayList<Integer>();
-     	  
-     	  try {
-     			scan = new Scanner(new File(filename));
-     			while(scan.hasNext())
-     			{   				
-     				String line;
-     				line = scan.nextLine();
-     				String[] items = line.trim().split(" ");
-     				if (items[0].equals("date")){       					
-     					this.edges.add(new ArrayList<Edge>());     					
-     					time++;
-     				}else if (items[0].equals("id")){
-     					nodeId = Integer.parseInt(items[1]);
-     					if (!allNodes.contains(nodeId)){
-     						 this.nodes.add(new Node(this.parent,nodeId,items[1],this.numTimeSlices)); 
-          				     this.nodes.get(nodeId).initPersistence();
-          				     allNodes.add(nodeId);
-     					}     				   
-     				}else if (items[0].equals("source")){
-     					int n1 = Integer.parseInt(items[1]);
-     					line = scan.nextLine();
-     					items = line.trim().split(" ");
-     					int n2 = Integer.parseInt(items[1]);
-     					if (allNodes.contains(n1) && allNodes.contains(n2)){ //Safety check
-     						this.edges.get(time).add(new Edge(this.parent,"",n1,n2,this.numTimeSlices));     					
-         					this.nodes.get(n1).persistence.set(time,1);
-         					this.nodes.get(n2).persistence.set(time,1); 
-     					}     					     					
-     				}
-     									
-     			}	       			
-     		} catch (FileNotFoundException e) {			
-     			e.printStackTrace();
-     		}         	  
-   }
+   
    /** Reads the dataset representing history of FIFA World Cup matches
     * */
    public void readWC (){
