@@ -36,7 +36,7 @@ public void setup() {
 	
 	size(this.screenWidth,this.screenHeight); 
 		
-	GraphGenerator g = new GraphGenerator(this,18);
+	//GraphGenerator g = new GraphGenerator(this,18);
     //g.process("WC_saved",this.screenWidth,this.screenHeight);
 	
     //this.graph = new ForceDirectedGraph(this,"WC_saved.txt",18);   
@@ -45,13 +45,13 @@ public void setup() {
 	this.clickedBorder = false;
 	this.t = 0;
 	
-    this.timeSlider = new Slider(this,graph.timelineLabels,70,10,650);  
+    this.timeSlider = new Slider(this,graph.timelineLabels,70,650,550);  
     this.selectedNode = -1;
     this.selectedEdge = -1;   
     //this.toggleLocalPersistence = 0;
-    this.globalViewButton = new Button(this,130,40,495,625,"Global View",560,650,18);
-    this.editModeButton = new Button(this,130,40,650,625,"Edit Mode",715,650,18);   
-    this.aggregateButton = new Button(this,130,40,805,625,"Aggregate",870,650,18);      
+    this.globalViewButton = new Button(this,100,40,650,625,"Global View",700,650,16);
+    this.editModeButton = new Button(this,100,40,770,625,"Edit Mode",820,650,16);   
+    this.aggregateButton = new Button(this,100,40,890,625,"Aggregate",940,650,16);      
     this.aggregateButton.clickedBorderColour = getColours.MintGreen;
     this.aggregateButton.clickedColour = getColours.MintGreen;
   }
@@ -64,7 +64,7 @@ public void setup() {
 	  }
 	  
 	 scale(scaleFactor); //Zooming in and out, re-scale the mouse coordinates 
-	 if (mouseX !=pmouseX && mouseY!=pmouseY){
+	 if (mouseX !=pmouseX && mouseY!=pmouseY){ //http://forum.processing.org/two/discussion/1015/scaling-up-1-5-the-whole-sketch-problems-with-non-working-buttons-/p1
 		 mouseX = (int)(mouseX/scaleFactor);
 		 mouseY = (int)(mouseY/scaleFactor);
 	 }
@@ -112,17 +112,29 @@ public void setup() {
 	  this.editModeButton.hover();
 	  this.aggregateButton.hover();
   }
+  /**Draws brief usage instructions on the bottom panel
+   * */
+  //TODO: make a help page/button and make a widget for zooming in and out
+  public void drawInstructions(){
+	  fill(getColours.Ink.getRGB());
+	  PFont font = createFont("Droid Sans",12,true);
+   	  textFont(font);
+   	  textAlign(LEFT);
+	  text("Press 'r' to take a screen shot",1010,630);
+	  text("+/- to zoom in/out",1010,650);
+	  text("0 to reset zoom",1010,670);
+	  textAlign(CENTER);
+  }
+  
   /**Draws the background and other interface components
    * */
   public void drawBackground(){	  
 	  background(255);	   	
 	  fill(getColours.LightSlate.getRGB());	  
 	  noStroke();
-	  rect(60,600,890,100,10); 
-	  fill(getColours.Ink.getRGB());
-	  PFont font = createFont("Droid Sans",12,true);
-   	  textFont(font);
-	  text("Press 'r' to take a screen shot",850,690);
+	  rect(60,600,1125,90,10); 
+	  drawInstructions();
+	  
 	  mouseOver();
 	  this.globalViewButton.draw();	
 	  this.editModeButton.draw();
@@ -236,8 +248,7 @@ public void setup() {
 	  if (mouseX >= this.borderSize && mouseX <= (this.screenWidth-this.borderSize) && mouseY >= this.borderSize && mouseY <= 
 				(this.screenHeight-this.borderSize)){		  
 		  return false;
-	  }
-		  
+	  }		  
 	  return true;
   }
   /**Responds to a mouse dragging event (mouse pressed + mouse move ) on the canvas 

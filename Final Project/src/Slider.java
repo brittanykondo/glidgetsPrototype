@@ -8,8 +8,7 @@ public class Slider {
      ArrayList <String> labels;
      int numLabels;
      PApplet parent;
-     ArrayList <Float> tickPositions;
-     int spacing; //Between ticks
+     ArrayList <Float> tickPositions;   
      float yPos; //Of the slider
      float xPos; //Spacing from edge
      float dragTickHeight = 30, dragTickWidth=20; //Of the draggable tick
@@ -18,6 +17,7 @@ public class Slider {
      boolean dragging;
      float dragTickX, dragTickY;
      float interpAmount;
+     int sliderWidth;
      
     //Colours    
      public Colours getColours = new Colours();     
@@ -25,15 +25,14 @@ public class Slider {
      
      /**Creates a new interactive slider widget
       * @param p reference to the processing applet (for drawing)
-      * @param l an array of labels to appear along the slider
-      * @param sp the spacing in between ticks along the slider
+      * @param l an array of labels to appear along the slider 
       * @param x,y the screen coordinates indicating position of the slider
+      * @param width the width of screen space assigned to the slider
       * */
-     Slider (PApplet p, ArrayList<String>l,int sp,int x, int y){   	  
+     Slider (PApplet p, ArrayList<String>l,int x, int y,int width){   	  
 	   	  this.parent = p;
 	   	  this.labels = l;   
-	   	  this.numLabels = l.size();
-	   	  this.spacing = sp;
+	   	  this.numLabels = l.size();	   	 
 	   	  
 	   	  this.yPos = y;
 	   	  this.xPos = x;
@@ -43,6 +42,7 @@ public class Slider {
 	   	  this.nextView = 1;
 	   	  this.dragging = false;
 	   	  this.interpAmount = 0;
+	   	  this.sliderWidth = width;
 	   	  
 	   	  setTicks();
 	   	  
@@ -58,8 +58,10 @@ public class Slider {
       * */
      void setTicks(){ 
     	 this.tickPositions = new ArrayList <Float>();
+    	 int intervalSize = this.sliderWidth/this.numLabels; //Size in between ticks
+    	 
     	 for (int i=0;i<this.numLabels;i++){
-    		 this.tickPositions.add((float) (i*this.spacing+this.spacing+this.xPos));
+    		 this.tickPositions.add((float) (i*intervalSize+intervalSize+this.xPos));
     	 }
      }
      /**Draws the non-interactive parts of the slider (labels, ticks and time line)
@@ -68,7 +70,7 @@ public class Slider {
     	//Draw the main line
     	  parent.strokeWeight(2);
 	   	  parent.stroke(sliderColour.getRGB());
-	   	  PFont font = parent.createFont("Century Gothic",16,true);
+	   	  PFont font = parent.createFont("Droid Sans",11,true);
 	   	  parent.textFont(font);		   	 
 	   	  parent.textAlign(parent.CENTER);
 	   	  
