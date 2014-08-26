@@ -68,6 +68,7 @@ public class Slider {
       * */
      void drawSliderBackground(){
     	//Draw the main line
+    	 parent.fill(sliderColour.getRGB());
     	  parent.strokeWeight(2);
 	   	  parent.stroke(sliderColour.getRGB());
 	   	  PFont font = parent.createFont("Droid Sans",11,true);
@@ -87,8 +88,7 @@ public class Slider {
      * Also re-draws the slider bar
      * */
     void drawSlider(){
-    	drawSliderBackground();
-    	 parent.fill(sliderColour.getRGB());
+    	drawSliderBackground();    	
     	if (this.dragging){
     		parent.stroke(slidingTickBorder.getRGB());
     	}else{

@@ -50,18 +50,42 @@ public class GraphGenerator {
      * @param graphWidth, graphHeight  The dimensions of the graph  
      * */
     public void process(String of,int graphWidth,int graphHeight){  
-    	 this.outfile = of;
-    	 this.graph = new UndirectedSparseGraph<Integer,Edge>(); 
+    	 this.outfile = of;    	
     	 this.width = graphWidth;
     	 this.height = graphHeight;
-      	// readVanDeBunt();         
-    	 readWC();
-      	 generateGraph();       
+    	 
+    	 //Read the graph data (uncomment for desired dataset)
+      	 readVanDeBunt();         
+    	 //readWC();
+    	 
+    	 addElements(this.nodes,this.edges); //Add all elements to a Jung graph data structure       
+      	 createLayout(0.75,0.75,1000,this.width,this.height);
+      	 saveGraphData(this.outfile,true,this.nodes,this.edges,this.timeLabels);
     }
-    /** Creates a JUNG graph to store all nodes and edges that ever existed in the network dataset.  Then, generates an FR Layout
-     *  and saves all info in a text file. Format of the output file:
+    /** Creates a JUNG graph layout to re-position nodes stored in the graph, runs the layout for a specified amount
+     * of iterations.
+     * @param r  repulsion factor 
+     * @param a  attraction factor
+     * @param it number of iterations for running the algorithm
+     * @param w, h drawing dimensions of the graph
+     * */
+    public void createLayout (double r, double a, int it,int w, int h){    	 
+   	 //Create the JUNG layout and set some parameters
+   	 this.layout = new FRLayout <Integer,Edge>(this.graph); 
+   	 this.layout.setRepulsionMultiplier(r);
+   	 this.layout.setAttractionMultiplier(a);
+     this.layout.setMaxIterations(it);  
+     this.layout.setSize(new Dimension(w,h));
+	 
+     while (!this.layout.done()){ //Keep applying the FR algorithm until max iterations reached
+	     this.layout.step();
+	  }	
+    }
+    /**Saves the graph data to a file that is readable by RunGlidgets.java
+     * 
+     * Format of the output file:
      *  
-     *  timeline 
+     *  timeline
      *  time1Label time2Label etc... (to appear on the time slider)
      *  
      *  node nodeId(unique) nodeXPosition nodeYPosition nodeLabel
@@ -71,72 +95,66 @@ public class GraphGenerator {
      *  
      *  time timeSliceNumber
      *  node1 node2 (edges)
-     *  ...for all time slices  
+     *  ...for all time slices 
+     *  
+     *  @param out name of the output file
+     *  @param useLayout  true, if FR layout should be applied to node positions  
+     *
      * */
-    public void generateGraph (){   	   	 
-   	 addElements(); //Add all elements
-   	 //Just a test to see if it worked..
-   	 //System.out.println(this.graph.toString());
-   	 
-   	 //Create the JUNG layout and set some parameters
-   	 this.layout = new FRLayout <Integer,Edge>(this.graph); 
-   	 //this.layout.setRepulsionMultiplier(0.5);
-   	 //this.layout.setAttractionMultiplier(0.8);
-     //this.layout.setMaxIterations(1000000);  
-     this.layout.setSize(new Dimension(this.width,this.height));
-	 
-     while (!this.layout.done()){ //Keep applying the FR algorithm until max iterations reached
-	     this.layout.step();
-	  }	
-		 
-	this.output = parent.createWriter(this.outfile+".txt");		 
-	
-	//Save the time line labels
-    System.out.println("timeline");
-    this.output.println("timeline");
-    for (int i=0;i<this.numTimeSlices;i++){
-    	System.out.print(this.timeLabels.get(i)+" ");
-    	this.output.print(this.timeLabels.get(i)+" ");
+    public void saveGraphData(String out,boolean useLayout,ArrayList<Node>nodes, ArrayList<ArrayList<Edge>> edges,ArrayList<String> timeLabels){
+    	this.output = parent.createWriter(out+".txt");		 
+    	
+    	//Save the time line labels     
+        this.output.println("timeline");
+        int numTimeSlices = timeLabels.size();
+        for (int i=0;i<numTimeSlices;i++){        	
+        	this.output.print(timeLabels.get(i)+" ");
+        }
+        this.output.println();
+    	//Save the node info
+    	for (int i=0;i<nodes.size();i++){	
+    		if (useLayout){
+    			 this.output.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i)+" "+nodes.get(i).label);
+    		}else{
+    			 this.output.println("node "+i+" "+nodes.get(i).x+" "+nodes.get(i).y+" "+nodes.get(i).label);
+    		}
+    		
+    		 for (int j=0;j<this.numTimeSlices;j++){
+    			  this.output.println(nodes.get(i).persistence.get(j));
+    		 }
+    	 }
+    	
+    	//Save the edge info
+    	 Edge currentEdge;   	 
+        for (int i=0;i<numTimeSlices;i++){				
+    			//System.out.println("time "+i); //Debugging
+    			this.output.println("time "+i);
+    			for (int j=0;j<edges.get(i).size();j++){
+    				currentEdge = edges.get(i).get(j);						
+    				this.output.println(currentEdge.node1+" "+currentEdge.node2);
+    			}
+        }    
+        
+    	 this.output.flush();
+    	 this.output.close();
     }
-    
-	//Save the node info
-	for (int i=0;i<this.nodes.size();i++){			
-		 this.output.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i)+" "+this.nodes.get(i).label);
-		 for (int j=0;j<this.numTimeSlices;j++){
-			  this.output.println(this.nodes.get(i).persistence.get(j));
-		 }
-	 }
-	
-	//Save the edge info
-	 Edge currentEdge;   	 
-    for (int i=0;i<this.numTimeSlices;i++){				
-			System.out.println("time "+i);
-			this.output.println("time "+i);
-			for (int j=0;j<this.edges.get(i).size();j++){
-				currentEdge = this.edges.get(i).get(j);						
-				this.output.println(currentEdge.node1+" "+currentEdge.node2);
-			}
-    }    
-    
-	 this.output.flush();
-	 this.output.close();
-}
     /**Adds all elements to the JUNG graph using the arrays used to save the data from the data file
      * */
-    public void addElements(){
-    	
+    public void addElements(ArrayList<Node>nodes,ArrayList<ArrayList<Edge>>edges){
+    	 this.graph = new UndirectedSparseGraph<Integer,Edge>(); //Create a new undirected graph to save elements
+    	 
     	//Add all the nodes
-    	for (int i=0;i<this.nodes.size();i++){
-    		this.graph.addVertex(this.nodes.get(i).id);
+    	for (int i=0;i<nodes.size();i++){
+    		this.graph.addVertex(nodes.get(i).id);
     	}
     	
     	//Add all the edges
     	int edgeNum = 0;
     	ArrayList<Edge> allEdges = new ArrayList<Edge>();
     	Edge currentEdge;
-    	for (int i=0;i<this.edges.size();i++){
-    		for (int j=0;j<this.edges.get(i).size();j++){
-    			currentEdge = this.edges.get(i).get(j);
+    	for (int i=0;i<edges.size();i++){
+    		for (int j=0;j<edges.get(i).size();j++){
+    			currentEdge = edges.get(i).get(j);
     			if (!findEdge(allEdges,currentEdge)){
     				this.graph.addEdge(edgeNum,currentEdge.node1, currentEdge.node2);
     				allEdges.add(currentEdge);
@@ -144,6 +162,8 @@ public class GraphGenerator {
     			}    			
     		}
     	}
+   	 //Just a test to see if it worked..
+     //System.out.println(this.graph.toString());
     }
  
     /**Finds an edge in an arraylist of edges
@@ -161,7 +181,7 @@ public class GraphGenerator {
      * Originally used in an experiment by Van De Bunt (1999)
      * */
     public void readVanDeBunt(){
-   	       String filename = "vanDeBunt_all_time_60.txt";
+   	       String filename = "vanDeBunt_all.txt";
       	  Scanner scan;
       	  int time = 0;
       	  int nodeCounter = 0;      	
