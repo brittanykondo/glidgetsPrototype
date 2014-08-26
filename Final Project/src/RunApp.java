@@ -1,11 +1,16 @@
 import java.awt.Color;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import javax.swing.JDialog;
 
 import processing.core.*;
 import processing.event.KeyEvent;
 import processing.pdf.PGraphicsPDF;
 
+/** Main class for running the app.
+ *  Accepts input data file name as a command line argument (with .txt), if no name provided, uses the default
+ *  data file (vanDeBunt.txt).
+ * */
 public class RunApp extends PApplet { 
     public Slider timeSlider;
     public ForceDirectedGraph graph;   
@@ -24,10 +29,15 @@ public class RunApp extends PApplet {
     public boolean clickedBorder;
     public double t; //Track animations
     
-    public float scaleFactor = 1;
+    public float scaleFactor = 1; 
+    public String inputFile = "vanDeBunt_saved.txt";
     
 /**Initialize the view, draw the visualization */
-public void setup() {    
+public void setup() {  
+
+	if (this.args != null){
+		inputFile = this.args[0];
+	}	
 	//this.screenHeight = displayHeight;
 	//this.screenWidth = displayWidth;
 	this.screenHeight = 700;
@@ -37,10 +47,9 @@ public void setup() {
 	size(this.screenWidth,this.screenHeight); 
 		
 	//GraphGenerator g = new GraphGenerator(this,18);
-    //g.process("WC_saved",this.screenWidth,this.screenHeight);
-	
-    //this.graph = new ForceDirectedGraph(this,"WC_saved.txt",18);   
-	this.graph = new ForceDirectedGraph(this,"vanDeBunt_saved.txt",6);
+    //g.process("WC_saved",this.screenWidth,this.screenHeight);	
+      
+	this.graph = new ForceDirectedGraph(this,inputFile);
     this.recording = false;	
 	this.clickedBorder = false;
 	this.t = 0;
@@ -58,6 +67,7 @@ public void setup() {
 
   /**Re-draw the view */
   public void draw() { 
+	 
 	 //Capture the current frame drawn on the screen, if 'r' was pressed
 	 if (recording){
 		  beginRecord(PDF,"frame-####.pdf");
@@ -344,8 +354,8 @@ public void setup() {
   
   /* The main executable class, will run full screen
    * */
-  static public void main(String args[]) {
-	   PApplet.main(new String[] { "--present", "RunApp" });	  
+  static public void main(String args[]) {		 
+	   PApplet.main(new String[] {"RunApp",args[0]});	  
 	}
 }
 

@@ -61,6 +61,9 @@ public class GraphGenerator {
     /** Creates a JUNG graph to store all nodes and edges that ever existed in the network dataset.  Then, generates an FR Layout
      *  and saves all info in a text file. Format of the output file:
      *  
+     *  timeline 
+     *  time1Label time2Label etc... (to appear on the time slider)
+     *  
      *  node nodeId(unique) nodeXPosition nodeYPosition nodeLabel
      *  persistence at t=0
      *  .... to t=totalTimeSlices
@@ -68,10 +71,7 @@ public class GraphGenerator {
      *  
      *  time timeSliceNumber
      *  node1 node2 (edges)
-     *  ...for all time slices
-     *  
-     *  timeline time1Label time2Label etc... (to appear on the time slider)
-     * 
+     *  ...for all time slices  
      * */
     public void generateGraph (){   	   	 
    	 addElements(); //Add all elements
@@ -90,7 +90,15 @@ public class GraphGenerator {
 	  }	
 		 
 	this.output = parent.createWriter(this.outfile+".txt");		 
-
+	
+	//Save the time line labels
+    System.out.println("timeline");
+    this.output.println("timeline");
+    for (int i=0;i<this.numTimeSlices;i++){
+    	System.out.print(this.timeLabels.get(i)+" ");
+    	this.output.print(this.timeLabels.get(i)+" ");
+    }
+    
 	//Save the node info
 	for (int i=0;i<this.nodes.size();i++){			
 		 this.output.println("node "+i+" "+this.layout.getX(i)+" "+this.layout.getY(i)+" "+this.nodes.get(i).label);
@@ -108,15 +116,8 @@ public class GraphGenerator {
 				currentEdge = this.edges.get(i).get(j);						
 				this.output.println(currentEdge.node1+" "+currentEdge.node2);
 			}
-    }
+    }    
     
-    //Save the time line labels
-    System.out.println("timeline");
-    this.output.println("timeline");
-    for (int i=0;i<this.numTimeSlices;i++){
-    	System.out.print(this.timeLabels.get(i)+" ");
-    	this.output.print(this.timeLabels.get(i)+" ");
-    }
 	 this.output.flush();
 	 this.output.close();
 }

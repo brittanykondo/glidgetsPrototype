@@ -50,12 +50,11 @@ public class ForceDirectedGraph {
      /**Creates a new graph manager which generates or parses and saves the data
       * necessary for drawing the dynamic graph
       * @param p   Processing applet for drawing the graph elements
-      * @param dataFile   name of the data file with connectivity and node positions
-      * @param time   the number of time slices
+      * @param dataFile   name of the data file with connectivity and node positions      
       * */
-     public ForceDirectedGraph(PApplet p,String dataFile,int time){
+     public ForceDirectedGraph(PApplet p,String dataFile){
     	 this.parent = p; 
-    	 this.numTimeSlices = time;
+    	 this.numTimeSlices = 0;
     	 this.currentView = 0;
     	 this.nextView = 1;
     	 this.drawingView = 0;
@@ -784,6 +783,7 @@ public class ForceDirectedGraph {
 			}else if (items[0].equals("timeline")){
 				String [] labels = scan.nextLine().split(" ");			
 				this.timelineLabels = new ArrayList<String>(Arrays.asList(labels));
+				this.numTimeSlices = this.timelineLabels.size();
 			}else{
 				if (nodesDone){ //Save the edge information       						
 					newEdge = new Edge (this.parent,"",Integer.parseInt(items[0]),Integer.parseInt(items[1]),this.numTimeSlices);
