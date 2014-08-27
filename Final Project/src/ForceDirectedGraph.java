@@ -1,17 +1,8 @@
-import java.awt.Color;
-import java.awt.Dimension;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import java.util.Arrays;
 import processing.core.PApplet;
-import processing.core.PFont;
 
 /**Manages the elements of a force directed graph visualization which evolves over time
  * This does not generate the layout, only reads in a data file containing pre-computed 

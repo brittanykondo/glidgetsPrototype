@@ -81,6 +81,20 @@ public class GraphGenerator {
 	     this.layout.step();
 	  }	
     }
+    /** Applies the layout to the node positions
+     * @param n  an array of nodes
+     * @return the arraylist of the same nodes, with new positions
+     * */
+    public ArrayList<Node> updateNodePositions(ArrayList<Node>n){
+    	ArrayList<Node> newNodes = new ArrayList<Node>();
+    	for (int i=0;i<n.size();i++){
+    		Node current = n.get(i);
+    		current.x = (float) this.layout.getX(current.id);
+    		current.y = (float) this.layout.getY(current.id);
+    		newNodes.add(current);
+    	}
+    	return newNodes;
+    }
     /**Saves the graph data to a file that is readable by RunGlidgets.java
      * 
      * Format of the output file:
