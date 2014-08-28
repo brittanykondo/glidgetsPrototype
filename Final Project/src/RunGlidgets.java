@@ -83,11 +83,19 @@ public void setup() {
     
     //Input parameters for changing the force directed layout
     this.cp5 = new ControlP5(this);
-    attractionInput = cp5.addTextfield("Attraction (default 0.75)").setPosition(100,635).setSize(70,20).setColor(getColours.MintGreen.getRGB()).hide();
-    repulsionInput = cp5.addTextfield("Repulsion (default 0.75)").setPosition(220,635).setSize(70,20).setColor(getColours.MintGreen.getRGB()).hide();
-    numIterationsInput = cp5.addTextfield("Max Iterations (default 1000)").setPosition(340,635).setSize(70,20).setColor(getColours.MintGreen.getRGB()).hide();
-    //System.out.println(attractionInput.getText());
-    //cp5.addTextfield("repulsionInput").setPosition(200,600).setSize(100,20).setColor(color(255,0,0)).hide();
+    PFont f = createFont("Sans-Serif",10);
+   
+    attractionInput = cp5.addTextfield("Attraction (default 0.75)").setPosition(100,635).setFont(f).setSize(70,20).setColor(255)
+    		.setColorBackground(getColours.Ink.getRGB()).setColorForeground(getColours.Ink.getRGB())
+    		.setColorActive(getColours.LightSlate2.getRGB()).setColorCaptionLabel(getColours.Ink.getRGB()).hide();
+    
+    repulsionInput = cp5.addTextfield("Repulsion (default 0.75)").setPosition(220,635).setFont(f).setSize(70,20).setColor(255)
+    		.setColorBackground(getColours.Ink.getRGB()).setColorForeground(getColours.Ink.getRGB())
+    		.setColorActive(getColours.LightSlate2.getRGB()).setColorCaptionLabel(getColours.Ink.getRGB()).hide();
+    
+    numIterationsInput = cp5.addTextfield("Max Iterations (default 1000)").setPosition(340,635).setFont(f).setSize(70,20).setColor(255)
+    		.setColorBackground(getColours.Ink.getRGB()).setColorForeground(getColours.Ink.getRGB())
+    		.setColorActive(getColours.LightSlate2.getRGB()).setColorCaptionLabel(getColours.Ink.getRGB()).hide();   
   }
 
   /**Re-draw the view */
