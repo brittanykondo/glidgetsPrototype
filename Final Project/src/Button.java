@@ -120,5 +120,14 @@ public class Button {
     	}    	
     	
     }
+    /**Re-sets button hover and clicked colours to the defaults
+     * */
+    public void resetColours(){
+    	 this.toggleColour = this.getColours.LightSlate3;
+    	 this.toggleBorderColour = this.getColours.LightSlate2;    	  
+    	 this.borderColour =  getColours.LightSlate2;
+    	 this.clickedColour = toggleColour;
+    	 this.clickedBorderColour = toggleBorderColour;
+    }
     
 }

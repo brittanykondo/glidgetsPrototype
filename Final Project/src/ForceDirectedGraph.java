@@ -37,6 +37,7 @@ public class ForceDirectedGraph {
      public boolean onDraggingEdge;
      public int pinnedView; 
      public int aggregate;
+     public int globalMaxDegree;
      
      /**Creates a new graph manager which generates or parses and saves the data
       * necessary for drawing the dynamic graph
@@ -664,20 +665,7 @@ public class ForceDirectedGraph {
     			  this.nodes.get(i).animate(start, end, interpolation,this.aggregatedNodes,false);    			  
     		  }  		      	
   	     }    	      	
-     }     
-     /** Calls functions for showing global persistence values for each node and edge
-      * */
-     /**public void showLocalPersistence(int view){
-    	 for (int i = 0;i<this.edges.size();i++){
-    		  this.edges.get(i).display(this.nodes,view,false,false);
-		      this.edges.get(i).drawGlobalPersistenceHighlights(this.nodes,view,false,1);  	
-	     }
-    	 
-    	 for (int i = 0;i<this.nodes.size();i++){
-    		   this.nodes.get(i).drawGlobalPersistenceHighlights(view,false,1);
-    		   this.nodes.get(i).display(view,this.aggregatedNodes,1,false); 
-    	  }     	 
-     } */ 
+     }    
      /** Calls functions for showing global persistence values for EVERY node and edge (slider disabled)
       * */   
      public void showGlobalPersistence(){
@@ -705,19 +693,19 @@ public class ForceDirectedGraph {
 	   	 for (int i = 0;i<this.nodes.size();i++){
 	   		 if (this.aggregatedNodes.size()>0){ //Highlight selected, aggregated nodes
 	   			if (this.aggregatedNodes.contains(i)){
-	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,1);	   				 
+	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,1,this.globalMaxDegree);	   				 
 	   			}else{
-	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,0.2f);	   				
+	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,0.2f,this.globalMaxDegree);	   				
 	   			}	   			
 	   		 }else if (this.aggregatedEdges.size()>0){//Fade all but the nodes connected to selected edges
 	   			boolean found = findNodeInEdges(this.aggregatedEdges,i);
 	   			if (found){
-	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,1);	   
+	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,1,this.globalMaxDegree);	   
 	   			}else{
-	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,0.2f);	   
+	   				this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,0.2f,this.globalMaxDegree);	   
 	   			}	   						 
 	   		 }else{ //Highlight all nodes
-	   			this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,1);	   			
+	   			this.nodes.get(i).drawGlobalPersistenceHighlights(-1,true,1,this.globalMaxDegree);	   			
 	   		 } 		   
 	   		 
 	   	  }     				 
@@ -804,9 +792,15 @@ public class ForceDirectedGraph {
 			
 		}
        	  
-       	  //Set the node degree changes over time
+       	  //Set the node degree changes over time, and get the highest node degree overall
+		  this.globalMaxDegree = 0;
+		  int deg;
        	  for (int i=0;i<this.nodes.size();i++){
        		  this.nodes.get(i).setNodeDegree(this.edges);
-       	  }       	 
+       		  deg = this.nodes.get(i).maxDegree;
+       		  if (deg>this.globalMaxDegree){
+       			  this.globalMaxDegree = deg;
+       		  }
+       	  }       	
      }
 }

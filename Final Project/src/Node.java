@@ -23,7 +23,7 @@ public class Node {
       ArrayList <Integer> incidentEdges; //Edges that the node forms with other nodes over time
             
       //Class Constants
-      static int MIN_WEIGHT = 6;
+      static int MIN_WEIGHT = 3;
       static int MAX_WEIGHT = 15;
       static final float RADIUS = 32;
       
@@ -86,9 +86,9 @@ public class Node {
       }
       /**Finds and saved the degree (number of edges incident on the node) of the node
        * for each time slice
-       * @param an array of all edges present in the graph (for each time slice) 
+       * @param an array of all edges present in the graph (for each time slice)       
        * */
-      void setNodeDegree(ArrayList<Edge> edges){
+      void setNodeDegree(ArrayList<Edge> edges){    	  
     	  this.incidentEdges = new ArrayList <Integer>();
     	  //Initialize the array for saving degree over time
     	  for (int i=0;i<this.numTimeSlices;i++){
@@ -186,17 +186,20 @@ public class Node {
      
       /** Visualizes the overall node persistence (how often is it displayed?) 
        *  at a certain time slice
-       *  @param the current view to draw at
+       *  @param view the current view to draw at
        *  @param showAllHighlights true, if all node persistence highlights should be drawn
+       *  @param fade  the amount of transparency to fade the glyph by
+       *  @param globalDegree  the max global degree, for the entire graph
        * */ 
-      void drawGlobalPersistenceHighlights(int view,boolean showAllHighlights,float fade){
+      void drawGlobalPersistenceHighlights(int view,boolean showAllHighlights,float fade,int globalDegree){
     	  
     	  if (showAllHighlights || this.persistence.get(view)==1){
     		  parent.strokeCap(parent.SQUARE);        	 
         	  parent.noFill();
         	  parent.stroke(presentColour.getRed(),presentColour.getGreen(),presentColour.getBlue(),(255*fade));
-    		  parent.strokeWeight(MIN_WEIGHT);
-        	  for (int i=0;i<this.numTimeSlices;i++){     		   		 
+        	  //parent.stroke(MIN_WEIGHT);    		  
+        	  for (int i=0;i<this.numTimeSlices;i++){  
+        		  parent.strokeWeight(MIN_WEIGHT+(int)(((float)this.degrees.get(i)/globalDegree)*MAX_WEIGHT));
         		  if (this.persistence.get(i)==1){    			  
                 	  parent.arc(this.x, this.y, RADIUS+MIN_WEIGHT, RADIUS+MIN_WEIGHT,this.hintAngles.get(i).x-parent.HALF_PI, 
                 			  (this.hintAngles.get(i).y-parent.HALF_PI-0.06f));       			      			  

@@ -196,7 +196,9 @@ public void setup() {
 	  //Draw the save button
 	  this.saveButton.draw();
 	  this.saveButton.hover();
-	 
+	  this.newLayoutButton.draw();
+	  this.newLayoutButton.hover();
+	  
 	  //Provide feedback that the saving completed by displaying the name of the output file
 	  if (this.saveButton.toggle ==1){
 		  this.t +=0.01;
@@ -215,21 +217,14 @@ public void setup() {
 	  attractionInput.show();
 	  repulsionInput.show();
 	  numIterationsInput.show();
-	  
-	  newLayoutButton.draw();
-	  newLayoutButton.hover();
-	  
-	 /** if (this.newLayoutButton.toggle ==1){
-		  this.t +=0.01;
+	 
+	  if (this.newLayoutButton.toggle ==1){
+		  this.t +=0.1;
 		  if (this.t>=1){
 			  this.t = 0;			  
 			  this.newLayoutButton.toggle = 0;
 		  }
-	  }*/
-  }
-  /*******************text input**********************/
-  public void textinput(String theValue) {
-    System.out.println(theValue);
+	  }
   }   
   /**Draws the de-selection border and toggles its colour when it is clicked, using animated transitions
    * (cubic ease in and out functions)
@@ -492,6 +487,9 @@ public void setup() {
 		  a = 0.75;
 	  }else{
 		  a = Double.parseDouble(a_str);
+		  if (a==0){
+			  a = 0.75;
+		  }
 	  }
 	  
 	  String r_str = repulsionInput.getText();
@@ -499,6 +497,9 @@ public void setup() {
 		  r = 0.75;
 	  }else{
 		  r = Double.parseDouble(r_str);
+		  if (r==0){
+			  r = 0.75;
+		  }
 	  }
 	  
 	  String i_str = numIterationsInput.getText();
