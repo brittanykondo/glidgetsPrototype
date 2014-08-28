@@ -21,6 +21,7 @@ public class RunGlidgets extends PApplet {
     public Button editModeButton;   
     public Button aggregateButton;
     public Button saveButton;
+    public Button newLayoutButton;
     public PGraphicsPDF pdf;
     public boolean recording;
     public Colours getColours = new Colours();
@@ -34,6 +35,11 @@ public class RunGlidgets extends PApplet {
     public float scaleFactor = 1; 
     public String inputFile = "";
     public GraphGenerator g;
+    
+    public ControlP5 cp5;
+    public Textfield attractionInput;
+    public Textfield repulsionInput;
+    public Textfield numIterationsInput;
 
 /**Initialize the interface and draw the graph 
  * */
@@ -70,14 +76,23 @@ public void setup() {
     this.globalViewButton = new Button(this,100,40,650,625,"Global View",700,650,16);
     this.editModeButton = new Button(this,100,40,890,625,"Edit Mode",940,650,16);   
     this.aggregateButton = new Button(this,100,40,770,625,"Aggregate",820,650,16); 
-    this.saveButton = new Button(this,140,50,1010,620,"Save Layout",1030,652,18); 
+    this.saveButton = new Button(this,140,50,1010,620,"Save Layout",1080,652,18); 
+    this.newLayoutButton = new Button(this,100,40,470,625,"New Layout",520,650,16); 
     this.aggregateButton.clickedBorderColour = getColours.MintGreen;
     this.aggregateButton.clickedColour = getColours.MintGreen;
+    
+    //Input parameters for changing the force directed layout
+    this.cp5 = new ControlP5(this);
+    attractionInput = cp5.addTextfield("Attraction (default 0.75)").setPosition(100,635).setSize(70,20).setColor(getColours.MintGreen.getRGB()).hide();
+    repulsionInput = cp5.addTextfield("Repulsion (default 0.75)").setPosition(220,635).setSize(70,20).setColor(getColours.MintGreen.getRGB()).hide();
+    numIterationsInput = cp5.addTextfield("Max Iterations (default 1000)").setPosition(340,635).setSize(70,20).setColor(getColours.MintGreen.getRGB()).hide();
+    //System.out.println(attractionInput.getText());
+    //cp5.addTextfield("repulsionInput").setPosition(200,600).setSize(100,20).setColor(color(255,0,0)).hide();
   }
 
   /**Re-draw the view */
   public void draw() { 
-	 
+	
 	 //Capture the current frame drawn on the screen, if 'r' was pressed
 	 if (recording){
 		  beginRecord(PDF,"frame-####.pdf");
@@ -160,7 +175,10 @@ public void setup() {
 	  
 	  if (this.editModeButton.toggle ==0){ //Can't de-select elements in edit mode..
 		  this.drawBorder();
-		  drawInstructions();
+		  drawInstructions();		 
+		  attractionInput.hide();
+		  repulsionInput.hide();
+		  numIterationsInput.hide();
 	  }else if (this.editModeButton.toggle ==1) { //Display some instructions for features offered in edit mode		  
 		  drawEditScreen();		 
 	  }
@@ -171,9 +189,9 @@ public void setup() {
 	  //Draw some instructions regarding dragging nodes
 	  fill(getColours.Ink.getRGB());
 	  PFont font = createFont("Droid Sans",16,true);
-   	  textFont(font);
+   	  /**textFont(font);
    	  textAlign(LEFT);
-	  text("Drag nodes to re-position them",200,650);
+	  text("Drag nodes to re-position them",80,620);*/
 	  
 	  //Draw the save button
 	  this.saveButton.draw();
@@ -191,11 +209,28 @@ public void setup() {
 		   	  textFont(font);
 			  text("Saved to file: graphData_"+this.outfile+".txt",1000,685);
 		  }
-	  }
+	  }	 
+	
+	  //Reveal the text fields for inputting force directed algorithm parameters
+	  attractionInput.show();
+	  repulsionInput.show();
+	  numIterationsInput.show();
 	  
-	  //ControlP5 cp5 = new ControlP5(this);
-	  //cp5.addTextfield("textInput_1").setPosition(20, 100).setSize(200, 40).setAutoClear(false);
+	  newLayoutButton.draw();
+	  newLayoutButton.hover();
+	  
+	 /** if (this.newLayoutButton.toggle ==1){
+		  this.t +=0.01;
+		  if (this.t>=1){
+			  this.t = 0;			  
+			  this.newLayoutButton.toggle = 0;
+		  }
+	  }*/
   }
+  /*******************text input**********************/
+  public void textinput(String theValue) {
+    System.out.println(theValue);
+  }   
   /**Draws the de-selection border and toggles its colour when it is clicked, using animated transitions
    * (cubic ease in and out functions)
    * 
@@ -271,6 +306,9 @@ public void setup() {
 	  if (this.editModeButton.toggle==1) {
 		  if (this.saveButton.toggle == 1){ //In edit mode, save the current layout				  
 			  this.save();
+		  }
+		  if (this.newLayoutButton.toggle ==1){ //In edit mode, create a new force directed layout
+			  this.changeLayout();
 		  }
 		  return;
 	  }
@@ -350,6 +388,7 @@ public void setup() {
 	  this.editModeButton.toggle();
 	  this.aggregateButton.toggle();
 	  this.saveButton.toggle();
+	  this.newLayoutButton.toggle();
 	  
 	  //Both global view and edit mode can't be selected at the same time
 	  if (this.globalViewButton.clicked){
@@ -377,9 +416,6 @@ public void setup() {
 		  if (scaleFactor <=0) scaleFactor = 0.01f; //Minimum zoom out level
 	  }else if (key =='0'){
 		  scaleFactor = 1;
-	  }else if (this.editModeButton.toggle ==1 && key =='f'){
-		  System.out.println("pressed");
-		  this.changeLayout();
 	  }
   }
   /** Cubic ease in animation function
@@ -444,13 +480,39 @@ public void setup() {
 	  }
 	  return edges2D;
   }
-  /** Changes the force directed layout according to the provided parameters, while in edit mode
+  /** Changes the force directed layout according to the provided parameters entered in the text field, while in edit mode
+   *  If none are entered, uses the default values (0.75 for forces, 1000 for max iterations).
    * */
   public void changeLayout(){	
+	  //Get the text input and check it for validity
+	  double a, r;
+	  int i;
+	  String a_str = attractionInput.getText();
+	  if (a_str.isEmpty()){
+		  a = 0.75;
+	  }else{
+		  a = Double.parseDouble(a_str);
+	  }
+	  
+	  String r_str = repulsionInput.getText();
+	  if (r_str.isEmpty()){
+		  r = 0.75;
+	  }else{
+		  r = Double.parseDouble(r_str);
+	  }
+	  
+	  String i_str = numIterationsInput.getText();
+	  if (i_str.isEmpty()){
+		  i = 1000;
+	  }else{
+		  i = Integer.parseInt(i_str);
+	  }
+	
 	 ArrayList<ArrayList<Edge>> edges2D = this.convertEdgeArray(this.graph.edges);
 	 this.g.addElements(this.graph.nodes, edges2D);
-	 this.g.createLayout(0.9,0.1,1000,this.width,this.height);
+	 this.g.createLayout(r,a,i,this.width,this.height-90);
 	 this.graph.nodes = this.g.updateNodePositions(this.graph.nodes);
+	 this.t = 0;
   }
   /* The main executable class, will run full screen
    * */

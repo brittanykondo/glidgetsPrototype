@@ -81,7 +81,8 @@ public class Button {
     		 parent.strokeWeight(1.5f);
     		 parent.rect(this.x,this.y,this.width,this.height,6);
     		 PFont font = parent.createFont("Sans-Serif",this.fontSize);     	
-    	   	 parent.textFont(font);  	  	  
+    	   	 parent.textFont(font);  
+    	   	 parent.textAlign(parent.CENTER);
     	   	 parent.fill(this.textColour.getRGB());
     	   	 parent.text(this.label,this.textX,this.textY);  
     	}
